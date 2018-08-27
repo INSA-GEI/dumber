@@ -1,0 +1,6 @@
+D'aprés mes souvenir :
+- Asservissement complétement pourrave
+- Architecture globalement correcte
+- Reprendre la façon de recevoir des messages pour que ça colle avec la norme 802.15.4
+	J'essayais de lire avec une DMA (taille fixe) mais la norme fait bouger la taille en ajoutant 
+	parfois des caractéres d'échapement

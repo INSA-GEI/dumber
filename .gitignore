@@ -1,0 +1,64 @@
+# Prerequisites
+*.d
+*.d
+*.dep
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+*.crf
+*.__i
+
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+main
+GUI
+*.elf
+*.hex
+
+# Image rpi
+*.img
+
+# Archives
+*.zip
+*.tar
+*.gz
+*.bz2
+*.xz
+*.arc
+*.arj
+*.7z
+*.rar
+
+# Trucs de MDK
+*.uvgui*
+*.bak
+*.axf
+
+# Android
+*.apk
+

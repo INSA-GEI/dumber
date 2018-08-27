@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<data>
+  <loop>false</loop>
+  <repeat_times>1</repeat_times>
+  <repeat_period>500</repeat_period>
+  <frames_list>
+    <frame name="ping">
+      <payload>7E0008010100040070000089</payload>
+    </frame>
+    <frame name="stop">
+      <payload>7E0008010000040072000088</payload>
+    </frame>
+    <frame name="Version">
+      <payload>7E00080100000400560000A4</payload>
+    </frame>
+    <frame name="Battery">
+      <payload>7E0008010000040076000084</payload>
+    </frame>
+    <frame name="busy">
+      <payload>7E0008010000040062000098</payload>
+    </frame>
+  </frames_list>
+</data>
