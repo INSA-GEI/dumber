@@ -33,7 +33,7 @@
 #include "stm32f10x.h"
 
 /* Déclaration des Constantes */
-#define VERSION				"version 1.3\r"
+#define VERSION				"version 1.4\r"
 
 #define SPI 				10 
 #define USART 				20 
@@ -47,9 +47,9 @@
 
 #define	UNDEFINED			101 
 
-#define TIMER_1s 			1000 // 1 sec
-#define TIMER_Watchdog		3050	 //
-#define TTMER_Inactivity 	120000 // 2 min
+#define TIMER_1s 			1000    // 1 sec
+//#define TIMER_Watchdog		3050
+//#define TTMER_Inactivity 	120000  // 2 min
 
 #define WATCHDOG_MIN        970
 #define WATCHDOG_MAX        1030

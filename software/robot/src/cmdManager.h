@@ -22,19 +22,7 @@
 #include <stm32f10x.h>
 
 void cmdManage(void);
-char cmdVerifyChecksum(void);
 void cmdAddChecksum(void);
-void cmdResetAction(void);
-void cmdBusyStateAction(void);
-void cmdPingAction(void);
-void cmdVersionAction(void);
-void cmdStartWithoutWatchdogAction(void);
-void cmdMoveAction(void);
-void cmdTurnAction(void);
-void cmdBatteryVoltageAction(void);
-void cmdStartWithWatchdogAction(void);
-void cmdResetWatchdogAction(void);
-void cmdDebugAction(void);
 
 #endif /* _CMD_MANAGER_H_ */
 

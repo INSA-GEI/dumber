@@ -49,6 +49,7 @@
 #define BusyStateCMD            'b'
 #define TestCMD                 't'
 #define DebugCMD                'a'
+#define PowerOffCMD             'z'
 
 #define OK_ANS              "O\r"
 #define ERR_ANS             "E\r"
@@ -56,6 +57,23 @@
 #define BAT_OK              "2\r"
 #define BAT_LOW             "1\r"
 #define BAT_EMPTY           "0\r"
+
+/* Prototype des fonctions */
+
+char cmdVerifyChecksum(void);
+void cmdAddChecksum(void);
+void cmdResetAction(void);
+void cmdBusyStateAction(void);
+void cmdPingAction(void);
+void cmdVersionAction(void);
+void cmdStartWithoutWatchdogAction(void);
+void cmdMoveAction(void);
+void cmdTurnAction(void);
+void cmdBatteryVoltageAction(void);
+void cmdStartWithWatchdogAction(void);
+void cmdResetWatchdogAction(void);
+void cmdDebugAction(void);
+void cmdPowerOffAction(void);
 
 /** @addtogroup Checksum
  * @{
@@ -138,8 +156,11 @@ void cmdManage(void) {
     if (cmdVerifyChecksum() != 0) {
         strcpy(sendString, UNKNOW_ANS);
     } else { // Checksum valide
-        if (Dumber.StateSystem==STATE_DISABLE) { // SI la batterie est trop faible, impossible d'accepter une commande: on reste dans ce mode
-            strcpy(sendString, ERR_ANS);
+        if (Dumber.StateSystem==STATE_DISABLE) { // SI la batterie est trop faible, impossible d'accepter une commande sauf poweroff: on reste dans ce mode
+            if (receiptString[0]==PowerOffCMD)
+                cmdPowerOffAction();
+            else
+                strcpy(sendString, ERR_ANS);
         } else {
             switch (receiptString[0]) {
                 case PingCMD:
@@ -182,10 +203,13 @@ void cmdManage(void) {
                     cmdBusyStateAction();
                     break;
 
-                case 'a':
+                case DebugCMD:
                     cmdDebugAction();
                     break;
 
+                case PowerOffCMD:
+                    cmdPowerOffAction();
+                    break;
                 default:
                     strcpy(sendString, UNKNOW_ANS);
             }
@@ -418,6 +442,25 @@ void cmdDebugAction(void) {
     usartSendData();
 }
 
+/**
+ * @brief       Eteint le robot
+ *
+ * @param       None
+ * @retval      None
+ */
+void cmdPowerOffAction(void) {
+    volatile int i;
+
+    systemChangeState(STATE_DISABLE);
+    strcpy(sendString, OK_ANS);
+
+    cmdAddChecksum();
+    usartSendData();
+    /* Attente d'un certain temps (100 ms), pour que la reponse parte */
+    for (i=0; i<100000; i++);
+
+    systemShutDown(); // Ne ressort jamais de cette fonction
+}
 /**
  * @}
  */
