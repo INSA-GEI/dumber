@@ -13,26 +13,24 @@
  ******************************************************************************
  ******************************************************************************
  */
-#ifndef cmde_usart_H
-#define cmde_usart_H
+#ifndef _USART_H_
+#define _USART_H_
 
 #include "stm32f10x.h"
 
 #define TBuffer   30
 
-/* Prototype des fonctions */
-
-void INIT_IT_UsartReceive(void);
-void INIT_DMASend(uint16_t bufferSize);
-void sendDataUSART(void);
-void INIT_USART(void);
-void MAP_UsartPin(void);
-
-/* Variable Externes necessair e*/
-
+/* Variables externes nécessaire*/
 extern char sendString[TBuffer];
 extern char receiptString[TBuffer];
 extern uint16_t cpt_Rx;
 
-#endif /* CMD_UART_H_ */
+/* Prototype des fonctions */
+void INIT_IT_UsartReceive(void);
+void usartInitDMA(uint16_t bufferSize);
+void usartSendData(void);
+void usartConfigure(void);
+void MAP_UsartPin(void);
+
+#endif /* _USART_H_ */
 

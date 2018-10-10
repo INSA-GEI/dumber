@@ -12,19 +12,18 @@
  ******************************************************************************
  ******************************************************************************
  */
-#ifndef LED_H
-#define LED_H
+#ifndef _LED_H_
+#define _LED_H_
 
 #include "stm32f10x.h"
 
-#define RED	255
+#define RED	    255
 #define GREEN	250
 
-void MAP_LEDpin(void);
-void INIT_TIM3Led(void);
-void LEDgreen(void);
-void LEDred(void);
-void LEDoff(void);
-void LEDorange(void);
+extern char etatLED; // Tout les 200 ms cette variable s'incrémente de 1 jusqu'à 5
+extern char LEDON;
 
-#endif /* LED_H */
+void ledConfigure(void);
+void ledManagement(States state, char batteryState);
+
+#endif /* _LED_H_ */

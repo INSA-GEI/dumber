@@ -5,28 +5,33 @@
  * @version V1.0
  * @date    16-mai-2016
  * @brief   Supervision de la tension batterie et detection de charge.
- *			Calcule le voltage de la batterie � interval r�gulier.
+ *			Calcule le voltage de la batterie à interval régulier.
  *			Converti le voltage batterie en signaux de commande - 2 -1 - 0.
- *			Configure une interruption externe pour d�tecter le branchement
+ *			Configure une interruption externe pour détecter le branchement
  *			du chargeur.
  ******************************************************************************
  ******************************************************************************
  */
-
-#include <battery.h>
-#include "system_dumby.h"
-#include "motor.h"
 #include <stm32f10x.h>
+#include "battery.h"
+#include "system_dumby.h"
 
-uint16_t PrescalerValue = 0;
-uint16_t PWM_BATTERY_ON = 0xC0;
-uint16_t PWM_BATTERY_OFF = 0;
-TIM_TimeBaseInitTypeDef TIM_BaseTempsTimer;
-TIM_OCInitTypeDef TIM_PWMConfigure;
-
-ADC_InitTypeDef ADC_InitStructure;
 DMA_InitTypeDef DMA_BAT_InitStructure;
-__IO uint16_t ADCConvertedValue[VOLTAGE_BUFFER_SIZE];
+uint16_t ADCConvertedValue[VOLTAGE_BUFFER_SIZE];
+
+char cptMesureHigh=0;
+char cptMesureLow=0;
+char cptMesureDisable=0;
+
+uint16_t vbatLowerVal;
+uint16_t vbatHighVal;
+uint16_t vbatDiff;
+
+uint16_t testPostion=0;
+uint32_t mesureVoltage;
+uint32_t meanVoltage;
+
+uint32_t cptMesureEmergencyHalt=0;
 
 /** @addtogroup Projects
  * @{
@@ -42,11 +47,11 @@ __IO uint16_t ADCConvertedValue[VOLTAGE_BUFFER_SIZE];
  */
 
 /**
- * @brief 		Definis les GPIO necessaires pour la batterie.
+ * @brief 		Défini les GPIO nécessaires pour la batterie.
  *
  * 				La fonction MAP_MotorPin va venir configurer le E/S du GPIO pour correspondre avec
- * 				le sch�ma electrique en ressource. La fonction initialise aussi l'interruption EXTI
- * 				de la d�tection du chargeur.
+ * 				le schéma electrique en ressource. La fonction initialise aussi l'interruption EXTI
+ * 				de la détection du chargeur.
  *
  * @note		A3 en output alternate function.
  *				A0 et A4 en floating input.
@@ -57,11 +62,12 @@ __IO uint16_t ADCConvertedValue[VOLTAGE_BUFFER_SIZE];
  *
  */
 
-void MAP_batteryPin(void)
+void batteryConfigure(void)
 {
     GPIO_InitTypeDef Init_Structure;
     NVIC_InitTypeDef NVIC_InitStructure;
     EXTI_InitTypeDef EXTI_InitStructure;
+    ADC_InitTypeDef ADC_InitStructure;
 
     Init_Structure.GPIO_Pin = GPIO_Pin_3;
     Init_Structure.GPIO_Speed = GPIO_Speed_10MHz;
@@ -91,20 +97,9 @@ void MAP_batteryPin(void)
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
-}
 
-/**
- * @brief 		Initialise la dma pour stocker les valeur dans ADCConvertedValue.
- *				On stockera 16 valeurs de fa�on � faire un moyennage.
- *
- * @param  		None
- * @retval 		None
- *
- */
+    // Initialise la dma pour stocker les valeur dans ADCConvertedValue.
 
-void DMA_BAT(void)
-{
-    /* DMA1 channel1 configuration ----------------------------------------------*/
     DMA_DeInit(DMA1_Channel1);
     DMA_BAT_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&(ADC1->DR); //   ADC1_DR_Address;
     DMA_BAT_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&ADCConvertedValue;
@@ -121,70 +116,8 @@ void DMA_BAT(void)
 
     DMA_Cmd(DMA1_Channel1, ENABLE);
     DMA_ITConfig(DMA1_Channel1, DMA_IT_TC, ENABLE);
-}
 
-/**
- * @}
- */
-
-/** @addtogroup Lancer_acquisition
- * @{
- */
-/**
- * @brief 		Demarrage des Acquisitions de la DMA.
- *
- * @param  		None
- * @retval 		None
- *
- */
-
-void startACQDMA(void)
-{
-    ADC_DMACmd(ADC1, ENABLE);
-    DMA_DeInit(DMA1_Channel1);
-    DMA_Init(DMA1_Channel1, &DMA_BAT_InitStructure);
-    DMA_Cmd(DMA1_Channel1, ENABLE);
-    DMA_ITConfig(DMA1_Channel1, DMA_IT_TC, ENABLE);
-}
-
-/**
- * @brief 		Fonction de plus haut niveau qui initialisera la DMA  et qui lancera une nouvelle acquisition.
- * 				Cette fonction est appell� � interval r�gulier dans le systick. Cette fonction utilise startACQDMA.
- *
- * @param  		None
- * @retval 		None
- *
- */
-
-void voltagePrepare(void)
-{
-    DMA_BAT_InitStructure.DMA_BufferSize = VOLTAGE_BUFFER_SIZE;
-
-    ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 1, ADC_SampleTime_55Cycles5);
-    ADC_Cmd(ADC1, ENABLE);
-    startACQDMA();
-}
-
-/**
- * @}
- */
-
-/** @addtogroup Init_GPIO_DMA_IT_Battery
- * @{
- */
-
-/**
- * @brief 		Configuration et Calibration de l'ADC1 sur 1 channel.
- * 				L'adc lira en mode continue.
- *
- * @param  		None
- * @retval 		None
- *
- */
-
-void ADC1_CONFIG(void)
-{
-    /* ADC1 configuration ------------------------------------------------------*/
+    // Configuration et Calibration de l'ADC1 sur 1 channel.
     ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
     ADC_InitStructure.ADC_ScanConvMode = ENABLE;
     ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
@@ -204,21 +137,8 @@ void ADC1_CONFIG(void)
     while(ADC_GetCalibrationStatus(ADC1));
 
     ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-}
 
-/**
- * @brief 		Initialise l'interruption � la fin des acquisitions sur la DMA.
- *
- * @param  		None
- * @retval 		None
- *
- */
-
-void INIT_IT_DMA(void)
-{
-    NVIC_InitTypeDef NVIC_InitStructure;
-
-    /* Enable the USARTz Interrupt */
+    /* Enable the ADC1 DMA Interrupt */
     NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
@@ -230,6 +150,119 @@ void INIT_IT_DMA(void)
  * @}
  */
 
+/** @addtogroup Lancer_acquisition
+ * @{
+ */
+/**
+ * @brief 		Demarrage des Acquisitions de la DMA.
+ *
+ * @param  		None
+ * @retval 		None
+ *
+ */
+
+void batteryStartAcquisition(void)
+{
+    ADC_DMACmd(ADC1, ENABLE);
+    DMA_DeInit(DMA1_Channel1);
+    DMA_Init(DMA1_Channel1, &DMA_BAT_InitStructure);
+    DMA_Cmd(DMA1_Channel1, ENABLE);
+    DMA_ITConfig(DMA1_Channel1, DMA_IT_TC, ENABLE);
+}
+
+/**
+ * @brief 		Fonction de plus haut niveau qui initialisera la DMA  et qui lancera une nouvelle acquisition.
+ * 				Cette fonction est appelée à intervalle régulier dans le systick. Cette fonction utilise startACQDMA.
+ *
+ * @param  		None
+ * @retval 		None
+ *
+ */
+
+void batteryRefreshData(void)
+{
+    DMA_BAT_InitStructure.DMA_BufferSize = VOLTAGE_BUFFER_SIZE;
+
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 1, ADC_SampleTime_55Cycles5);
+    ADC_Cmd(ADC1, ENABLE);
+    batteryStartAcquisition();
+}
+
+/**
+ * @brief       Appelé de manière régulière pour mettre à jour le niveau batterie
+ *
+ * @param       None
+ * @retval      None
+ */
+void batteryManagement(void) {
+    int k;
+
+    if(Dumber.acquisition==VOLTAGE && Dumber.BatterieChecking==TRUE) {
+        vbatLowerVal = 0xFFF;
+        vbatHighVal = 0;
+
+        for(k=0; k<VOLTAGE_BUFFER_SIZE; k++)
+        {
+            meanVoltage+=ADCConvertedValue[k];
+
+            if (vbatLowerVal> ADCConvertedValue[k]) vbatLowerVal = ADCConvertedValue[k];
+            if (vbatHighVal< ADCConvertedValue[k]) vbatHighVal = ADCConvertedValue[k];
+        }
+
+        vbatDiff = vbatHighVal - vbatLowerVal;
+
+        meanVoltage= meanVoltage/VOLTAGE_BUFFER_SIZE;
+        mesureVoltage = meanVoltage;
+
+        Dumber.BatteryPercentage = mesureVoltage;
+        Dumber.acquisition=FALSE;
+
+        if(Dumber.BatteryPercentage >= VBAT_SEUIL_LOW)
+        {
+            cptMesureHigh++;
+            if(cptMesureHigh >= COMPTEUR_SEUIL_HIGH)
+            {
+                if(Dumber.StateSystem == STATE_LOW)
+                    systemChangeState(STATE_RUN);
+
+                Dumber.stateBattery = 2;
+                cptMesureHigh=0;
+                cptMesureLow=0;
+                cptMesureDisable=0;
+                cptMesureEmergencyHalt=0;
+            }
+        }
+        else if (Dumber.BatteryPercentage < VBAT_SEUIL_LOW && Dumber.BatteryPercentage >= VBAT_SEUIL_DISABLE)
+        {
+            cptMesureLow++;
+            if(cptMesureLow >= COMPTEUR_SEUIL_LOW)
+            {
+                if(Dumber.StateSystem == STATE_RUN)
+                    systemChangeState(STATE_LOW);
+
+                Dumber.stateBattery =1;
+                cptMesureHigh=0;
+                cptMesureLow=0;
+                cptMesureDisable=0;
+            }
+        }
+        else // Dumber.BatteryPercentage < VBAT_SEUIL_DISABLE
+        {
+            cptMesureDisable++;
+
+            if(cptMesureDisable >= COMPTEUR_SEUIL_DISABLE)
+            {
+                systemChangeState(STATE_DISABLE);
+            }
+        }
+    }
+}
+
+/**
+ * @}
+ */
+
+
 
 /** @addtogroup Handler
  * @{
@@ -237,8 +270,8 @@ void INIT_IT_DMA(void)
 
 
 /**
- * @brief 		Interruption Handler. Qui va faire la moyenne des derni�res
- * 				acquisitions lorsque la DMA � rempli son buffer.
+ * @brief 		Interruption Handler. Qui va faire la moyenne des dernières
+ * 				acquisitions lorsque la DMA à rempli son buffer.
  *
  * @param  		None
  * @retval 		None
@@ -256,8 +289,8 @@ void DMA1_Channel1_IRQHandler(void)
 }
 
 /**
- * @brief 		Interruption qui donne l'ordre d'�teindre le robot.
- * 				L'IT se d�clenche lorsque le chargeur est branch�.
+ * @brief 		Interruption qui donne l'ordre d'éteindre le robot.
+ * 				L'IT se déclenche lorsque le chargeur est branché.
  *
  * @param  		None
  * @retval 		None
@@ -265,7 +298,7 @@ void DMA1_Channel1_IRQHandler(void)
  */
 void EXTI15_10_IRQHandler(void)
 {
-    shutDown();
+    systemShutDown();
     while (1);
 }
 

@@ -11,10 +11,11 @@
  ******************************************************************************
  */
 
-#include "stm32f10x.h"                  // Device header
-#include "debug.h"
+#include <stm32f10x.h>                  // Device header
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "debug.h"
 
 /** @addtogroup Projects
  * @{

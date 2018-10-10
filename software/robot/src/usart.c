@@ -16,10 +16,10 @@
 #include "system_dumby.h"
 #include <stm32f10x.h>
 #include <string.h>
+#include <usart.h>
 
 #include "cmdManager.h"
 
-#include "cmde_usart.h"
 
 //#include "Battery.h"
 //#include "motor.h"
@@ -64,28 +64,51 @@ volatile uint16_t tmp;
  */
 
 /**
- * @brief		Configuration du GPIO pour l'uart.
+ * @brief Initialise l'UART avec les paramètres suivants : 9600 bauds / 1bits de stop / pas de partité ou de controle
  *
- * @note		La fonction mapUsartPin va venir configurer le E/S du GPIO pour correspondre avec le sch�ma electrique en ressource.
- *				PB7 Analog Input / PB6 Alternate function output.
- *
- * @param  		Aucun
- * @retval 		Aucun
+ * @param  Aucun
+ * @retval Aucun
  */
-void MAP_UsartPin()
-{
-    GPIO_InitTypeDef Init_Structure;
 
-    /// Configure Output ALTERNATE FONCTION PPULL PORT B6 Tx
+void usartConfigure(void)
+{
+    USART_InitTypeDef USART_InitStructure;
+    GPIO_InitTypeDef Init_Structure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+
+    // Configure les lignes d'E/S
+    // Configure Output ALTERNATE FONCTION PPULL PORT B6 Tx
     Init_Structure.GPIO_Pin = GPIO_Pin_6;
     Init_Structure.GPIO_Mode = GPIO_Mode_AF_PP;
     Init_Structure.GPIO_Speed=GPIO_Speed_50MHz;
     GPIO_Init(GPIOB, &Init_Structure);
 
-    /// Configure B7 Rx
+    // Configure B7 Rx
     Init_Structure.GPIO_Pin = GPIO_Pin_7;
     Init_Structure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOB, &Init_Structure);
+
+    // Configure l'USART
+    USART_InitStructure.USART_BaudRate = 9600;
+    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+    USART_InitStructure.USART_StopBits = USART_StopBits_1;
+    USART_InitStructure.USART_Parity = USART_Parity_No;
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+
+    USART_Init(USART1, &USART_InitStructure);
+
+    USART_DMACmd(USART1, USART_DMAReq_Tx, ENABLE);
+    USART_Cmd(USART1, ENABLE);
+    GPIO_PinRemapConfig(GPIO_Remap_USART1,ENABLE);
+    USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+
+    // configure les interruptions de l'USART
+    NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 }
 
 /**
@@ -94,7 +117,7 @@ void MAP_UsartPin()
  * @param  Aucun
  * @retval Aucun
  */
-void INIT_DMASend(uint16_t bufferSize)
+void usartInitDMA(uint16_t bufferSize)
 {
     DMA_InitTypeDef DMA_InitStructure;
 
@@ -110,56 +133,13 @@ void INIT_DMASend(uint16_t bufferSize)
     DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
     DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
     DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+
     DMA_Init(DMA1_Channel4, &DMA_InitStructure);
-}
-
-/**
- * @brief  Configure l'IT sur la reception d'un caractère sur l'uart.
- *
- * @param  Aucun
- * @retval Aucun
- */
-void INIT_IT_UsartReceive(void)
-{
-    NVIC_InitTypeDef NVIC_InitStructure;
-
-    /* Enable the USARTz Interrupt */
-    NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
 }
 
 /**
  * @}
  */
-
-/**
- * @brief Initialise l'UART avec les paramètres suivants : 9600 bauds / 1bits de stop / pas de partité ou de controle
- *
- * @param  Aucun
- * @retval Aucun
- */
-
-void INIT_USART(void)
-{
-    USART_InitTypeDef USART_InitStructure;
-
-    USART_InitStructure.USART_BaudRate = 9600;
-    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-    USART_InitStructure.USART_StopBits = USART_StopBits_1;
-    USART_InitStructure.USART_Parity = USART_Parity_No;
-    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-
-    USART_Init(USART1, &USART_InitStructure);
-
-    USART_DMACmd(USART1, USART_DMAReq_Tx, ENABLE);
-    USART_Cmd(USART1, ENABLE);
-    GPIO_PinRemapConfig(GPIO_Remap_USART1,ENABLE);
-    USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-}
 
 /** @addtogroup Function Send - Receive
  * @{
@@ -181,20 +161,17 @@ void INIT_USART(void)
 
 void USART1_IRQHandler(void)
 {
-   if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
+    if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
         receiptString[cpt_Rx] = USART_ReceiveData(USART1);
         if (cpt_Rx < 16)
             cpt_Rx++;
 
-        if (receiptString[cpt_Rx - 1] == 13) {
-            if (verifyCheckSum() == 0) {
-                manageCmd();
-            } else
-                strcpy(sendString, UNKNOW_ANS);
+        if (receiptString[cpt_Rx - 1] == '\r') {
+            cmdManage();
 
             if (Dumber.AddOn == FALSE) {
-                inclusionCheckSum();
-                sendDataUSART();
+                cmdAddChecksum();
+                usartSendData(); // Fonction bloquante
             }
 
             for (i = 0; i < cpt_Rx + 1; i++)
@@ -221,10 +198,10 @@ void USART1_IRQHandler(void)
  * @param  Aucun
  * @retval Aucun
  */
-void sendDataUSART(void){
+void usartSendData(void){
     int taille;
     for(taille = 0; sendString[taille]!= '\r'; taille++);
-    INIT_DMASend(taille+1);
+    usartInitDMA(taille+1);
     DMA_Cmd(DMA1_Channel4, ENABLE);
     while (DMA_GetFlagStatus(DMA1_FLAG_TC4) == RESET);
     for(i=0; i<TBuffer;i++)

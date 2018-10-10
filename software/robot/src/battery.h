@@ -14,24 +14,40 @@
  ******************************************************************************
  */
 
-#ifndef Battery_H
-#define Battery_H
+#ifndef _BATTERY_H_
+#define _BATTERY_H_
 
 #include "stm32f10x.h"
 
-#define VOLTAGE_BUFFER_SIZE 64
-extern __IO uint16_t ADCConvertedValue[VOLTAGE_BUFFER_SIZE];
+#define VOLTAGE_BUFFER_SIZE         64
 
-#define VBAT_SEUIL_LOW			0x878
-#define VBAT_SEUIL_DISABLE		0x7CA
+#define VBAT_SEUIL_LOW			    0x878
+#define VBAT_SEUIL_DISABLE		    0x7CA
 #define VBAT_SEUIL_EMERGENCY_HALT	0x6E0
 
-void MAP_batteryPin(void);
-void DMA_BAT(void);
-void ADC1_CONFIG(void);
-void INIT_IT_DMA(void);
-void startACQDMA(void);
-void voltagePrepare(void);
+#define COMPTEUR_SEUIL_HIGH         8
+#define COMPTEUR_SEUIL_LOW          8
+#define COMPTEUR_SEUIL_DISABLE      8
+#define COMPTEUR_SEUIL_EMERGENCY_HALT   3000
 
-#endif /* Battery_H */
+extern char cptMesureHigh;
+extern char cptMesureLow;
+extern char cptMesureDisable;
+
+extern uint16_t vbatLowerVal;
+extern uint16_t vbatHighVal;
+extern uint16_t vbatDiff;
+
+extern uint16_t testPostion;
+extern uint32_t mesureVoltage;
+extern uint32_t meanVoltage;
+
+extern uint32_t cptMesureEmergencyHalt;
+
+void batteryConfigure(void);
+void batteryManagement(void);
+void batteryStartAcquisition(void);
+void batteryRefreshData(void);
+
+#endif /* _BATTERY_H_ */
 

@@ -22,45 +22,37 @@
  *		0			|				X	| Roue Libre
  *--------------------------------------------------------------------
  *					|  CMDA & !CMDB 			| Avant
- *		1			|  !CMDA & CMDB				| Arriére
+ *		1			|  !CMDA & CMDB				| Arrière
  *					|  CMDA = CMDB				| Frein
  ******************************************************************************
  ******************************************************************************
  */
-#ifndef Motor_H
-#define Motor_H
+#ifndef _MOTOR_H_
+#define _MOTOR_H_
 
 #include "stm32f10x.h"
-//#include "system_dumby.h"
 
 extern uint16_t G_speedRight, G_speedLeft, G_lapsLeft, G_lapsRight;
 extern uint16_t tourG, tourD, tourPositionD,tourPositionG;
 
+extern uint16_t asservissement;
+extern uint16_t regulation_vitesseD, regulation_vitesseG;
 /**
- * @brief Etats que peuvent prendre chaques moteurs
- * 		  Avant, Arriére, Frein
+ * @brief États que peuvent prendre chaque moteurs
+ * 		  Avant, Arrière, Frein
  */
 #define FORWARD 11  
 #define REVERSE 12 
 #define BRAKE 	13 
 
-void MAP_MotorPin(void);
-void INIT_TIM2(void);
-void INIT_OCMotorPwm(void);
-void commandeMoteur(void);
+void motorConfigure(void);
+void motorManagement(void);
 
-void IC_TIM1_CHANEL3(void);
-void IC_TIM1_CHANEL1(void);
-void IT_TIM1(void);
+void motorCmdRight(char mod, uint16_t pwm);
+void motorCmdLeft(char mod, uint16_t pwm);
+void motorSpeedUpdateLeft(uint16_t pwm);
+void motorSpeedUpdateRight(uint16_t pwm);
+void motorRegulation(char modRight, char modLeft, uint16_t lapsRight, uint16_t lapsLeft, uint16_t speedRight, uint16_t speedLeft);
 
-void cmdRightMotor(char mod, uint16_t pwm);
-void cmdLeftMotor(char mod, uint16_t pwm);
-
-void majVitesseMotorG(uint16_t pwm);
-void majVitesseMotorD(uint16_t pwm);
-
-void regulationMoteur(char modRight, char modLeft, uint16_t lapsRight, uint16_t lapsLeft, uint16_t speedRight, uint16_t speedLeft);
-//void regulationCBK(void);
-
-#endif /* Motor_H */
+#endif /* _MOTOR_H_ */
 

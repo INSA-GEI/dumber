@@ -16,17 +16,15 @@
  */
 
 #include <stm32f10x.h>
-
-#include "cmdManager.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "cmde_usart.h"
+#include "cmdManager.h"
 #include "battery.h"
 #include "motor.h"
 #include "system_dumby.h"
+#include "usart.h"
 
 /** @addtogroup Projects
  * @{
@@ -36,9 +34,28 @@
  * @{
  */
 
-volatile unsigned char checksum;
-volatile int length;
-uint16_t j;
+/* Definition des commandes */
+
+#define PingCMD                 'p'
+#define ResetCMD                'r'
+#define SetMotorCMD             'm'
+#define StartWWatchDogCMD       'W'
+#define ResetWatchdogCMD        'w'
+#define GetBatteryVoltageCMD    'v'
+#define GetVersionCMD           'V'
+#define StartWithoutWatchCMD    'u'
+#define MoveCMD                 'M'
+#define TurnCMD                 'T'
+#define BusyStateCMD            'b'
+#define TestCMD                 't'
+#define DebugCMD                'a'
+
+#define OK_ANS              "O\r"
+#define ERR_ANS             "E\r"
+#define UNKNOW_ANS          "C\r"
+#define BAT_OK              "2\r"
+#define BAT_LOW             "1\r"
+#define BAT_EMPTY           "0\r"
 
 /** @addtogroup Checksum
  * @{
@@ -53,8 +70,10 @@ uint16_t j;
  * @retval 		0 ou 1
  *
  */
-void inclusionCheckSum(void) {
-    checksum = 0;
+void cmdAddChecksum(void) {
+    uint16_t j;
+    unsigned char checksum=0;
+
     for (j = 0; sendString[j] != '\r'; j++)
         checksum ^= sendString[j];
     if (checksum == '\r')
@@ -73,20 +92,23 @@ void inclusionCheckSum(void) {
  * @retval 		0 ou 1
  *
  */
-char verifyCheckSum(void) {
-    uint16_t j, lenght;
-    checksum = 0;
-    lenght = strlen(receiptString);
-    for (j = 0; j < lenght - 2; j++) {
+char cmdVerifyChecksum(void) {
+    uint16_t j;
+    uint16_t length;
+    unsigned char checksum=0;
+
+    length = strlen(receiptString);
+    for (j = 0; j < length - 2; j++) {
         checksum ^= receiptString[j];
     }
     if (checksum == '\r')
         checksum++;
 
     if (receiptString[j] == checksum) {
-        receiptString[lenght - 2] = 13;
-        receiptString[lenght - 1] = 0;
-        receiptString[lenght] = 0;
+        receiptString[length - 2] = 13;
+        receiptString[length - 1] = 0;
+        receiptString[length] = 0;
+
         return 0;
     } else
         return 1;
@@ -112,55 +134,65 @@ char verifyCheckSum(void) {
  * @retval 		None
  */
 
-void manageCmd(void) {
-    switch (receiptString[0]) {
-        case PingCMD:
-            actionPing();
-            break;
+void cmdManage(void) {
+    if (cmdVerifyChecksum() != 0) {
+        strcpy(sendString, UNKNOW_ANS);
+    } else { // Checksum valide
+        if (Dumber.StateSystem==STATE_DISABLE) { // SI la batterie est trop faible, impossible d'accepter une commande: on reste dans ce mode
+            strcpy(sendString, ERR_ANS);
+        } else {
+            switch (receiptString[0]) {
+                case PingCMD:
+                    cmdPingAction();
+                    break;
 
-        case ResetCMD:
-            actionReset();
-            break;
+                case ResetCMD:
+                    cmdResetAction();
+                    break;
 
-        case StartWWatchDogCMD:
-            actionStartWithWD();
-            break;
+                case StartWWatchDogCMD:
+                    cmdStartWithWatchdogAction();
+                    break;
 
-        case ResetWatchdogCMD:
-            actionResetWD();
-            break;
+                case ResetWatchdogCMD:
+                    cmdResetWatchdogAction();
+                    break;
 
-        case GetBatteryVoltageCMD:
-            actionBatteryVoltage();
-            break;
+                case GetBatteryVoltageCMD:
+                    cmdBatteryVoltageAction();
+                    break;
 
-        case GetVersionCMD:
-            actionVersion();
-            break;
+                case GetVersionCMD:
+                    cmdVersionAction();
+                    break;
 
-        case StartWithoutWatchCMD:
-            actionStartWWD();
-            break;
+                case StartWithoutWatchCMD:
+                    cmdStartWithoutWatchdogAction();
+                    break;
 
-        case MoveCMD:
-            actionMove();
-            break;
+                case MoveCMD:
+                    cmdMoveAction();
+                    break;
 
-        case TurnCMD:
-            actionTurn();
-            break;
+                case TurnCMD:
+                    cmdTurnAction();
+                    break;
 
-        case BusyStateCMD:
-            actionBusyState();
-            break;
+                case BusyStateCMD:
+                    cmdBusyStateAction();
+                    break;
 
-        case 'a':
-            actionDebug();
-            break;
+                case 'a':
+                    cmdDebugAction();
+                    break;
 
-        default:
-            strcpy(sendString, UNKNOW_ANS);
+                default:
+                    strcpy(sendString, UNKNOW_ANS);
+            }
+        }
     }
+
+    Dumber.cpt_inactivity=0; // remise a zéro du compteur d'inativité
 }
 
 /**
@@ -179,8 +211,8 @@ void manageCmd(void) {
  * @retval 		None
  */
 
-void actionPing(void) {
-    if (receiptString[1] == 13)
+void cmdPingAction(void) {
+    if (receiptString[1] == '\r')
         strcpy(sendString, OK_ANS);
     else
         strcpy(sendString, ERR_ANS);
@@ -194,13 +226,8 @@ void actionPing(void) {
  * @param  		None
  * @retval 		None
  */
-void actionReset(void) {
-    Dumber.StateSystem = IDLE;
-    Dumber.WatchDogStartEnable = TRUE;
-    Dumber.cpt_watchdog = 0;
-    Dumber.cpt_systick = 0;
-    cmdLeftMotor(BRAKE, 0);
-    cmdRightMotor(BRAKE, 0);
+void cmdResetAction(void) {
+    systemChangeState(STATE_IDLE);
     strcpy(sendString, OK_ANS);
 }
 
@@ -210,8 +237,8 @@ void actionReset(void) {
  * @param  		None
  * @retval 		None
  */
-void actionVersion(void) {
-    if (receiptString[1] == 13)
+void cmdVersionAction(void) {
+    if (receiptString[1] == '\r')
         strcpy(sendString, VERSION);
     else
         strcpy(sendString, ERR_ANS);
@@ -225,30 +252,27 @@ void actionVersion(void) {
  * @param  		None
  * @retval 		None
  */
-void actionBusyState(void) {
-    if (Dumber.StateSystem == RUN || Dumber.StateSystem == LOW) {
+void cmdBusyStateAction(void) {
+    if ((Dumber.StateSystem == STATE_RUN) || (Dumber.StateSystem == STATE_LOW)) {
         if (Dumber.busyState == TRUE)
-            strcpy(sendString, "1");
+            strcpy(sendString, "1\r");
         else
-            strcpy(sendString, "0");
+            strcpy(sendString, "0\r");
     } else {
         strcpy(sendString, ERR_ANS);
     }
 }
 
 /**
- * @brief 		Effectue une remise à zero du watchdog.
+ * @brief 		Effectue une remise à zéro du watchdog.
  *
  * @param  		None
  * @retval 		None
  */
-void actionResetWD(void) {
-    if (Dumber.StateSystem == RUN && watchDogState==TRUE){
-        Dumber.cpt_watchdog = 0;
+void cmdResetWatchdogAction(void) {
+    if (systemResetWatchdog()!=0) { // Réussite
         strcpy(sendString, OK_ANS);
-    }
-    else
-        strcpy(sendString, ERR_ANS);
+    } else strcpy(sendString, ERR_ANS);
 }
 
 /**
@@ -260,11 +284,11 @@ void actionResetWD(void) {
  * @param  		None
  * @retval 		None
  */
-void actionStartWithWD(void) {
-    if (Dumber.StateSystem == IDLE && receiptString[1] == 13) {
-        strcpy(sendString, OK_ANS);
+void cmdStartWithWatchdogAction(void) {
+    if (Dumber.StateSystem == STATE_IDLE && receiptString[1] == '\r') {
         Dumber.WatchDogStartEnable = TRUE;
-        Dumber.StateSystem = RUN;
+        systemChangeState(STATE_RUN);
+        strcpy(sendString, OK_ANS);
     } else
         strcpy(sendString, ERR_ANS);
 }
@@ -276,11 +300,11 @@ void actionStartWithWD(void) {
  * @param  		None
  * @retval 		None
  */
-void actionStartWWD(void) {
-    if (Dumber.StateSystem == IDLE && receiptString[1] == 13) {
-        strcpy(sendString, OK_ANS);
+void cmdStartWithoutWatchdogAction(void) {
+    if (Dumber.StateSystem == STATE_IDLE && receiptString[1] == '\r') {
         Dumber.WatchDogStartEnable = FALSE;
-        Dumber.StateSystem = RUN;
+        systemChangeState(STATE_RUN);
+        strcpy(sendString, OK_ANS);
     } else
         strcpy(sendString, ERR_ANS);
 }
@@ -295,8 +319,8 @@ void actionStartWWD(void) {
  * @param  		None
  * @retval 		None
  */
-void actionMove(void) {
-    if (Dumber.StateSystem == RUN || Dumber.StateSystem == LOW) {
+void cmdMoveAction(void) {
+    if (Dumber.StateSystem == STATE_RUN || Dumber.StateSystem == STATE_LOW) {
         int laps;
         uint16_t testReception = sscanf(receiptString, "M=%i\r", &laps);
         unsigned char mod = 0;
@@ -313,8 +337,10 @@ void actionMove(void) {
                 mod = FORWARD;
 
             laps = laps * 2;
-            regulationMoteur(mod, mod, (unsigned) laps, (unsigned) laps,
+
+            motorRegulation(mod, mod, (unsigned) laps, (unsigned) laps,
                     COMMONSPEED, COMMONSPEED);
+
             strcpy(sendString, OK_ANS);
         } else
             strcpy(sendString, ERR_ANS);
@@ -322,39 +348,34 @@ void actionMove(void) {
 }
 
 /**
- * @brief 		Execute une action tourne avec les paramétres dans receitpString.
+ * @brief 		Execute une action tourne avec les paramètres dans receitpString.
  * 				Type de commande à envoyer : "T=val\r". Ou val peut être positif
  * 				ou negatif.
  *
  * @param  		None
  * @retval 		None
  */
-void actionTurn(void) {
-    if (Dumber.StateSystem == RUN || Dumber.StateSystem == LOW) {
+void cmdTurnAction(void) {
+    if (Dumber.StateSystem == STATE_RUN || Dumber.StateSystem == STATE_LOW) {
         int degree;
         uint16_t testReception = sscanf(receiptString, "T=%i\r", &degree);
         tourPositionG = 0;
         tourPositionD = 0;
+
         if (testReception == 1) {
             degree = degree * 1.40;
             Dumber.cpt_inactivity = 0;
             Dumber.busyState = TRUE;
+
             if (degree < 0) {
                 degree = degree * -1;
-                if (degree < 30)
-                    regulationMoteur(FORWARD, REVERSE, (unsigned) degree,
-                            (unsigned) degree, LOWSPEED, LOWSPEED);
-                else
-                    regulationMoteur(FORWARD, REVERSE, (unsigned) degree,
-                            (unsigned) degree, COMMONSPEED, COMMONSPEED);
+                motorRegulation(FORWARD, REVERSE, (unsigned) degree,
+                        (unsigned) degree, LOWSPEED, LOWSPEED);
             } else {
-                if (degree < 30)
-                    regulationMoteur(REVERSE, FORWARD, (unsigned) degree,
-                            (unsigned) degree, LOWSPEED, LOWSPEED);
-                else
-                    regulationMoteur(REVERSE, FORWARD, (unsigned) degree,
-                            (unsigned) degree, COMMONSPEED, COMMONSPEED);
+                motorRegulation(REVERSE, FORWARD, (unsigned) degree,
+                        (unsigned) degree, LOWSPEED, LOWSPEED);
             }
+            strcpy(sendString, OK_ANS);
         } else
             strcpy(sendString, ERR_ANS);
     }
@@ -370,7 +391,7 @@ void actionTurn(void) {
  * @param  		None
  * @retval 		None
  */
-void actionBatteryVoltage(void) {
+void cmdBatteryVoltageAction(void) {
     char battery[2];
     battery[0] = Dumber.stateBattery + '0';
     battery[1] = '\r';
@@ -386,12 +407,15 @@ void actionBatteryVoltage(void) {
  * @param  		None
  * @retval 		None
  */
-void actionDebug(void) {
+void cmdDebugAction(void) {
+    uint8_t j;
+
     sprintf(sendString, "Th-D=%u G=%u\r", tourPositionD, tourPositionG);
-    sendDataUSART();
+    usartSendData();
+
     for (j = 0; j < 200; j++);
     sprintf(sendString, "Re-D=%u G=%u\r", G_lapsRight, G_lapsLeft);
-    sendDataUSART();
+    usartSendData();
 }
 
 /**
