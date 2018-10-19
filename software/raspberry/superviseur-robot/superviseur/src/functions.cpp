@@ -12,16 +12,27 @@ void f_server(void *arg) {
     printf("Init %s\n", info.name);
     rt_sem_p(&sem_barrier, TM_INFINITE);
 
-    err = run_nodejs("/usr/local/bin/node", "/home/pi/Interface_Robot/server.js");
+    err=openServer(DEFAULT_SERVER_PORT);
 
     if (err < 0) {
-        printf("Failed to start nodejs: %s\n", strerror(-err));
+        printf("Failed to start server: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     } else {
 #ifdef _WITH_TRACE_
-        printf("%s: nodejs started\n", info.name);
+        printf("%s: server started\n", info.name);
 #endif
-        open_server();
+        //Waiting for a client to connect
+        err=acceptClient();
+        
+        if (err<0) {
+            printf("Client accept failed: %s\n", strerror(-err));
+            exit(EXIT_FAILURE);
+        }
+
+#ifdef _WITH_TRACE_
+        printf ("client connected: %d\n", err);
+        printf ("Rock'n'roll baby !\n");
+#endif        
         rt_sem_broadcast(&sem_serverOk);
     }
 }
@@ -105,7 +116,7 @@ void f_receiveFromMon(void *arg) {
                 robotMove = msg.data[0];
                 rt_mutex_release(&mutex_move);
 #ifdef _WITH_TRACE_
-                printf("%s: message update movement with %c\n", info.name, move);
+                printf("%s: message update movement with %c\n", info.name, robotMove);
 #endif
 
             }
@@ -191,18 +202,18 @@ void f_move(void *arg) {
     rt_sem_p(&sem_barrier, TM_INFINITE);
 
     /* PERIODIC START */
-#ifdef _WITH_TRACE_
+#ifdef _WITH_PERIODIC_TRACE_
     printf("%s: start period\n", info.name);
 #endif
     rt_task_set_periodic(NULL, TM_NOW, 100000000);
     while (1) {
-#ifdef _WITH_TRACE_
+#ifdef _WITH_PERIODIC_TRACE_
         printf("%s: Wait period \n", info.name);
 #endif
         rt_task_wait_period(NULL);
-#ifdef _WITH_TRACE_
+#ifdef _WITH_PERIODIC_TRACE_
         printf("%s: Periodic activation\n", info.name);
-        printf("%s: move equals %c\n", info.name, move);
+        printf("%s: move equals %c\n", info.name, robotMove);
 #endif
         rt_mutex_acquire(&mutex_robotStarted, TM_INFINITE);
         if (robotStarted) {
@@ -210,7 +221,7 @@ void f_move(void *arg) {
             send_command_to_robot(robotMove);
             rt_mutex_release(&mutex_move);
 #ifdef _WITH_TRACE_
-            printf("%s: the movement %c was sent\n", info.name, move);
+            printf("%s: the movement %c was sent\n", info.name, robotMove);
 #endif            
         }
         rt_mutex_release(&mutex_robotStarted);

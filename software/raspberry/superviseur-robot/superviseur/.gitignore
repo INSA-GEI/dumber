@@ -1,6 +1,7 @@
 bin/
 build/
 CMakeFiles/
+dist/
 
 .dep.inc
 Makefile

@@ -29,6 +29,7 @@
 #include "robot.h"
 #include "image.h"
 #include "message.h"
+#include "server.h"
 
 extern RT_TASK th_server;
 extern RT_TASK th_sendToMon;
