@@ -25,10 +25,10 @@
 #include <alchemy/sem.h>
 #include <alchemy/queue.h>
 
-#include "../../src/monitor.h"    
-#include "../../src/robot.h"
-#include "../../src/image.h"
-#include "../../src/message.h"
+#include "monitor.h"
+#include "robot.h"
+#include "image.h"
+#include "message.h"
 
 extern RT_TASK th_server;
 extern RT_TASK th_sendToMon;
@@ -49,7 +49,7 @@ extern RT_QUEUE q_messageToMon;
 
 extern int etatCommMoniteur;
 extern int robotStarted;
-extern char move;
+extern char robotMove;
 
 extern int MSG_QUEUE_SIZE;
 

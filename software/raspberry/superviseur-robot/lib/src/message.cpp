@@ -25,5 +25,5 @@ void free_msgToMon_data(MessageToMon *msg) {
 
 void print_msgToMon(MessageToMon *msg) {
     printf("header: %s\n", msg->header);
-    printf("data: %s\n", msg->data);
+    printf("data: %s\n", (char*)msg->data);
 }

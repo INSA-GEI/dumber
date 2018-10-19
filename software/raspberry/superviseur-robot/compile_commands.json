@@ -1,0 +1,32 @@
+[
+{
+  "directory": "/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib",
+  "command": "/usr/bin/g++   -I/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/.   -I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy -g3 -gdwarf-2   -std=gnu++11 -o CMakeFiles/destijl.dir/src/robot.cpp.o -c /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/src/robot.cpp",
+  "file": "/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/src/robot.cpp"
+},
+{
+  "directory": "/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib",
+  "command": "/usr/bin/g++   -I/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/.   -I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy -g3 -gdwarf-2   -std=gnu++11 -o CMakeFiles/destijl.dir/src/monitor.cpp.o -c /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/src/monitor.cpp",
+  "file": "/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/src/monitor.cpp"
+},
+{
+  "directory": "/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib",
+  "command": "/usr/bin/g++   -I/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/.   -I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy -g3 -gdwarf-2   -std=gnu++11 -o CMakeFiles/destijl.dir/src/message.cpp.o -c /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/src/message.cpp",
+  "file": "/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/src/message.cpp"
+},
+{
+  "directory": "/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib",
+  "command": "/usr/bin/g++   -I/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/.   -I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy -g3 -gdwarf-2   -std=gnu++11 -o CMakeFiles/destijl.dir/src/image.cpp.o -c /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/src/image.cpp",
+  "file": "/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/src/image.cpp"
+},
+{
+  "directory": "/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur",
+  "command": "/usr/bin/g++   -I/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/./src -I/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/../lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury   -I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy -g3 -gdwarf-2   -std=gnu++11 -o CMakeFiles/superviseur.dir/src/main.cpp.o -c /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/src/main.cpp",
+  "file": "/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/src/main.cpp"
+},
+{
+  "directory": "/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur",
+  "command": "/usr/bin/g++   -I/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/./src -I/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/../lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury   -I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy -g3 -gdwarf-2   -std=gnu++11 -o CMakeFiles/superviseur.dir/src/functions.cpp.o -c /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/src/functions.cpp",
+  "file": "/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/src/functions.cpp"
+}
+]

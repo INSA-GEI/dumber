@@ -16,7 +16,7 @@
 #include <alchemy/sem.h>
 #include <alchemy/queue.h>
 
-#include "./header/functions.h"
+#include "functions.h"
 
 // Déclaration des taches
 RT_TASK th_server;
@@ -51,7 +51,7 @@ int MSG_QUEUE_SIZE = 10;
 // Déclaration des ressources partagées
 int etatCommMoniteur = 1;
 int robotStarted = 0;
-char move = DMB_STOP_MOVE;
+char robotMove = DMB_STOP_MOVE;
 
 /**
  * \fn void initStruct(void)
@@ -91,10 +91,11 @@ int main(int argc, char **argv) {
 }
 
 void initStruct(void) {
+
     int err;
     /* Creation des mutex */
     if (err = rt_mutex_create(&mutex_robotStarted, NULL)) {
-        printf("Error mutex create: %s\n", strerror(-err));
+        printf("Error mutex create: %d %s\n", err, strerror(-err));
         exit(EXIT_FAILURE);
     }
     if (err = rt_mutex_create(&mutex_move, NULL)) {
@@ -103,20 +104,20 @@ void initStruct(void) {
     }
 
     /* Creation du semaphore */
-    if (err = rt_sem_create(&sem_barrier, NULL, 0, S_FIFO)) {
-        printf("Error semaphore create: %s\n", strerror(-err));
+    if (err = rt_sem_create(&sem_barrier, "truc", 0, S_FIFO)) {
+        printf("Error semaphore create 1: %d %s\n", err, strerror(-err));
         exit(EXIT_FAILURE);
     }
     if (err = rt_sem_create(&sem_openComRobot, NULL, 0, S_FIFO)) {
-        printf("Error semaphore create: %s\n", strerror(-err));
+        printf("Error semaphore create 2: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
     if (err = rt_sem_create(&sem_serverOk, NULL, 0, S_FIFO)) {
-        printf("Error semaphore create: %s\n", strerror(-err));
+        printf("Error semaphore create 3: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
     if (err = rt_sem_create(&sem_startRobot, NULL, 0, S_FIFO)) {
-        printf("Error semaphore create: %s\n", strerror(-err));
+        printf("Error semaphore create 4: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
 

@@ -1,4 +1,4 @@
-#include "../header/functions.h"
+#include "functions.h"
 
 char mode_start;
 
@@ -102,7 +102,7 @@ void f_receiveFromMon(void *arg) {
                     || (msg.data[0] == DMB_STOP_MOVE)) {
 
                 rt_mutex_acquire(&mutex_move, TM_INFINITE);
-                move = msg.data[0];
+                robotMove = msg.data[0];
                 rt_mutex_release(&mutex_move);
 #ifdef _WITH_TRACE_
                 printf("%s: message update movement with %c\n", info.name, move);
@@ -207,7 +207,7 @@ void f_move(void *arg) {
         rt_mutex_acquire(&mutex_robotStarted, TM_INFINITE);
         if (robotStarted) {
             rt_mutex_acquire(&mutex_move, TM_INFINITE);
-            send_command_to_robot(move);
+            send_command_to_robot(robotMove);
             rt_mutex_release(&mutex_move);
 #ifdef _WITH_TRACE_
             printf("%s: the movement %c was sent\n", info.name, move);

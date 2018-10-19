@@ -4,8 +4,8 @@ set(serialTest_FILES ./src/serialTest.cpp)
 set(serverTest_FILES ./src/serverTest.cpp)
 include_directories(./src ../lib)
 
-add_executable(serialTest ${serialTest_FILES})
-target_link_libraries(serialTest destjil)
+add_executable(serialtest ${serialTest_FILES})
+target_link_libraries(serialtest destijl)
 
-add_executable(serverTest ${serverTest_FILES})
-target_link_libraries(serverTest destjil)
+add_executable(servertest ${serverTest_FILES})
+target_link_libraries(servertest destijl)

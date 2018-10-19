@@ -102,7 +102,7 @@ int send_message_to_monitor(const char* typeMessage, const void * data) {
         serverSend("TRAME", 5);
         return 0;
     } else if ((string) typeMessage == HEADER_STM_POS) {
-        char buffer[20];
+        char buffer[400];
         Position * maPosition = (Position*) data;
         sprintf(buffer, "POScenter: %3d;%3d | %.1fTRAME", maPosition->center.x, maPosition->center.y, maPosition->angle);
         serverSend(buffer, strlen(buffer));

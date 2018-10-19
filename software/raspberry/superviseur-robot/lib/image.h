@@ -14,6 +14,8 @@
 #ifndef IMAGERIE_H
 #define IMAGERIE_H
 
+#define __STUB__
+
 #ifndef __STUB__
 #include <raspicam/raspicam_cv.h>
 #else

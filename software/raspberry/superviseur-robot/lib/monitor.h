@@ -62,7 +62,7 @@ typedef struct {
  * \param    file  chemin du fichier de l'interface (défaut ./interface.js)
  * \return   retourne 0 si le process a été lancé et -1 sinon.
  */
-int run_nodejs(const char * path = DEFAULT_NODEJS_PATH, char * file = DEFAULT_INTERFACE_FILE);
+int run_nodejs(const char *path = (const char*)DEFAULT_NODEJS_PATH, char *file = (const char*)DEFAULT_INTERFACE_FILE);
 
 /**
  * \brief    Tue le process exécutant nodejs.

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="100">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df root="." name="0">
+      <df name="lib">
+        <df name="src">
+          <in>image.cpp</in>
+          <in>message.cpp</in>
+          <in>monitor.cpp</in>
+          <in>robot.cpp</in>
+        </df>
+      </df>
+      <df name="superviseur">
+        <df name="src">
+          <in>functions.cpp</in>
+          <in>main.cpp</in>
+        </df>
+        <in>.gitignore</in>
+      </df>
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>CMakeLists.txt</itemPath>
+      <itemPath>Makefile</itemPath>
+      <itemPath>nbproject/private/launcher.properties</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>false</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <flagsDictionary>
+        <element flagsID="0" commonFlags="-std=gnu++11"/>
+      </flagsDictionary>
+      <codeAssistance>
+      </codeAssistance>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>${MAKE} -f Makefile</buildCommand>
+          <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
+          <executablePath></executablePath>
+          <ccTool>
+            <preprocessorList>
+              <Elem>_GNU_SOURCE</Elem>
+              <Elem>_REENTRANT</Elem>
+              <Elem>__MERCURY__</Elem>
+            </preprocessorList>
+          </ccTool>
+        </makeTool>
+        <preBuild>
+          <preBuildCommandWorkingDir>.</preBuildCommandWorkingDir>
+          <preBuildCommand>${CMAKE} -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=${IDE_CC} -DCMAKE_CXX_COMPILER=${IDE_CXX} -DCMAKE_C_FLAGS_DEBUG="-g3 -gdwarf-2" -DCMAKE_CXX_FLAGS_DEBUG="-g3 -gdwarf-2" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .</preBuildCommand>
+        </preBuild>
+      </makefileType>
+      <folder path="0/lib">
+        <ccTool>
+          <incDir>
+            <pElem>lib</pElem>
+            <pElem>/usr/xenomai/include/mercury</pElem>
+            <pElem>/usr/xenomai/include</pElem>
+            <pElem>/usr/xenomai/include/alchemy</pElem>
+          </incDir>
+        </ccTool>
+      </folder>
+      <folder path="0/superviseur">
+        <ccTool>
+          <incDir>
+            <pElem>superviseur/src</pElem>
+            <pElem>lib</pElem>
+            <pElem>/usr/xenomai/include</pElem>
+            <pElem>/usr/xenomai/include/mercury</pElem>
+            <pElem>/usr/xenomai/include/alchemy</pElem>
+            <pElem>superviseur</pElem>
+          </incDir>
+        </ccTool>
+      </folder>
+      <item path="lib/src/image.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="0">
+        </ccTool>
+      </item>
+      <item path="lib/src/message.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="0">
+        </ccTool>
+      </item>
+      <item path="lib/src/monitor.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="0">
+        </ccTool>
+      </item>
+      <item path="lib/src/robot.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="0">
+        </ccTool>
+      </item>
+      <item path="superviseur/.gitignore" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="superviseur/src/functions.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="0">
+        </ccTool>
+      </item>
+      <item path="superviseur/src/main.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="0">
+        </ccTool>
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
