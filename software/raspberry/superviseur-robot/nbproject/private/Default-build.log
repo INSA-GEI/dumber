@@ -1,0 +1,48 @@
+Scanning dependencies of target destijl
+[ 12%] Building CXX object lib/CMakeFiles/destijl.dir/src/robot.cpp.o
+[ 25%] Building CXX object lib/CMakeFiles/destijl.dir/src/monitor.cpp.o
+In file included from /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/src/monitor.cpp:1:0:
+/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/./monitor.h:65:117: warning: ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
+ int run_nodejs(const char *path = (const char*)DEFAULT_NODEJS_PATH, char *file = (const char*)DEFAULT_INTERFACE_FILE);
+                                                                                                                     ^
+/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/src/monitor.cpp: In function ‘int run_nodejs(const char*, char*)’:
+/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/src/monitor.cpp:24:50: warning: ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
+     char * const parmList[] = {"node", file, NULL};
+                                                  ^
+[ 37%] Building CXX object lib/CMakeFiles/destijl.dir/src/message.cpp.o
+[ 50%] Building CXX object lib/CMakeFiles/destijl.dir/src/image.cpp.o
+[ 62%] Linking CXX static library /home/dimercur/Documents/Travail/git/dumber/software/raspberry/lib/libdestijl.a
+[ 62%] Built target destijl
+Scanning dependencies of target superviseur
+[ 75%] Building CXX object superviseur/CMakeFiles/superviseur.dir/src/main.cpp.o
+In file included from /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/src/functions.h:28:0,
+                 from /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/src/main.cpp:19:
+/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/../lib/monitor.h:65:117: warning: ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
+ int run_nodejs(const char *path = (const char*)DEFAULT_NODEJS_PATH, char *file = (const char*)DEFAULT_INTERFACE_FILE);
+                                                                                                                     ^
+[ 87%] Building CXX object superviseur/CMakeFiles/superviseur.dir/src/functions.cpp.o
+In file included from /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/src/functions.h:28:0,
+                 from /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/src/functions.cpp:1:
+/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/../lib/monitor.h:65:117: warning: ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
+ int run_nodejs(const char *path = (const char*)DEFAULT_NODEJS_PATH, char *file = (const char*)DEFAULT_INTERFACE_FILE);
+                                                                                                                     ^
+/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/src/functions.cpp: In function ‘void f_server(void*)’:
+/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/src/functions.cpp:15:81: warning: ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
+     err = run_nodejs("/usr/local/bin/node", "/home/pi/Interface_Robot/server.js");
+                                                                                 ^
+/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/src/functions.cpp: In function ‘void f_openComRobot(void*)’:
+/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/src/functions.cpp:140:53: warning: ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
+             set_msgToMon_header(&msg, HEADER_STM_ACK);
+                                                     ^
+/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/src/functions.cpp:144:56: warning: ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
+             set_msgToMon_header(&msg, HEADER_STM_NO_ACK);
+                                                        ^
+/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/src/functions.cpp: In function ‘void f_startRobot(void*)’:
+/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/src/functions.cpp:176:53: warning: ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
+             set_msgToMon_header(&msg, HEADER_STM_ACK);
+                                                     ^
+/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/superviseur/src/functions.cpp:180:56: warning: ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
+             set_msgToMon_header(&msg, HEADER_STM_NO_ACK);
+                                                        ^
+[100%] Linking CXX executable /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur/bin/superviseur
+[100%] Built target superviseur

@@ -62,3 +62,4 @@ GUI
 # Android
 *.apk
 
+/software/raspberry/superviseur-robot/superviseur/dist/
