@@ -129,7 +129,7 @@ public partial class MainWindow : Gtk.Window
         a.RetVal = true;
     }
 
-    public void OnCommandReceivedEvent(string header, string data)
+    public void OnCommandReceivedEvent(string header, string data, byte[] buffer)
     {
         if (header != null) Console.WriteLine("Received header (" + header.Length + "): " + header);
         if (data != null) Console.WriteLine("Received data (" + data.Length + "): " + data);
@@ -151,6 +151,13 @@ public partial class MainWindow : Gtk.Window
                     labelBatteryLevel.Text = "Invalid value";
                     break;
             }
+        }
+        else if (header.ToUpper() == DestijlCommandList.HeaderStmImage)
+        {
+            Console.WriteLine("Image received");
+            byte[] image = new byte[buffer.Length-4];
+            System.Buffer.BlockCopy(buffer, 4, image, 0, image.Length);
+            drawingareaCameraPixbuf = new Pixbuf(image.Length, image, true);
         }
     }
 
@@ -382,9 +389,9 @@ public partial class MainWindow : Gtk.Window
         {
             if (cmdManager.CameraClose() != DestijlCommandManager.CommandStatus.Success)
             {
-                MessagePopup(MessageType.Error,
-                             ButtonsType.Ok, "Error",
-                             "Error when closing camera: bad answer for supervisor or timeout");
+                //MessagePopup(MessageType.Error,
+                //             ButtonsType.Ok, "Error",
+                //             "Error when closing camera: bad answer for supervisor or timeout");
             }
         }
         else

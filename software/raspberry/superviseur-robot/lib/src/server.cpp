@@ -52,6 +52,8 @@ int closeServer() {
     close(socketFD);
 
     socketFD = -1;
+    
+    return 0;
 }
 
 int acceptClient() {

@@ -50,7 +50,7 @@ namespace monitor
         private string receivedHeader = null;
         private string receivedData = null;
 
-        public delegate void CommandReceivedEvent(string header, string data);
+        public delegate void CommandReceivedEvent(string header, string data, byte[] buffer);
         public CommandReceivedEvent commandReceivedEvent = null;
 
         public double timeout = 100; // timeout pour les commandes avec acquitement
@@ -76,7 +76,7 @@ namespace monitor
             if (commandManager != null) commandManager.Close();
         }
 
-        private void OnCommandReceived(string msg)
+        private void OnCommandReceived(string msg, byte[] buffer)
         {
             string[] msgs = msg.Split(':');
 
@@ -86,7 +86,7 @@ namespace monitor
             if (msgs.Length >= 2) receivedData = msgs[1];
             else receivedData = null;
 
-            this.commandReceivedEvent?.Invoke(receivedHeader, receivedData);
+            this.commandReceivedEvent?.Invoke(receivedHeader, receivedData, buffer);
         }
 
         public bool Open(string hostname)

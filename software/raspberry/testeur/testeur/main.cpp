@@ -114,6 +114,20 @@ int sendAnswer(string cmd, string data) {
     return status;
 }
 
+int sendBinaryData(string cmd, unsigned char* data) {
+    int status = 0;
+    string msg;
+
+//TODO: Faire une version binaire de sendDataToServer
+    //TODO: Gerer la concatenation du header et des données binaires
+    msg = cmd + ':' + data;
+    cout << "Answer: " + msg;
+    cout << "\n";
+    sendDataToServer((char*) msg.c_str(), msg.length());
+
+    return status;
+}
+
 int decodeMessage(MessageFromMon *mes, int dataLength) {
     int status = 0;
     string header(mes->header, 4);
@@ -169,12 +183,12 @@ int main(int argc, char** argv) {
     namedWindow("Sortie Camera");
 
     // Ouverture de la com robot
-    if (open_communication_robot("/dev/ttyUSB0") != 0) {
+    /*if (open_communication_robot("/dev/ttyUSB0") != 0) {
         cerr << "Unable to open /dev/ttyUSB0: abort\n";
         return -1;
     }
     cout << "/dev/ttyUSB0 opened\n";
-
+*/
     // Ouverture de la camera
     if (open_camera(0) == -1) {
         cerr << "Unable to open camera: abort\n";

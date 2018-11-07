@@ -4,7 +4,7 @@ namespace monitor
 {
     public class CommandManager
     {
-        public delegate void CommandReceivedEvent(string msg);
+        public delegate void CommandReceivedEvent(string msg, byte[] buffer);
         public CommandReceivedEvent commandReceivedEvent = null;
 
         private System.Timers.Timer waitTimer = new System.Timers.Timer();
@@ -50,7 +50,7 @@ namespace monitor
             Client.Close();
         }
 
-        private void OnMessageReception(string message)
+        private void OnMessageReception(string message, byte[] buffer)
         {
             waitTimer.Stop();
             this.messageReceived = message;
@@ -62,14 +62,14 @@ namespace monitor
             }
             else {
                 waitForAcknowledge = false;
-                this.commandReceivedEvent?.Invoke(message);
+                this.commandReceivedEvent?.Invoke(message, buffer);
             }
         }
 
         private void OnMessageTimeout(object sender, System.Timers.ElapsedEventArgs e)
         {
             messageReceived = null;
-            OnMessageReception(messageReceived);
+            OnMessageReception(messageReceived, null);
         }
 
         public CommandManagerStatus SendCommand(string cmd, out string answer, double timeout)

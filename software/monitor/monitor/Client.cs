@@ -11,6 +11,7 @@ namespace monitor
         private static NetworkStream myStream = null;
         private const int BufferMaxSize = 512;
         private static byte[] buffer = new byte[BufferMaxSize];
+
         private static StringBuilder sb = new StringBuilder();
         private static int newLength = 1;
 
@@ -51,10 +52,12 @@ namespace monitor
 
         private const int BufferMaxSize = 512;
         private static byte[] buffer = new byte[BufferMaxSize];
+        private static byte[] receiveBuffer;
+        private static int initialReceiveBufferIndex = 0;
         private static StringBuilder message = new StringBuilder();
         private static int newLength = 1;
 
-        public delegate void ReadEvent(string msg);
+        public delegate void ReadEvent(string msg, byte[] buffer);
         public static ReadEvent readEvent = null;
 
         public Client()
@@ -124,6 +127,11 @@ namespace monitor
                 if (bytesRead > 0)
                 {
                     message.Append(Encoding.ASCII.GetString(buffer, 0, bytesRead));
+                    if (receiveBuffer == null) receiveBuffer = new byte[bytesRead];
+                    else Array.Resize<byte>(ref receiveBuffer, initialReceiveBufferIndex + bytesRead);
+
+                    System.Buffer.BlockCopy(buffer, 0, receiveBuffer, initialReceiveBufferIndex, bytesRead);
+                    initialReceiveBufferIndex = receiveBuffer.Length;
                 }
 
                 if (client.Available > 0)
@@ -134,9 +142,11 @@ namespace monitor
                 }
                 else
                 {
-                    readEvent?.Invoke(message.ToString());
+                    readEvent?.Invoke(message.ToString(), receiveBuffer);
 
                     message.Clear();
+                    receiveBuffer = null;
+                    initialReceiveBufferIndex = 0;
                 }
 
                 stream.BeginRead(buffer, 0, newLength, new AsyncCallback(ReadCallback), message);
