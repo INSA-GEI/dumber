@@ -60,5 +60,4 @@ int close_communication_robot(void);
  */
 int send_command_to_robot(char cmd, const char * arg=NULL);
 
-
 #endif //DUMBERC_SERIAL_H_H

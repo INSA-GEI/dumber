@@ -14,10 +14,12 @@
 #ifndef IMAGERIE_H
 #define IMAGERIE_H
 
-#define __STUB__
-
 #ifndef __STUB__
+#ifndef __FOR_PC__
 #include <raspicam/raspicam_cv.h>
+#else
+#include <opencv2/highgui/highgui.hpp>
+#endif /* __FOR_PC__ */
 #else
 #include <opencv2/highgui/highgui.hpp>
 #endif
@@ -31,15 +33,22 @@
 using namespace std;
 using namespace cv;
 #ifndef __STUB__
+#ifndef __FOR_PC__
 using namespace raspicam;
+#endif /* __FOR_PC__ */
 #endif
 
 typedef Mat Image;
 #ifndef __STUB__
+#ifndef __FOR_PC__
 typedef RaspiCam_Cv Camera;
 #else
 typedef int Camera;
+#endif /* __FOR_PC__ */
+#else
+typedef int Camera;
 #endif
+
 typedef Rect Arene;
 typedef vector<unsigned char> Jpg;
 

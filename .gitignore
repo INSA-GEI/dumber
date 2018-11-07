@@ -63,3 +63,5 @@ GUI
 *.apk
 
 /software/raspberry/superviseur-robot/superviseur/dist/
+/software/raspberry/testeur/testeur/build/
+/software/raspberry/testeur/testeur/dist/

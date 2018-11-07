@@ -15,9 +15,14 @@
 
 using namespace cv;
 #ifndef __STUB__
+#ifdef __FOR_PC__
+VideoCapture cap;
+#else
 using namespace raspicam;
+#endif /* __FOR_PC__ */
 #else
 Image stubImg;
+
 #endif
 using namespace std;
 
@@ -35,6 +40,16 @@ void draw_arena(Image *imgInput, Image *imgOutput, Arene *monArene)
 int open_camera(Camera  *camera)
 {
 #ifndef __STUB__
+#ifdef __FOR_PC__
+    // open the default camera, use something different from 0 otherwise;
+    // Check VideoCapture documentation.
+    printf("Opening Camera...\n");
+    if(!cap.open(0))
+        return -1;
+    
+    sleep(1);
+    return 0;
+#else // for raspberry
     camera->set(CV_CAP_PROP_FORMAT, CV_8UC3);
     camera->set(CV_CAP_PROP_FRAME_WIDTH,WIDTH);
     camera->set(CV_CAP_PROP_FRAME_HEIGHT,HEIGHT);
@@ -50,16 +65,26 @@ int open_camera(Camera  *camera)
         sleep(2);
         printf("Start capture\n");
         return 0;
-    }   
+    }
+#endif /* __FOR_PC__ */
+#else 
+    return 0;
 #endif
 }
 
 void get_image(Camera *camera, Image * monImage, const char  * fichier) // getImg(Camera, Image img);
 {
 #ifndef __STUB__
+#ifdef __FOR_PC__
+    if (monImage != NULL)
+    {
+        cap>>*monImage;
+    }
+#else // for raspberry
     camera->grab();
     camera->retrieve(*monImage);
     cvtColor(*monImage,*monImage,CV_BGR2RGB);
+#endif /* __FOR_PC__ */
 #else
     stubImg = imread(fichier, CV_LOAD_IMAGE_COLOR);
     stubImg.copyTo(*monImage);
@@ -69,7 +94,13 @@ void get_image(Camera *camera, Image * monImage, const char  * fichier) // getIm
 void close_camera(Camera *camera) // closeCam(Camera) : camera Entrer
 {
 #ifndef __STUB__
+#ifdef __FOR_PC__
+    cap.release();
+#else // for raspberry
     camera->release();
+#endif /* __FOR_PC__ */
+#else
+
 #endif
 }
 

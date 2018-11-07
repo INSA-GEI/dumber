@@ -48,7 +48,7 @@
 
 #define DMB_BAT_LOW 0
 #define DMB_BAT_MEDIUM 1
-#define DMB_BAT_HIGHT 2
+#define DMB_BAT_HIGH 2
 
 #define DMB_BUSY 1
 #define DMB_DO_NOTHING 0
