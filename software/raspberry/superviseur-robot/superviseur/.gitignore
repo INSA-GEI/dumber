@@ -1,9 +1,0 @@
-bin/
-build/
-CMakeFiles/
-
-.dep.inc
-Makefile
-*.cmake
-*.o
-
