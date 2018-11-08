@@ -207,6 +207,8 @@ public partial class MainWindow
 		global::Gtk.Box.BoxChild w5 = ((global::Gtk.Box.BoxChild)(this.hbox2[this.buttonAskArena]));
 		w5.PackType = ((global::Gtk.PackType)(1));
 		w5.Position = 2;
+		w5.Expand = false;
+		w5.Fill = false;
 		this.alignment1.Add(this.hbox2);
 		this.boxCamera.Add(this.alignment1);
 		global::Gtk.Box.BoxChild w7 = ((global::Gtk.Box.BoxChild)(this.boxCamera[this.alignment1]));

@@ -1,38 +1,81 @@
 ﻿using System;
 using System.Net.Sockets;
-using System.Threading;
 using System.Text;
 
 namespace monitor
 {
-    public class Client
+    /// <summary>
+    /// Static class for TCP client
+    /// </summary>
+    public static class Client
     {
+        /// <summary>
+        /// Default server name
+        /// </summary>
         public const string defaultIP = "localhost";
+
+        /// <summary>
+        /// Default server port number
+        /// </summary>
         public const int defaultPort = 4500;
 
+        /// <summary>
+        /// Tcp client object
+        /// </summary>
         private static TcpClient client = null;
+
+        /// <summary>
+        /// Stream object used for communication
+        /// </summary>
         private static NetworkStream stream = null;
 
+        /// <summary>
+        /// Size of internal buffer used when reading data from server
+        /// </summary>
         private const int BufferMaxSize = 512;
+
+        /// <summary>
+        /// Internal buffer used when reading data from server
+        /// </summary>
         private static byte[] buffer = new byte[BufferMaxSize];
+
+        /// <summary>
+        /// buffer containing received message from TCP server
+        /// Used to concatenate internal buffers into one
+        /// </summary>
         private static byte[] receiveBuffer;
+
         private static int initialReceiveBufferIndex = 0;
+
+        /// <summary>
+        /// String containing received message from tcp server
+        /// </summary>
         private static StringBuilder message = new StringBuilder();
         private static int newLength = 1;
         private static int packetCounter = 0;
 
+        /// <summary>
+        /// Callback to send received message to upper level
+        /// </summary>
         public delegate void ReadEvent(string msg, byte[] buffer);
         public static ReadEvent readEvent = null;
 
-        public Client()
-        {
-        }
-
+        /// <summary>
+        /// Open connection to server "host", on default port number.
+        /// </summary>
+        /// <returns>true if connection succeded, false otherwise</returns>
+        /// <param name="host">Hostname to connect to</param>
         public static bool Open(string host)
         {
             return Client.Open(host, defaultPort);
         }
 
+        /// <summary>
+        /// Open connection to server "host", with port number "port"
+        /// </summary>
+        /// <returns>true if connection succeded, false otherwise</returns>
+        /// <param name="host">Hostname to connect to</param>
+        /// <param name="port">Port number for connection</param>
         public static bool Open(string host, int port)
         {
             bool status = true;
@@ -43,6 +86,13 @@ namespace monitor
 
                 stream = client.GetStream();
 
+                // Start reading tcp stream and call "ReadCallback" method when newLength data
+                // will be received
+                // initially, "newLength" is equal to 1, so first call to ReadCallback
+                // will be done after reception of 1 byte.
+
+                // received data are stored in buffer
+                // Next reading will be done in ReadCallback method
                 stream.BeginRead(buffer, 0, newLength, new AsyncCallback(ReadCallback), message);
             }
             catch (ArgumentNullException e)
@@ -55,30 +105,38 @@ namespace monitor
                 Console.WriteLine("SocketException: " + e.ToString());
                 status = false;
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
                 Console.WriteLine("Unknown Exception: " + e.ToString());
-                status = false;  
+                status = false;
             }
 
             return status;
         }
 
-        public static void Close() 
+        /// <summary>
+        /// Close connection to server
+        /// </summary>
+        public static void Close()
         {
-            if (stream!=null) stream.Close();
-            if (client!=null) client.Close();
+            if (stream != null) stream.Close();
+            if (client != null) client.Close();
         }
 
+        /// <summary>
+        /// Callback call by stream.BeginRead after reception of newLength data
+        /// </summary>
+        /// <param name="ar">Not sure of what is it, but needed for terminate reading</param>
         private static void ReadCallback(IAsyncResult ar)
         {
             if (client.Connected)
             {
                 int bytesRead;
 
-                try 
+                try
                 {
-                    bytesRead = stream.EndRead(ar); 
+                    // Termintae read operation, and get number of byte stored in buffer
+                    bytesRead = stream.EndRead(ar);
                 }
                 catch (ObjectDisposedException e)
                 {
@@ -88,23 +146,28 @@ namespace monitor
 
                 newLength = 1;
 
+                // if number of byte read is not 0, concatenate string and buffer
                 if (bytesRead > 0)
                 {
                     packetCounter++;
 
-                    if (packetCounter>=3)
+                    if (packetCounter >= 3)
                     {
                         //Console.WriteLine("Supplementary packet " + packetCounter);
                     }
 
+                    // Append new data to current string (expecting data are ascii)
                     message.Append(Encoding.ASCII.GetString(buffer, 0, bytesRead));
-                    if (receiveBuffer == null) receiveBuffer = new byte[bytesRead];
-                    else Array.Resize<byte>(ref receiveBuffer, initialReceiveBufferIndex + bytesRead);
 
-                    System.Buffer.BlockCopy(buffer, 0, receiveBuffer, initialReceiveBufferIndex, bytesRead);
-                    initialReceiveBufferIndex = receiveBuffer.Length;
+                    // Similarly, append received bytes to current buffer 
+                    if (receiveBuffer == null) receiveBuffer = new byte[bytesRead];
+                    else Array.Resize<byte>(ref receiveBuffer, initialReceiveBufferIndex + bytesRead); // resize currrent buffer
+
+                    System.Buffer.BlockCopy(buffer, 0, receiveBuffer, initialReceiveBufferIndex, bytesRead); // and add received data
+                    initialReceiveBufferIndex = receiveBuffer.Length; // move last index of current buffer
                 }
 
+                // if it remains received data, prepare for a new reading (get another buffer to append to current one)
                 if (client.Available > 0)
                 {
                     newLength = client.Available;
@@ -113,6 +176,7 @@ namespace monitor
                 }
                 else
                 {
+                    // no more data to read, buffer and string can be send to upper level
                     readEvent?.Invoke(message.ToString(), receiveBuffer);
 
                     message.Clear();
@@ -121,10 +185,16 @@ namespace monitor
                     packetCounter = 0;
                 }
 
+                // Prepare for reading new data
                 stream.BeginRead(buffer, 0, newLength, new AsyncCallback(ReadCallback), message);
             }
         }
 
+        /// <summary>
+        /// Write a string to server
+        /// </summary>
+        /// <returns>Nothing</returns>
+        /// <param name="mes">Message to send to server</param>
         public static void Write(string mes)
         {
             if (client.Connected)

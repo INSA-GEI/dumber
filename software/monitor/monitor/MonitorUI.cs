@@ -1,10 +1,12 @@
 ﻿using System;
 using Gtk;
 using Gdk;
-using System.Threading;
 
 using monitor;
 
+/// <summary>
+/// Main window.
+/// </summary>
 public partial class MainWindow : Gtk.Window
 {
     private DestijlCommandManager cmdManager;
@@ -23,7 +25,7 @@ public partial class MainWindow : Gtk.Window
     public MainWindow() : base(Gtk.WindowType.Toplevel)
     {
         Build();
-       
+
         cmdManager = new DestijlCommandManager(OnCommandReceivedEvent);
 
         batteryTimer = new System.Timers.Timer(10000.0);
@@ -210,9 +212,9 @@ public partial class MainWindow : Gtk.Window
                 Console.WriteLine("Connecting to " + entryServerName.Text + ":" + entryServerPort.Text);
                 bool status = false;
 
-                try 
+                try
                 {
-                    cmdManager.timeout = Convert.ToDouble(entryTimeout.Text);    
+                    cmdManager.timeout = Convert.ToDouble(entryTimeout.Text);
                 }
                 catch (Exception)
                 {
@@ -427,9 +429,11 @@ public partial class MainWindow : Gtk.Window
 
         DrawingArea area = (DrawingArea)o;
         Gdk.Pixbuf displayPixbuf;
+        int areaWidth, areaHeight;
 
         Gdk.GC gc = area.Style.BackgroundGC(Gtk.StateType.Normal);
-        area.GdkWindow.GetSize(out int areaWidth, out int areaHeight);
+
+        area.GdkWindow.GetSize(out areaWidth, out areaHeight);
         int width = drawingareaCameraPixbuf.Width;
         int height = drawingareaCameraPixbuf.Height;
         float ratio = (float)width / (float)height;
@@ -440,7 +444,7 @@ public partial class MainWindow : Gtk.Window
             height = (int)(width / ratio);
         }
 
-        if (width>areaWidth)
+        if (width > areaWidth)
         {
             width = areaWidth;
         }
@@ -470,9 +474,9 @@ public partial class MainWindow : Gtk.Window
         };
 
         ResponseType result = (ResponseType)md.Run();
-        md.Destroy(); 
+        md.Destroy();
 
-        if (result == ResponseType.Yes) 
+        if (result == ResponseType.Yes)
         {
             status = cmdManager.CameraArenaConfirm();
         }
@@ -499,8 +503,6 @@ public partial class MainWindow : Gtk.Window
             return;
         }
 
-        //Thread askArena = new Thread(new System.Threading.ThreadStart(DetectArena));
-        //askArena.Start();
         DetectArena();
     }
 }

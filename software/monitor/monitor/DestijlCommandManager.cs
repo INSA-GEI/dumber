@@ -259,7 +259,7 @@ namespace monitor
                 CreateCommand(DestijlCommandList.HeaderMtsDmbOrder, RobotCommandList.RobotGetBattery),
                 out answer,
                 0);
-            
+
             //if (localStatus == CommandManager.CommandManagerStatus.AnswerReceived) {
             //    string[] msg = answer.Split(':');
 
