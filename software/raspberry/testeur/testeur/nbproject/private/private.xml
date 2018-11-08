@@ -7,9 +7,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/dimercur/Documents/Travail/dumber/software/raspberry/superviseur-robot/lib/src/server.cpp</file>
-            <file>file:/home/dimercur/Documents/Travail/dumber/software/raspberry/superviseur-robot/lib/src/image.cpp</file>
-            <file>file:/home/dimercur/Documents/Travail/dumber/software/raspberry/testeur/testeur/main.cpp</file>
+            <file>file:/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/image.h</file>
+            <file>file:/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/src/server.cpp</file>
+            <file>file:/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/src/image.cpp</file>
+            <file>file:/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/src/robot.cpp</file>
+            <file>file:/home/dimercur/Documents/Travail/git/dumber/software/raspberry/testeur/testeur/main.cpp</file>
+            <file>file:/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/robot.h</file>
         </group>
     </open-files>
 </project-private>

@@ -69,27 +69,27 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/testeur: ${OBJECTFILES}
 ${OBJECTDIR}/_ext/e4d40e25/image.o: ../../superviseur-robot/lib/src/image.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/e4d40e25
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DD_REENTRANT -D__FOR_PC__ -I../../superviseur-robot/lib `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/e4d40e25/image.o ../../superviseur-robot/lib/src/image.cpp
+	$(COMPILE.cc) -g -D__FOR_PC__ -DD_REENTRANT -I../../superviseur-robot/lib `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/e4d40e25/image.o ../../superviseur-robot/lib/src/image.cpp
 
 ${OBJECTDIR}/_ext/e4d40e25/message.o: ../../superviseur-robot/lib/src/message.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/e4d40e25
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DD_REENTRANT -D__FOR_PC__ -I../../superviseur-robot/lib `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/e4d40e25/message.o ../../superviseur-robot/lib/src/message.cpp
+	$(COMPILE.cc) -g -D__FOR_PC__ -DD_REENTRANT -I../../superviseur-robot/lib `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/e4d40e25/message.o ../../superviseur-robot/lib/src/message.cpp
 
 ${OBJECTDIR}/_ext/e4d40e25/robot.o: ../../superviseur-robot/lib/src/robot.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/e4d40e25
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DD_REENTRANT -D__FOR_PC__ -I../../superviseur-robot/lib `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/e4d40e25/robot.o ../../superviseur-robot/lib/src/robot.cpp
+	$(COMPILE.cc) -g -D__FOR_PC__ -DD_REENTRANT -I../../superviseur-robot/lib `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/e4d40e25/robot.o ../../superviseur-robot/lib/src/robot.cpp
 
 ${OBJECTDIR}/_ext/e4d40e25/server.o: ../../superviseur-robot/lib/src/server.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/e4d40e25
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DD_REENTRANT -D__FOR_PC__ -I../../superviseur-robot/lib `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/e4d40e25/server.o ../../superviseur-robot/lib/src/server.cpp
+	$(COMPILE.cc) -g -D__FOR_PC__ -DD_REENTRANT -I../../superviseur-robot/lib `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/e4d40e25/server.o ../../superviseur-robot/lib/src/server.cpp
 
 ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DD_REENTRANT -D__FOR_PC__ -I../../superviseur-robot/lib `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+	$(COMPILE.cc) -g -D__FOR_PC__ -DD_REENTRANT -I../../superviseur-robot/lib `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
 
 # Subprojects
 .build-subprojects:

@@ -1,6 +1,7 @@
 ﻿using System;
 using Gtk;
 using Gdk;
+using System.Threading;
 
 using monitor;
 
@@ -29,6 +30,11 @@ public partial class MainWindow : Gtk.Window
         batteryTimer.Elapsed += OnBatteryTimerElapsed;
 
         AdjustControls();
+        PixbufFormat[] format = Gdk.Pixbuf.Formats;
+        foreach (PixbufFormat f in format)
+        {
+            Console.WriteLine("Format: " + f.Name);
+        }
     }
 
     public void AdjustControls()
@@ -131,33 +137,40 @@ public partial class MainWindow : Gtk.Window
 
     public void OnCommandReceivedEvent(string header, string data, byte[] buffer)
     {
-        if (header != null) Console.WriteLine("Received header (" + header.Length + "): " + header);
-        if (data != null) Console.WriteLine("Received data (" + data.Length + "): " + data);
-
-        if (header.ToUpper() == DestijlCommandList.HeaderStmBat)
+        if (header != null)
         {
-            switch (data[0])
+            Console.WriteLine("Received header (" + header.Length + "): " + header);
+            if (header.ToUpper() != DestijlCommandList.HeaderStmImage)
             {
-                case '2':
-                    labelBatteryLevel.Text = "High";
-                    break;
-                case '1':
-                    labelBatteryLevel.Text = "Low";
-                    break;
-                case '0':
-                    labelBatteryLevel.Text = "Empty";
-                    break;
-                default:
-                    labelBatteryLevel.Text = "Invalid value";
-                    break;
+                if (data != null) Console.WriteLine("Received data (" + data.Length + "): " + data);
             }
-        }
-        else if (header.ToUpper() == DestijlCommandList.HeaderStmImage)
-        {
-            Console.WriteLine("Image received");
-            byte[] image = new byte[buffer.Length-4];
-            System.Buffer.BlockCopy(buffer, 4, image, 0, image.Length);
-            drawingareaCameraPixbuf = new Pixbuf(image.Length, image, true);
+
+            if (header.ToUpper() == DestijlCommandList.HeaderStmBat)
+            {
+                switch (data[0])
+                {
+                    case '2':
+                        labelBatteryLevel.Text = "High";
+                        break;
+                    case '1':
+                        labelBatteryLevel.Text = "Low";
+                        break;
+                    case '0':
+                        labelBatteryLevel.Text = "Empty";
+                        break;
+                    default:
+                        labelBatteryLevel.Text = "Invalid value";
+                        break;
+                }
+            }
+            else if (header.ToUpper() == DestijlCommandList.HeaderStmImage)
+            {
+                byte[] image = new byte[buffer.Length - 4];
+                System.Buffer.BlockCopy(buffer, 4, image, 0, image.Length);
+
+                drawingareaCameraPixbuf = new Pixbuf(image);
+                drawingAreaCamera.QueueDraw();
+            }
         }
     }
 
@@ -306,7 +319,6 @@ public partial class MainWindow : Gtk.Window
         if (sender == buttonRight)
         {
             cmdManager.RobotTurn(90);
-
         }
         else if (sender == buttonLeft)
         {
@@ -329,37 +341,17 @@ public partial class MainWindow : Gtk.Window
     void OnBatteryTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
     {
         DestijlCommandManager.CommandStatus status;
-        //int batteryLevel;
-
         batteryTimer.Stop();
 
         if (checkButtonGetBattery.Active)
         {
-            //status = cmdManager.RobotGetBattery(out batteryLevel);
             status = cmdManager.RobotGetBattery();
             switch (status)
             {
                 case DestijlCommandManager.CommandStatus.Success:
-                    /*switch (batteryLevel)
-                    {
-                        case 2:
-                            labelBatteryLevel.Text = "High";
-                            break;
-                        case 1:
-                            labelBatteryLevel.Text = "Low";
-                            break;
-                        case 0:
-                            labelBatteryLevel.Text = "Empty";
-                            break;
-                        default:
-                            labelBatteryLevel.Text = "Unknown";
-                            break;
-                    }*/
-
                     batteryTimer.Start();
                     break;
                 case DestijlCommandManager.CommandStatus.CommunicationLostWithServer:
-                    //MessagePopup(MessageType.Error, ButtonsType.Ok, "Error", "Connection lost with server");
                     Console.WriteLine("Error: Connection lost with server");
                     batteryTimer.Stop();
                     labelBatteryLevel.Text = "Unknown";
@@ -367,7 +359,6 @@ public partial class MainWindow : Gtk.Window
                     ChangeState(SystemState.NotConnected);
                     break;
                 case DestijlCommandManager.CommandStatus.CommunicationLostWithRobot:
-                    //MessagePopup(MessageType.Error, ButtonsType.Ok, "Error", "Connection lost with robot");
                     Console.WriteLine("Error: Connection lost with robot");
                     batteryTimer.Stop();
                     labelBatteryLevel.Text = "Unknown";
@@ -389,9 +380,9 @@ public partial class MainWindow : Gtk.Window
         {
             if (cmdManager.CameraClose() != DestijlCommandManager.CommandStatus.Success)
             {
-                //MessagePopup(MessageType.Error,
-                //             ButtonsType.Ok, "Error",
-                //             "Error when closing camera: bad answer for supervisor or timeout");
+                MessagePopup(MessageType.Error,
+                             ButtonsType.Ok, "Error",
+                             "Error when closing camera: bad answer for supervisor or timeout");
             }
         }
         else
@@ -430,30 +421,86 @@ public partial class MainWindow : Gtk.Window
         }
     }
 
-    protected void OnDrawingAreaCameraRealized(object sender, EventArgs e)
-    {
-        Console.WriteLine("Event realized. Args = " + e.ToString());
-    }
-
     protected void OnDrawingAreaCameraExposeEvent(object o, ExposeEventArgs args)
     {
         //Console.WriteLine("Event expose. Args = " + args.ToString());
 
         DrawingArea area = (DrawingArea)o;
+        Gdk.Pixbuf displayPixbuf;
+
         Gdk.GC gc = area.Style.BackgroundGC(Gtk.StateType.Normal);
-
         area.GdkWindow.GetSize(out int areaWidth, out int areaHeight);
+        int width = drawingareaCameraPixbuf.Width;
+        int height = drawingareaCameraPixbuf.Height;
+        float ratio = (float)width / (float)height;
 
-        area.GdkWindow.DrawPixbuf(gc, drawingareaCameraPixbuf,
+        if (areaWidth <= width)
+        {
+            width = areaWidth;
+            height = (int)(width / ratio);
+        }
+
+        if (width>areaWidth)
+        {
+            width = areaWidth;
+        }
+
+        if (height > areaHeight)
+        {
+            height = areaHeight;
+        }
+
+        displayPixbuf = drawingareaCameraPixbuf.ScaleSimple(width, height, InterpType.Bilinear);
+
+        area.GdkWindow.DrawPixbuf(gc, displayPixbuf,
                                   0, 0,
-                                  (areaWidth - drawingareaCameraPixbuf.Width) / 2,
-                                  (areaHeight - drawingareaCameraPixbuf.Height) / 2,
-                                  drawingareaCameraPixbuf.Width, drawingareaCameraPixbuf.Height,
+                                  (areaWidth - displayPixbuf.Width) / 2,
+                                  (areaHeight - displayPixbuf.Height) / 2,
+                                  displayPixbuf.Width, displayPixbuf.Height,
                                   RgbDither.Normal, 0, 0);
     }
 
-    protected void OnDrawingAreaCameraConfigureEvent(object o, ConfigureEventArgs args)
+    protected void DetectArena()
     {
-        //Console.WriteLine("Event configure. Args = " + args.ToString());
+        DestijlCommandManager.CommandStatus status;
+        MessageDialog md = new MessageDialog(this, DialogFlags.DestroyWithParent,
+                                             MessageType.Question, ButtonsType.YesNo, "Arena is correct ?");
+        {
+            Title = "Check arena";
+        };
+
+        ResponseType result = (ResponseType)md.Run();
+        md.Destroy(); 
+
+        if (result == ResponseType.Yes) 
+        {
+            status = cmdManager.CameraArenaConfirm();
+        }
+        else
+        {
+            status = cmdManager.CameraArenaInfirm();
+        }
+
+        if (status != DestijlCommandManager.CommandStatus.Success)
+        {
+            MessagePopup(MessageType.Error,
+                            ButtonsType.Ok, "Error",
+                            "Unable to send Confirm or Infirm arena command to supervisor");
+        }
+    }
+
+    protected void OnButtonAskArenaClicked(object sender, EventArgs e)
+    {
+        if (cmdManager.CameraAskArena() != DestijlCommandManager.CommandStatus.Success)
+        {
+            MessagePopup(MessageType.Error,
+                         ButtonsType.Ok, "Error",
+                         "Error when asking for arena rendering");
+            return;
+        }
+
+        //Thread askArena = new Thread(new System.Threading.ThreadStart(DetectArena));
+        //askArena.Start();
+        DetectArena();
     }
 }

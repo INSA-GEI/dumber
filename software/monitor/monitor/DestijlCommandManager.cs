@@ -133,9 +133,8 @@ namespace monitor
                 {
                     if (answer.ToUpper().Contains(DestijlCommandList.HeaderStmNoAck)) status = CommandStatus.Rejected;
                     else if (answer.ToUpper().Contains(DestijlCommandList.HeaderStmLostDmb)) status = CommandStatus.CommunicationLostWithRobot;
-                    else if (answer.ToUpper().Contains(DestijlCommandList.HeaderStmAck)) status = CommandStatus.Success;
                     else if (answer.Length == 0) status = CommandStatus.CommunicationLostWithServer;
-                    else status = CommandStatus.InvalidAnswer;
+                    //else status = CommandStatus.InvalidAnswer;
                 }
             }
 

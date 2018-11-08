@@ -44,7 +44,7 @@ int open_camera(Camera  *camera)
     // open the default camera, use something different from 0 otherwise;
     // Check VideoCapture documentation.
     printf("Opening Camera...\n");
-    if(!cap.open(1))
+    if(!cap.open(0))
         return -1;
     
     sleep(1);

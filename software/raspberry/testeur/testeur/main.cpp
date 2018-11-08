@@ -20,7 +20,7 @@
 
 #include <iostream>
 #include <string>
-
+#include <time.h>
 #include <thread>
 
 #include "definitions.h"
@@ -78,10 +78,18 @@ void ThreadServer(void) {
 }
 
 void ThreadTimer(void) {
+    struct timespec tim, tim2;
+    tim.tv_sec = 0;
+    tim.tv_nsec = 100000000;
 
     while (1) {
         //std::this_thread::sleep_for(std::chrono::seconds )
-        sleep(1);
+        //sleep(1);
+        if (nanosleep(&tim, &tim2) < 0) {
+            printf("Nano sleep system call failed \n");
+            return;
+        }
+        
         sysTick = true;
     }
 }
@@ -114,17 +122,22 @@ int sendAnswer(string cmd, string data) {
     return status;
 }
 
-int sendBinaryData(string cmd, unsigned char* data) {
+int sendBinaryData(string cmd, char* data, int length) {
     int status = 0;
-    string msg;
+    char* msg;
 
-//TODO: Faire une version binaire de sendDataToServer
-    //TODO: Gerer la concatenation du header et des données binaires
-    msg = cmd + ':' + data;
-    cout << "Answer: " + msg;
+    msg = (char*) malloc(length + 4);
+    msg[0] = cmd[0];
+    msg[1] = cmd[1];
+    msg[2] = cmd[2];
+    msg[3] = ':';
+
+    memcpy((void*) &msg[4], (const void *) data, length);
+    cout << "Answer: " + cmd;
     cout << "\n";
-    sendDataToServer((char*) msg.c_str(), msg.length());
+    sendDataToServer(msg, length + 4);
 
+    free((void*) msg);
     return status;
 }
 
@@ -188,7 +201,7 @@ int main(int argc, char** argv) {
         return -1;
     }
     cout << "/dev/ttyUSB0 opened\n";
-*/
+     */
     // Ouverture de la camera
     if (open_camera(0) == -1) {
         cerr << "Unable to open camera: abort\n";
@@ -226,8 +239,6 @@ int main(int argc, char** argv) {
                 decodeMessage(message, receivedLength - 4);
 
                 free(message);
-
-
             }
 
             if (sysTick) {
@@ -235,7 +246,9 @@ int main(int argc, char** argv) {
 
                 if (sendImage) {
                     compress_image(&monImage, &imageCompressed);
-                    sendAnswer(HEADER_STM_IMAGE, reinterpret_cast<char*> (imageCompressed.data()));
+                    int length = imageCompressed.size();
+                    sendBinaryData(HEADER_STM_IMAGE, reinterpret_cast<char*> (imageCompressed.data()), length);
+                    //sendAnswer(HEADER_STM_IMAGE, reinterpret_cast<char*> (imageCompressed.data()));
                 }
 
                 if (sendPos) {

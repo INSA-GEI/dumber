@@ -5,43 +5,6 @@ using System.Text;
 
 namespace monitor
 {
-    public class ClientReadEvent
-    {
-        private static TcpClient myClient = null;
-        private static NetworkStream myStream = null;
-        private const int BufferMaxSize = 512;
-        private static byte[] buffer = new byte[BufferMaxSize];
-
-        private static StringBuilder sb = new StringBuilder();
-        private static int newLength = 1;
-
-        public delegate void ReadEvent(string str);
-        public static ReadEvent readEvent = null;
-
-        public static void Set(TcpClient client, NetworkStream stream)
-        {
-            myClient = client;
-            myStream = stream;
-        }
-
-        public static void ReadThread()
-        {
-            while (true)
-            {
-                if (myClient.Connected)
-                {
-                    myStream.BeginRead(buffer, 0, newLength, new AsyncCallback(ReadCallback), sb);
-                }
-                else Thread.Sleep(200);
-            }
-        }
-
-        public static void ReadCallback(IAsyncResult ar)
-        {
-
-        }
-    }
-
     public class Client
     {
         public const string defaultIP = "localhost";
@@ -56,6 +19,7 @@ namespace monitor
         private static int initialReceiveBufferIndex = 0;
         private static StringBuilder message = new StringBuilder();
         private static int newLength = 1;
+        private static int packetCounter = 0;
 
         public delegate void ReadEvent(string msg, byte[] buffer);
         public static ReadEvent readEvent = null;
@@ -126,6 +90,13 @@ namespace monitor
 
                 if (bytesRead > 0)
                 {
+                    packetCounter++;
+
+                    if (packetCounter>=3)
+                    {
+                        //Console.WriteLine("Supplementary packet " + packetCounter);
+                    }
+
                     message.Append(Encoding.ASCII.GetString(buffer, 0, bytesRead));
                     if (receiveBuffer == null) receiveBuffer = new byte[bytesRead];
                     else Array.Resize<byte>(ref receiveBuffer, initialReceiveBufferIndex + bytesRead);
@@ -147,6 +118,7 @@ namespace monitor
                     message.Clear();
                     receiveBuffer = null;
                     initialReceiveBufferIndex = 0;
+                    packetCounter = 0;
                 }
 
                 stream.BeginRead(buffer, 0, newLength, new AsyncCallback(ReadCallback), message);
