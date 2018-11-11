@@ -70,6 +70,7 @@
     <Compile Include="Client.cs" />
     <Compile Include="CommandManager.cs" />
     <Compile Include="DestijlCommandManager.cs" />
+    <Compile Include="ClientUDP.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
