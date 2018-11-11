@@ -28,7 +28,7 @@ int clientID = -1;
 
 int socketUDP= -1;
 struct sockaddr_in UDPcliaddr;
-int UDPcliaddrlen = -1;
+socklen_t UDPcliaddrlen = -1;
 char *UDPBuffer=0;
 
 int openServer(int port) {
