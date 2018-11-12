@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>../../superviseur-robot/lib/definitions.h</itemPath>
       <itemPath>../../superviseur-robot/lib/image.h</itemPath>
       <itemPath>../../superviseur-robot/lib/message.h</itemPath>
       <itemPath>../../superviseur-robot/lib/robot.h</itemPath>
@@ -70,6 +71,11 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="../../superviseur-robot/lib/definitions.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../superviseur-robot/lib/image.h"
             ex="false"
             tool="3"
@@ -133,6 +139,11 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="../../superviseur-robot/lib/definitions.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../superviseur-robot/lib/image.h"
             ex="false"
             tool="3"
@@ -174,6 +185,90 @@
             flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Debug-rpi" type="1">
+      <toolsSet>
+        <compilerSet>GNU|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <incDir>
+            <pElem>../../superviseur-robot/lib</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>__FOR_PC__</Elem>
+          </preprocessorList>
+        </cTool>
+        <ccTool>
+          <standard>8</standard>
+          <incDir>
+            <pElem>../../superviseur-robot/lib</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>D_REENTRANT</Elem>
+          </preprocessorList>
+        </ccTool>
+        <linkerTool>
+          <linkerAddLib>
+            <pElem>/usr/local/lib</pElem>
+          </linkerAddLib>
+          <linkerLibItems>
+            <linkerOptionItem>`pkg-config --libs opencv`</linkerOptionItem>
+            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
+            <linkerLibLibItem>raspicam</linkerLibLibItem>
+            <linkerLibLibItem>raspicam_cv</linkerLibLibItem>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../../superviseur-robot/lib/definitions.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../superviseur-robot/lib/image.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../superviseur-robot/lib/message.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../superviseur-robot/lib/robot.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../superviseur-robot/lib/server.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../superviseur-robot/lib/src/image.cpp"
+            ex="false"
+            tool="1"
+            flavor2="8">
+      </item>
+      <item path="../../superviseur-robot/lib/src/message.cpp"
+            ex="false"
+            tool="1"
+            flavor2="8">
+      </item>
+      <item path="../../superviseur-robot/lib/src/robot.cpp"
+            ex="false"
+            tool="1"
+            flavor2="8">
+      </item>
+      <item path="../../superviseur-robot/lib/src/server.cpp"
+            ex="false"
+            tool="1"
+            flavor2="8">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="8">
       </item>
     </conf>
   </confs>

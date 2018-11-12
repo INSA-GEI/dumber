@@ -152,5 +152,42 @@
       <item path="gdbsudo.sh" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
+    <conf name="Debug__RPI_" type="1">
+      <toolsSet>
+        <compilerSet>GNU|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+      </compileType>
+      <item path="../lib/image.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../lib/message.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../lib/monitor.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../lib/robot.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../lib/server.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../lib/src/image.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../lib/src/message.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../lib/src/monitor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../lib/src/robot.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../lib/src/server.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./src/functions.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./src/functions.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./src/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="gdbsudo.sh" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
   </confs>
 </configurationDescriptor>

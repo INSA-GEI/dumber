@@ -2,7 +2,7 @@
 \label{class_main_window}\index{Main\+Window@{Main\+Window}}
 
 
-Main window.  
+Main part of the program, behavior of main window  
 
 
 
@@ -16,8 +16,7 @@ Inheritance diagram for Main\+Window\+:\nopagebreak
 \end{figure}
 
 
-Collaboration diagram for Main\+Window\+:
-\nopagebreak
+Collaboration diagram for Main\+Window\+:\nopagebreak
 \begin{figure}[H]
 \begin{center}
 \leavevmode
@@ -28,72 +27,72 @@ Collaboration diagram for Main\+Window\+:
 \begin{DoxyCompactItemize}
 \item 
 \textbf{ Main\+Window} ()
-\item 
+\begin{DoxyCompactList}\small\item\em Initializes a new instance of the \doxyref{Main\+Window}{p.}{class_main_window} class. \end{DoxyCompactList}\item 
 void \textbf{ Adjust\+Controls} ()
-\item 
+\begin{DoxyCompactList}\small\item\em Make some adjustement to controls, like disabling some controls \end{DoxyCompactList}\item 
 void \textbf{ On\+Command\+Received\+Event} (string header, string data, byte[$\,$] buffer)
-\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Callback called when new message is received from server \end{DoxyCompactList}\end{DoxyCompactItemize}
 \subsection*{Protected Member Functions}
 \begin{DoxyCompactItemize}
 \item 
 void \textbf{ On\+Delete\+Event} (object sender, Delete\+Event\+Args a)
-\item 
+\begin{DoxyCompactList}\small\item\em Callback called when delete event is sent by window \end{DoxyCompactList}\item 
 void \textbf{ On\+Quit\+Action\+Activated} (object sender, Event\+Args e)
-\item 
+\begin{DoxyCompactList}\small\item\em Callback called by \char`\"{}quit\char`\"{} menu \end{DoxyCompactList}\item 
 void \textbf{ On\+Show\+Log\+Window\+Action\+Activated} (object sender, Event\+Args e)
-\item 
+\begin{DoxyCompactList}\small\item\em Callback called by \char`\"{}show log\char`\"{} menu \end{DoxyCompactList}\item 
 void \textbf{ On\+Button\+Server\+Connection\+Clicked} (object sender, Event\+Args e)
-\item 
+\begin{DoxyCompactList}\small\item\em Callback called by \char`\"{}button\+Server\+Connection\char`\"{} button \end{DoxyCompactList}\item 
 void \textbf{ On\+Button\+Robot\+Activation\+Clicked} (object sender, Event\+Args e)
-\item 
+\begin{DoxyCompactList}\small\item\em Callback called when \char`\"{}button\+Robotactivation\char`\"{} is clicked \end{DoxyCompactList}\item 
 void \textbf{ On\+Button\+Mouv\+Clicked} (object sender, Event\+Args e)
-\item 
+\begin{DoxyCompactList}\small\item\em Callback called when user click on direction button \end{DoxyCompactList}\item 
 void \textbf{ On\+Check\+Button\+Camera\+On\+Clicked} (object sender, Event\+Args e)
-\item 
+\begin{DoxyCompactList}\small\item\em Callback called when checkbutton for camera is clicked \end{DoxyCompactList}\item 
 void \textbf{ On\+Check\+Button\+Robot\+Position\+Clicked} (object sender, Event\+Args e)
-\item 
+\begin{DoxyCompactList}\small\item\em Callback called when checkbutton robot position is clicked \end{DoxyCompactList}\item 
 void \textbf{ On\+Drawing\+Area\+Camera\+Expose\+Event} (object o, Expose\+Event\+Args args)
-\item 
+\begin{DoxyCompactList}\small\item\em Callback called when drawingarea need refresh \end{DoxyCompactList}\item 
 void \textbf{ Detect\+Arena} ()
-\item 
+\begin{DoxyCompactList}\small\item\em Show a popup asking user to tell if arena is correct or not \end{DoxyCompactList}\item 
 void \textbf{ On\+Button\+Ask\+Arena\+Clicked} (object sender, Event\+Args e)
-\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Callback called when \char`\"{}detect Arena \char`\"{} button is clicked \end{DoxyCompactList}\end{DoxyCompactItemize}
 \subsection*{Private Types}
 \begin{DoxyCompactItemize}
 \item 
 enum \textbf{ System\+State} \{ \textbf{ System\+State.\+Not\+Connected}, 
 \textbf{ System\+State.\+Server\+Connected}, 
 \textbf{ System\+State.\+Robot\+Connected}
- \}
+ \}\begin{DoxyCompactList}\small\item\em List of availble state for the application \end{DoxyCompactList}
 \end{DoxyCompactItemize}
 \subsection*{Private Member Functions}
 \begin{DoxyCompactItemize}
 \item 
 void \textbf{ Change\+State} (\textbf{ System\+State} new\+State)
-\item 
+\begin{DoxyCompactList}\small\item\em Method used to change controls visibility (greyed or not) depending on current state \end{DoxyCompactList}\item 
 void \textbf{ Message\+Popup} (Message\+Type type, Buttons\+Type buttons, string title, string message)
-\item 
+\begin{DoxyCompactList}\small\item\em Display a popup message window \end{DoxyCompactList}\item 
 void \textbf{ On\+Battery\+Timer\+Elapsed} (object sender, System.\+Timers.\+Elapsed\+Event\+Args e)
-\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Callback called when battery timer expired \end{DoxyCompactList}\end{DoxyCompactItemize}
 \subsection*{Private Attributes}
 \begin{DoxyCompactItemize}
 \item 
 \textbf{ Destijl\+Command\+Manager} \textbf{ cmd\+Manager}
-\item 
+\begin{DoxyCompactList}\small\item\em Destijl command manager reference \end{DoxyCompactList}\item 
 Pixbuf \textbf{ drawingarea\+Camera\+Pixbuf}
-\item 
+\begin{DoxyCompactList}\small\item\em Pixbuffer used for displaying image \end{DoxyCompactList}\item 
 \textbf{ System\+State} \textbf{ system\+State} = \textbf{ System\+State.\+Not\+Connected}
-\item 
+\begin{DoxyCompactList}\small\item\em The state of the system. Can take a value from System\+State \end{DoxyCompactList}\item 
 System.\+Timers.\+Timer \textbf{ battery\+Timer}
-\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Timer for battery request \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
 \subsection{Detailed Description}
-Main window. 
+Main part of the program, behavior of main window 
 
 
 
-Definition at line 10 of file Monitor\+U\+I.\+cs.
+Definition at line 32 of file Monitor\+U\+I.\+cs.
 
 
 
@@ -103,6 +102,10 @@ Definition at line 10 of file Monitor\+U\+I.\+cs.
 \index{System\+State@{System\+State}!Main\+Window@{Main\+Window}}
 \subsubsection{System\+State}
 {\footnotesize\ttfamily enum \textbf{ Main\+Window.\+System\+State}\hspace{0.3cm}{\ttfamily [strong]}, {\ttfamily [private]}}
+
+
+
+List of availble state for the application 
 
 \begin{DoxyEnumFields}{Enumerator}
 \raisebox{\heightof{T}}[0pt][0pt]{\index{Not\+Connected@{Not\+Connected}!Main\+Window@{Main\+Window}}\index{Main\+Window@{Main\+Window}!Not\+Connected@{Not\+Connected}}}\mbox{\label{class_main_window_a7b18ca1f8f71faf272c9856aaf7b8e3da4075072d219e061ca0f3124f8fbef463}} 
@@ -120,7 +123,7 @@ Robot\+Connected&\\
 \end{DoxyEnumFields}
 
 
-Definition at line 15 of file Monitor\+U\+I.\+cs.
+Definition at line 47 of file Monitor\+U\+I.\+cs.
 
 
 
@@ -133,7 +136,11 @@ Definition at line 15 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 25 of file Monitor\+U\+I.\+cs.
+Initializes a new instance of the \doxyref{Main\+Window}{p.}{class_main_window} class. 
+
+
+
+Definition at line 67 of file Monitor\+U\+I.\+cs.
 
 
 
@@ -146,7 +153,11 @@ Definition at line 25 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 42 of file Monitor\+U\+I.\+cs.
+Make some adjustement to controls, like disabling some controls 
+
+
+
+Definition at line 84 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_aedc27cabbe1604313a452fcbf3ffe9f4}} 
 \index{Main\+Window@{Main\+Window}!Change\+State@{Change\+State}}
@@ -156,7 +167,16 @@ Definition at line 42 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 54 of file Monitor\+U\+I.\+cs.
+Method used to change controls visibility (greyed or not) depending on current state 
+
+
+\begin{DoxyParams}{Parameters}
+{\em new\+State} & New state\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 103 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_a89c79ce9ca4114ca9c50f32dc080e9cd}} 
 \index{Main\+Window@{Main\+Window}!Detect\+Arena@{Detect\+Arena}}
@@ -166,7 +186,11 @@ Definition at line 54 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 467 of file Monitor\+U\+I.\+cs.
+Show a popup asking user to tell if arena is correct or not 
+
+
+
+Definition at line 610 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_afc4f923aaa481a93dddaff6303efb9e0}} 
 \index{Main\+Window@{Main\+Window}!Message\+Popup@{Message\+Popup}}
@@ -176,7 +200,22 @@ Definition at line 467 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 120 of file Monitor\+U\+I.\+cs.
+Display a popup message window 
+
+
+\begin{DoxyParams}{Parameters}
+{\em type} & Type of popup window (question, error, information,...)\\
+\hline
+{\em buttons} & Buttons available on popup window\\
+\hline
+{\em title} & Title of window\\
+\hline
+{\em message} & Message\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 176 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_af303b70c08cda04a76f6418f727c4891}} 
 \index{Main\+Window@{Main\+Window}!On\+Battery\+Timer\+Elapsed@{On\+Battery\+Timer\+Elapsed}}
@@ -186,7 +225,18 @@ Definition at line 120 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 343 of file Monitor\+U\+I.\+cs.
+Callback called when battery timer expired 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sender} & Sender object\\
+\hline
+{\em e} & Event\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 457 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_a31e299085d6286d680bd488c73fdff82}} 
 \index{Main\+Window@{Main\+Window}!On\+Button\+Ask\+Arena\+Clicked@{On\+Button\+Ask\+Arena\+Clicked}}
@@ -196,7 +246,18 @@ Definition at line 343 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 496 of file Monitor\+U\+I.\+cs.
+Callback called when \char`\"{}detect Arena \char`\"{} button is clicked 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sender} & Sender object\\
+\hline
+{\em e} & Event\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 644 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_a7f8d06747f887216ab8c941ad10cb48b}} 
 \index{Main\+Window@{Main\+Window}!On\+Button\+Mouv\+Clicked@{On\+Button\+Mouv\+Clicked}}
@@ -206,7 +267,18 @@ Definition at line 496 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 319 of file Monitor\+U\+I.\+cs.
+Callback called when user click on direction button 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sender} & Sender button\\
+\hline
+{\em e} & Event\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 427 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_a2b5e11a49a10b24c59bebb377cdfeae8}} 
 \index{Main\+Window@{Main\+Window}!On\+Button\+Robot\+Activation\+Clicked@{On\+Button\+Robot\+Activation\+Clicked}}
@@ -216,7 +288,18 @@ Definition at line 319 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 264 of file Monitor\+U\+I.\+cs.
+Callback called when \char`\"{}button\+Robotactivation\char`\"{} is clicked 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sender} & Sender object\\
+\hline
+{\em e} & Event\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 363 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_ac0acc6c3a63f405f14ec8e4d132a2661}} 
 \index{Main\+Window@{Main\+Window}!On\+Button\+Server\+Connection\+Clicked@{On\+Button\+Server\+Connection\+Clicked}}
@@ -226,7 +309,18 @@ Definition at line 264 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 194 of file Monitor\+U\+I.\+cs.
+Callback called by \char`\"{}button\+Server\+Connection\char`\"{} button 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sender} & Sender object\\
+\hline
+{\em e} & Event\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 282 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_af4b587cdd614d5bdb8d9158a1f59e4fa}} 
 \index{Main\+Window@{Main\+Window}!On\+Check\+Button\+Camera\+On\+Clicked@{On\+Check\+Button\+Camera\+On\+Clicked}}
@@ -236,7 +330,18 @@ Definition at line 194 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 379 of file Monitor\+U\+I.\+cs.
+Callback called when checkbutton for camera is clicked 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sender} & Sender object\\
+\hline
+{\em e} & Event\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 501 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_a20d07605619027d82a30552f294b128f}} 
 \index{Main\+Window@{Main\+Window}!On\+Check\+Button\+Robot\+Position\+Clicked@{On\+Check\+Button\+Robot\+Position\+Clicked}}
@@ -246,7 +351,18 @@ Definition at line 379 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 402 of file Monitor\+U\+I.\+cs.
+Callback called when checkbutton robot position is clicked 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sender} & Sender object\\
+\hline
+{\em e} & Event\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 530 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_a4b651f10b9079c128b9e36d15ad10211}} 
 \index{Main\+Window@{Main\+Window}!On\+Command\+Received\+Event@{On\+Command\+Received\+Event}}
@@ -256,7 +372,20 @@ Definition at line 402 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 140 of file Monitor\+U\+I.\+cs.
+Callback called when new message is received from server 
+
+
+\begin{DoxyParams}{Parameters}
+{\em header} & Header of message\\
+\hline
+{\em data} & Data of message\\
+\hline
+{\em buffer} & Raw buffer corresponding of received message\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 207 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_a64bdcb29cebb58957790da1ee2733fe1}} 
 \index{Main\+Window@{Main\+Window}!On\+Delete\+Event@{On\+Delete\+Event}}
@@ -266,7 +395,18 @@ Definition at line 140 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 131 of file Monitor\+U\+I.\+cs.
+Callback called when delete event is sent by window 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sender} & Sender object\\
+\hline
+{\em a} & Not really sure of what it is...\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 192 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_afe4b0001f191554aed5d9b65208a06f5}} 
 \index{Main\+Window@{Main\+Window}!On\+Drawing\+Area\+Camera\+Expose\+Event@{On\+Drawing\+Area\+Camera\+Expose\+Event}}
@@ -276,7 +416,18 @@ Definition at line 131 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 426 of file Monitor\+U\+I.\+cs.
+Callback called when drawingarea need refresh 
+
+
+\begin{DoxyParams}{Parameters}
+{\em o} & Sender object\\
+\hline
+{\em args} & Expose arguments\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 560 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_ab54b643c364b46a150f6f993267bb709}} 
 \index{Main\+Window@{Main\+Window}!On\+Quit\+Action\+Activated@{On\+Quit\+Action\+Activated}}
@@ -286,7 +437,18 @@ Definition at line 426 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 179 of file Monitor\+U\+I.\+cs.
+Callback called by \char`\"{}quit\char`\"{} menu 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sender} & Sender object\\
+\hline
+{\em e} & Event\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 257 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_a87132738a6ca496303940d56e091bdc7}} 
 \index{Main\+Window@{Main\+Window}!On\+Show\+Log\+Window\+Action\+Activated@{On\+Show\+Log\+Window\+Action\+Activated}}
@@ -296,7 +458,18 @@ Definition at line 179 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 187 of file Monitor\+U\+I.\+cs.
+Callback called by \char`\"{}show log\char`\"{} menu 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sender} & Sender object\\
+\hline
+{\em e} & Event\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 270 of file Monitor\+U\+I.\+cs.
 
 
 
@@ -309,7 +482,11 @@ Definition at line 187 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 23 of file Monitor\+U\+I.\+cs.
+Timer for battery request 
+
+
+
+Definition at line 62 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_a0b60450970b8a6fb6e016d5c0728e474}} 
 \index{Main\+Window@{Main\+Window}!cmd\+Manager@{cmd\+Manager}}
@@ -319,7 +496,11 @@ Definition at line 23 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 12 of file Monitor\+U\+I.\+cs.
+Destijl command manager reference 
+
+
+
+Definition at line 37 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_a41581e449b18e87acbdff5baa12c2050}} 
 \index{Main\+Window@{Main\+Window}!drawingarea\+Camera\+Pixbuf@{drawingarea\+Camera\+Pixbuf}}
@@ -329,7 +510,11 @@ Definition at line 12 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 13 of file Monitor\+U\+I.\+cs.
+Pixbuffer used for displaying image 
+
+
+
+Definition at line 42 of file Monitor\+U\+I.\+cs.
 
 \mbox{\label{class_main_window_a105025ee1bdfac188f1ce640d593550d}} 
 \index{Main\+Window@{Main\+Window}!system\+State@{system\+State}}
@@ -339,7 +524,11 @@ Definition at line 13 of file Monitor\+U\+I.\+cs.
 
 
 
-Definition at line 22 of file Monitor\+U\+I.\+cs.
+The state of the system. Can take a value from System\+State 
+
+
+
+Definition at line 57 of file Monitor\+U\+I.\+cs.
 
 
 

@@ -1,4 +1,25 @@
-﻿using System;
+﻿//
+//  Client.cs
+//
+//  Author:
+//       Di MERCURIO Sébastien <dimercur@insa-toulouse.fr>
+//
+//  Copyright (c) 2018 INSA - DGEI
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+using System;
 using System.Net.Sockets;
 using System.Text;
 
@@ -17,7 +38,7 @@ namespace monitor
         /// <summary>
         /// Default server port number
         /// </summary>
-        public const int defaultPort = 4500;
+        public const int defaultPort = 5544;
 
         /// <summary>
         /// Tcp client object
@@ -186,6 +207,8 @@ namespace monitor
                 }
 
                 // Prepare for reading new data
+                if (newLength> BufferMaxSize) newLength = BufferMaxSize;
+                if (newLength <= 0) newLength = 1;
                 stream.BeginRead(buffer, 0, newLength, new AsyncCallback(ReadCallback), message);
             }
         }

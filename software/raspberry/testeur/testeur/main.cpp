@@ -50,8 +50,7 @@ bool sendPos = false;
 
 Image monImage;
 Jpg imageCompressed;
-
-pthread_t thread;
+Camera cam;
 
 typedef struct {
     char header[4];
@@ -193,17 +192,19 @@ int decodeMessage(MessageFromMon *mes, int dataLength) {
 
 int main(int argc, char** argv) {
 
-    namedWindow("Sortie Camera");
-
     // Ouverture de la com robot
-    /*if (open_communication_robot("/dev/ttyUSB0") != 0) {
+#ifdef __FOR_PC__
+    if (open_communication_robot("/dev/ttyUSB0") != 0) {
+#else
+    if (open_communication_robot("/dev/ttyS0") != 0) {
+#endif /*__FOR_PC__ */
         cerr << "Unable to open /dev/ttyUSB0: abort\n";
         return -1;
     }
-    cout << "/dev/ttyUSB0 opened\n";
-     */
+    cout << "Com port opened\n";
+     
     // Ouverture de la camera
-    if (open_camera(0) == -1) {
+    if (open_camera(&cam) == -1) {
         cerr << "Unable to open camera: abort\n";
         return -1;
     }
@@ -226,7 +227,7 @@ int main(int argc, char** argv) {
         while (disconnected == false) {
 
             // Recuperation de l'image
-            get_image(0, &monImage, "");
+            get_image(&cam, &monImage, "");
 
             if (dataReady == true) // des données ont été recu par le serveur
             {
