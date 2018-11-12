@@ -24,5 +24,8 @@ int sendDataToServer(char *data, int length);
 int sendDataToServerForClient(int client, char *data, int length);
 int receiveDataFromServer(char *data, int size);
 int receiveDataFromServerFromClient(int client, char *data, int size);
+
+int sendCamImage(char *data, int length);
+void waitUdpPing(void);
 #endif /* _SERVER_H_ */
 

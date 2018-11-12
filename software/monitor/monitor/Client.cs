@@ -164,6 +164,11 @@ namespace monitor
                     Console.WriteLine("Connection to server dropped: " + e.ToString());
                     return;
                 }
+                catch (System.IO.IOException e)
+                {
+                    readEvent?.Invoke(null, null);
+                    return ;
+                }
 
                 newLength = 1;
 

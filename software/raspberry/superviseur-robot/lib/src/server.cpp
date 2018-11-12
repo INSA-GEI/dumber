@@ -53,7 +53,7 @@ int openServer(int port) {
     listen(socketFD, NB_CONNECTION_MAX);
 
     /* Open UDP connection */
-    socketUDP = socket(AF_INET, SOCK_DGRAM, 0);
+    socketUDP = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (socketUDP < 0) {
         perror("Can not create UDP socket");
         exit(-1);
@@ -114,31 +114,36 @@ void waitUDPClientAddr(void)
             MSG_WAITALL, ( struct sockaddr *) &UDPcliaddr, &UDPcliaddrlen); 
 }
 
-int sendImage(char *data, int length) {
+int sendCamImage(char *data, int length) {
     if (clientID >= 0)
     {
-        UDPBuffer= (char*)malloc(length+12);
+        UDPBuffer= (char*)malloc(length+4);
     
         UDPBuffer[0]='I';
-        UDPBuffer[1]='N';
-        UDPBuffer[2]='S';
-        UDPBuffer[3]='A';
-        UDPBuffer[4]='B';
-        UDPBuffer[5]='G';
+        UDPBuffer[1]='M';
+        UDPBuffer[2]='G';
+        UDPBuffer[3]=':';
         
-        UDPBuffer[length+6]='A';
-        UDPBuffer[length+7]='S';
-        UDPBuffer[length+8]='N';
-        UDPBuffer[length+9]='I';
-        UDPBuffer[length+10]='E';
-        UDPBuffer[length+11]='D';
+        memcpy((void*)(UDPBuffer+4),(const void *)data, length);
         
-        memcpy((void*)(UDPBuffer+6),(const void *)data, length);
-        
-        return sendto(socketUDP, data, length, 
+        return sendto(socketUDP, UDPBuffer, length+4, 
         MSG_CONFIRM, (const struct sockaddr *) &UDPcliaddr, UDPcliaddrlen); 
     }   
     else return 0;
+}
+
+void waitUdpPing(void)
+{
+    char msg[4];
+    volatile int i=0;
+    
+    // Wait for client to send a small message, to get its IP
+    UDPcliaddrlen = sizeof(UDPcliaddr);
+    bzero(&UDPcliaddr, sizeof(UDPcliaddr));
+    
+    recvfrom(socketUDP, msg, 2, 0, (sockaddr *)&UDPcliaddr, &UDPcliaddrlen);
+    printf("Received packet from %s:%d\n", 
+            inet_ntoa(UDPcliaddr.sin_addr), ntohs(UDPcliaddr.sin_port));
 }
 
 int receiveDataFromServer(char *data, int size) {

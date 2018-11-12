@@ -206,6 +206,7 @@ int decodeMessage(MessageFromMon *mes, int dataLength) {
 
 int main(int argc, char** argv) {
 
+    int lengthSend;
     // Ouverture de la com robot
 #ifdef __FOR_PC__
     if (open_communication_robot("/dev/ttyUSB0") != 0) {
@@ -233,7 +234,11 @@ int main(int argc, char** argv) {
     socketID = openServer(5544);
     cout << "Server opened on port 5544";
     cout << std::endl;
+    cout << "UDP Server opened on port 5545";
+    cout << std::endl;
 
+    waitUdpPing();
+    
     threadTimer = new std::thread(ThreadTimer);
 
     for (;;) {
@@ -271,8 +276,12 @@ int main(int argc, char** argv) {
                 if (sendImage) {
                     compress_image(&monImage, &imageCompressed);
                     int length = imageCompressed.size();
-                    sendBinaryData(HEADER_STM_IMAGE, reinterpret_cast<char*> (imageCompressed.data()), length);
+                    //sendBinaryData(HEADER_STM_IMAGE, reinterpret_cast<char*> (imageCompressed.data()), length);
                     //sendAnswer(HEADER_STM_IMAGE, reinterpret_cast<char*> (imageCompressed.data()));
+                    lengthSend=sendCamImage(reinterpret_cast<char*> (imageCompressed.data()), length);
+                    
+                    cout << "Requested Length: " + to_string(length) + " / Send Length: " + to_string(lengthSend);
+                    cout << std::endl;
                 }
 
                 if (sendPos) {

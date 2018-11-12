@@ -24,6 +24,8 @@ using System;
 using Gtk;
 using Gdk;
 
+using System.Threading;
+
 using monitor;
 
 /// <summary>
@@ -61,8 +63,27 @@ public partial class MainWindow : Gtk.Window
     /// </summary>
     private System.Timers.Timer batteryTimer;
 
+    /// <summary>
+    /// Counter for total image received, reset after CAM_OPEN is sent
+    /// </summary>
     private int imageReceivedCounter = 0;
+
+    /// <summary>
+    /// Counter increased each time incorrect image is received
+    /// </summary>
     private int badImageReceivedCounter = 0;
+
+    /// <summary>
+    /// Buffer containing a complete image.
+    /// </summary>
+    private byte[] imageComplete;
+
+    /// <summary>
+    /// Buffer used to store incoming image.
+    /// </summary>
+    private byte[] imageInProgress;
+
+    private Thread imageThread;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -120,7 +141,11 @@ public partial class MainWindow : Gtk.Window
 
                 checkButtonCameraOn.Active = false;
                 checkButtonRobotPosition.Active = false;
-                if (cmdManager != null) cmdManager.Close();
+                if (cmdManager != null)
+                {
+                    cmdManager.Close();
+                    ClientUDP.UDPClose();
+                }
 
                 batteryTimer.Stop();
                 break;
@@ -195,13 +220,15 @@ public partial class MainWindow : Gtk.Window
     {
         Console.WriteLine("Bye bye");
 
-        if (cmdManager != null) cmdManager.Close();
+        if (cmdManager != null)
+        {
+            cmdManager.Close();
+            ClientUDP.UDPClose();
+        }
+
         Application.Quit();
         a.RetVal = true;
     }
-
-    private byte[] imageComplete;
-    private byte[] imageInProgress;
 
     /// <summary>
     /// Callback called when new message is received from server
@@ -211,7 +238,7 @@ public partial class MainWindow : Gtk.Window
     /// <param name="buffer">Raw buffer corresponding of received message</param>
     public void OnCommandReceivedEvent(string header, string data, byte[] buffer)
     {
-        if (buffer==null)
+        if (buffer == null)
         {
             // we have lost server
             ChangeState(SystemState.NotConnected);
@@ -220,6 +247,7 @@ public partial class MainWindow : Gtk.Window
                      ButtonsType.Ok, "Server lost",
                          "Server is down: disconnecting");
             cmdManager.Close();
+            ClientUDP.UDPClose();
         }
 
         // if we have received a valid message
@@ -231,10 +259,6 @@ public partial class MainWindow : Gtk.Window
                 Console.WriteLine("Bad header(" + buffer.Length + ")");
             else
                 Console.WriteLine("Received header (" + header.Length + "): " + header);
-            //if (header.ToUpper() != DestijlCommandList.HeaderStmImage)
-            //{
-            //    if (data != null) Console.WriteLine("Received data (" + data.Length + "): " + data);
-            //}
 #endif
             // Image management
             if (header == DestijlCommandList.HeaderStmImage)
@@ -272,32 +296,6 @@ public partial class MainWindow : Gtk.Window
                         break;
                 }
             }
-            else if (header.ToUpper() == DestijlCommandList.HeaderStmImage)
-            {
-                // if message is an image, convert it to a pixbuf
-                // that can be displayed
-                if (imageComplete != null)
-                {
-                    byte[] image = new byte[imageComplete.Length - 4];
-                    System.Buffer.BlockCopy(imageComplete, 4, image, 0, image.Length);
-
-                    imageReceivedCounter++;
-                    try
-                    {
-                        drawingareaCameraPixbuf = new Pixbuf(image);
-                        drawingAreaCamera.QueueDraw();
-                    }
-                    catch (GLib.GException)
-                    {
-                        badImageReceivedCounter++;
-#if DEBUG
-                        Console.WriteLine("Bad Image: " + badImageReceivedCounter +
-                                          " / " + imageReceivedCounter +
-                                          " (" + badImageReceivedCounter * 100 / imageReceivedCounter + "%)");
-#endif
-                    }
-                }
-            }
         }
     }
 
@@ -309,7 +307,12 @@ public partial class MainWindow : Gtk.Window
     protected void OnQuitActionActivated(object sender, EventArgs e)
     {
         Console.WriteLine("Bye bye 2");
-        if (cmdManager != null) cmdManager.Close();
+        if (cmdManager != null)
+        {
+            cmdManager.Close();
+            ClientUDP.UDPClose();
+        }
+
         this.Destroy();
         Application.Quit();
     }
@@ -366,14 +369,16 @@ public partial class MainWindow : Gtk.Window
                     entryTimeout.Text = cmdManager.timeout.ToString();
                 }
 
-                // try to connect to givn server. 
+                // try to connect to given server. 
                 try
                 {
                     status = cmdManager.Open(entryServerName.Text, Convert.ToInt32(entryServerPort.Text));
+                    ClientUDP.UDPOpen(entryServerName.Text,Convert.ToInt32(entryServerPort.Text) + 1);
                 }
-                catch (Exception)
+                catch (Exception err)
                 {
                     Console.WriteLine("Something went wrong during connection");
+                    Console.WriteLine(err.ToString());
                     return;
                 }
 
@@ -401,6 +406,7 @@ public partial class MainWindow : Gtk.Window
                                      "Unable to open communication with robot.\nCheck that supervisor is accepting OPEN_COM_DMB command");
 
                         cmdManager.Close();
+                        ClientUDP.UDPClose();
                     }
                 }
             }
@@ -417,10 +423,10 @@ public partial class MainWindow : Gtk.Window
         DestijlCommandManager.CommandStatus status;
 
         //if robot is not activated
-        if (buttonRobotActivation.Label == "Activate") 
+        if (buttonRobotActivation.Label == "Activate")
         {
             // if a startup with watchdog is requested
-            if (radioButtonWithWatchdog.Active) 
+            if (radioButtonWithWatchdog.Active)
             {
                 status = cmdManager.RobotStartWithWatchdog();
             }
@@ -546,6 +552,74 @@ public partial class MainWindow : Gtk.Window
     }
 
     /// <summary>
+    /// Thread for image reception
+    /// </summary>
+    private void ImageThread()
+    {
+        byte[] imageFull = null;
+        byte[] imageBuffer = null;
+        byte[] bytes;
+        bool done = false;
+
+        while (true)
+        {
+            bytes = new byte[1];
+            bytes[0] = 0;
+
+            try
+            {
+                bytes = ClientUDP.GetData();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
+            if (bytes[0] == (byte)'I')
+            {
+                // Nouvelle trame recu
+                imageFull = imageBuffer;
+                imageBuffer = bytes;
+                done = true;
+            }
+
+            else
+            {
+                Array.Resize<byte>(ref imageBuffer, imageBuffer.Length + bytes.Length); // resize currrent buffer
+                System.Buffer.BlockCopy(imageBuffer, 0, bytes, imageBuffer.Length - bytes.Length, bytes.Length);
+            }
+
+
+            if (done)
+            {
+                done = false;
+
+                if (imageFull != null)
+                {
+                    byte[] image = new byte[imageFull.Length - 4];
+                    System.Buffer.BlockCopy(imageFull, 4, image, 0, image.Length);
+
+                    imageReceivedCounter++;
+                    try
+                    {
+                        drawingareaCameraPixbuf = new Pixbuf(image);
+                        drawingAreaCamera.QueueDraw();
+                    }
+                    catch (GLib.GException)
+                    {
+                        badImageReceivedCounter++;
+#if DEBUG
+                        Console.WriteLine("Bad Image: " + badImageReceivedCounter +
+                                          " / " + imageReceivedCounter +
+                                          " (" + badImageReceivedCounter * 100 / imageReceivedCounter + "%)");
+#endif
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Callback called when checkbutton for camera is clicked
     /// </summary>
     /// <param name="sender">Sender object</param>
@@ -561,6 +635,14 @@ public partial class MainWindow : Gtk.Window
                              ButtonsType.Ok, "Error",
                              "Error when closing camera: bad answer for supervisor or timeout");
             }
+            else
+            {
+                if (imageThread != null)
+                {
+                    imageThread.Abort();
+                    imageThread = null;
+                }
+            }
         }
         else // camera is not active, switch it on
         {
@@ -573,6 +655,11 @@ public partial class MainWindow : Gtk.Window
                              ButtonsType.Ok, "Error",
                              "Error when opening camera: bad answer for supervisor or timeout");
                 checkButtonCameraOn.Active = false;
+            }
+            else
+            {
+                imageThread = new Thread(new ThreadStart(ImageThread));
+                imageThread.Start();
             }
         }
     }

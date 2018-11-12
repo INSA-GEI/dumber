@@ -8,62 +8,47 @@ namespace monitor
     public static class ClientUDP
     {
         private const int listenPort = 11000;
-        private static byte[] ImageBuffer = null;
 
-        private static UdpClient listener = null;
-        private static IPEndPoint groupEP = null;
+        private static UdpClient clientUDP = null;
+        private static IPEndPoint ep = null;
 
-        public static void UDPOpen(int port)
+        public static void UDPOpen(string addr, int port)
         {
-            listener = new UdpClient(port);
-            groupEP = new IPEndPoint(IPAddress.Any, port);
+            clientUDP = new UdpClient(port);
+            ep = new IPEndPoint(IPAddress.Parse(addr), port);
+            clientUDP.Connect(ep);
+
+            SendPing();
         }
 
         public static void UDPClose()
         {
-            listener.Close();
+            if (clientUDP!=null)
+                clientUDP.Close();
         }
 
-        public static byte[] GetImage()
+        public static byte[] GetData()
         {
-            bool done = false;
+            Console.WriteLine("Waiting for broadcast");
+            byte[] bytes = clientUDP.Receive(ref ep);
 
-            try
-            {
-                while (!done)
-                {
-                    Console.WriteLine("Waiting for broadcast");
-                    byte[] bytes = listener.Receive(ref groupEP);
+            Console.WriteLine("Received broadcast from {0} :\n {1}\n",
+                ep.ToString(),
+                Encoding.ASCII.GetString(bytes, 0, bytes.Length));
+            
+            return bytes;
+        }
 
-                    Console.WriteLine("Received broadcast from {0} :\n {1}\n",
-                        groupEP.ToString(),
-                        Encoding.ASCII.GetString(bytes, 0, bytes.Length));
+        public static bool SendPing()
+        {
+            byte[] msg = new byte[2];
+            msg[0] = (byte)'O';
+            msg[1] = (byte)'k';
 
-                    if (bytes[0]=='I') {
-                        // Nouvelle trame recu
-                        ImageBuffer = bytes;
-                    }
-                    else if (bytes[bytes.Length-1]=='D')
-                    {
-                        Array.Resize<byte>(ref ImageBuffer, ImageBuffer.Length + bytes.Length); // resize currrent buffer
+            Console.WriteLine("Ping Server to send address");
+            clientUDP.Send(msg, msg.Length);
 
-                        System.Buffer.BlockCopy(ImageBuffer, 0, bytes, ImageBuffer.Length-bytes.Length, bytes.Length);
-                        done = true;
-                    }
-                    else{
-                        Array.Resize<byte>(ref ImageBuffer, ImageBuffer.Length + bytes.Length); // resize currrent buffer
-
-                        System.Buffer.BlockCopy(ImageBuffer, 0, bytes, ImageBuffer.Length-bytes.Length, bytes.Length);
-                    }
-                }
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-     
-            return ImageBuffer;
+            return true;
         }
     }
 }
