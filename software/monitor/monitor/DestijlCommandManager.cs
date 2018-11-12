@@ -1,8 +1,32 @@
-﻿using System;
+﻿//
+//  DestijlCommandManager.cs
+//
+//  Author:
+//       Di MERCURIO Sébastien <dimercur@insa-toulouse.fr>
+//
+//  Copyright (c) 2018 INSA - DGEI
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+using System;
 
 namespace monitor
 {
-    public class DestijlCommandList
+    /// <summary>
+    /// Commands and options parameters used in Destijl project when communicating with server
+    /// </summary>
+    public static class DestijlCommandList
     {
         public const string HeaderMtsComDmb = "COM";
         public const string HeaderMtsDmbOrder = "DMB";
@@ -29,7 +53,10 @@ namespace monitor
         public const string HeaderStmBat = "BAT";
     }
 
-    public class RobotCommandList
+    /// <summary>
+    /// Commands used for robot messages
+    /// </summary>
+    public static class RobotCommandList
     {
         public const string RobotPing = "p";
         public const string RobotReset = "r";
@@ -43,18 +70,40 @@ namespace monitor
         public const string RobotPowerOff = "z";
     }
 
+    /// <summary>
+    /// Specialization class for command manager, which implemnent destijl protocol between monitor and server
+    /// </summary>
     public class DestijlCommandManager
     {
+        /// <summary>
+        /// Command Manager object
+        /// </summary>
         private CommandManager commandManager = null;
 
+        /// <summary>
+        /// Part of received message corresponding to command header
+        /// </summary>
         private string receivedHeader = null;
+
+        /// <summary>
+        /// Part of received message corresponding to command data
+        /// </summary>
         private string receivedData = null;
 
+        /// <summary>
+        /// Callback for sending received data to application level
+        /// </summary>
         public delegate void CommandReceivedEvent(string header, string data, byte[] buffer);
         public CommandReceivedEvent commandReceivedEvent = null;
 
-        public double timeout = 100; // timeout pour les commandes avec acquitement
+        /// <summary>
+        /// Timeout used for command with acknowledge
+        /// </summary>
+        public double timeout = 100; 
 
+        /// <summary>
+        /// List of available return status
+        /// </summary>
         public enum CommandStatus
         {
             Success,
@@ -65,74 +114,111 @@ namespace monitor
             CommunicationLostWithServer
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="monitor.DestijlCommandManager"/> class.
+        /// </summary>
+        /// <param name="callback">Callback reference for reception of data</param>
         public DestijlCommandManager(CommandReceivedEvent callback)
         {
             commandManager = new CommandManager(OnCommandReceived);
             this.commandReceivedEvent += callback;
         }
 
+        /// <summary>
+        /// Releases unmanaged resources and performs other cleanup operations before the
+        /// <see cref="monitor.DestijlCommandManager"/> is reclaimed by garbage collection.
+        /// </summary>
         ~DestijlCommandManager()
         {
             if (commandManager != null) commandManager.Close();
         }
 
+        /// <summary>
+        /// Callback used for receiving data from lower layer (CommandManager class)
+        /// </summary>
+        /// <param name="msg">String containing received message</param>
+        /// <param name="buffer">Raw buffer to be used when data are not in ascii format (image for example)</param>
         private void OnCommandReceived(string msg, byte[] buffer)
         {
+            // Firstly, split message in (at least) two part : header, and data
             string[] msgs = msg.Split(':');
 
+            // If it exist at least on element in string array, it should be command header
             if (msgs.Length >= 1) receivedHeader = msgs[0];
             else receivedHeader = null;
 
+            // if msgs array contains at least two elements, second element is normally data
             if (msgs.Length >= 2) receivedData = msgs[1];
             else receivedData = null;
 
+            // when split is done, provide data to application
             this.commandReceivedEvent?.Invoke(receivedHeader, receivedData, buffer);
         }
 
+        /// <summary>
+        /// Open the specified hostname server, using default port number.
+        /// </summary>
+        /// <returns>true if connection succeded, false otherwise</returns>
+        /// <param name="hostname">Hostname to connect to</param>
         public bool Open(string hostname)
         {
             return this.Open(hostname, Client.defaultPort);
         }
 
+        /// <summary>
+        /// Open connection to server "host", with port number "port"
+        /// </summary>
+        /// <returns>true if connection succeded, false otherwise</returns>
+        /// <param name="hostname">Hostname to connect to</param>
+        /// <param name="port">Port number for connection</param>
         public bool Open(string hostname, int port)
         {
             if (commandManager != null) return commandManager.Open(hostname, port);
             else return false;
         }
 
+        /// <summary>
+        /// Close connection to server
+        /// </summary>
         public void Close()
         {
             if (commandManager != null) commandManager.Close();
         }
 
+        /// <summary>
+        /// Creates the command to send to server, based on header and data provided
+        /// </summary>
+        /// <returns>The command string</returns>
+        /// <param name="header">Header part of the command</param>
+        /// <param name="data">Data part of the command</param>
         private string CreateCommand(string header, string data)
         {
             return header + ":" + data;
         }
 
-        private void SplitCommand(string cmd, out string header, out string data)
-        {
-            string[] cmdParts = cmd.Split(':');
-
-            if (cmdParts.Length > 0) header = cmdParts[0];
-            else header = null;
-
-            if (cmdParts.Length > 1) data = cmdParts[1];
-            else data = null;
-        }
-
+        /// <summary>
+        /// Provide DestijlCommandManager.CommandStatus based on status received by CommandManager.SendCommand and answer string 
+        /// </summary>
+        /// <returns>Status compatible with DestijlCommandManager.CommandStatus type</returns>
+        /// <param name="localStatus">Status provided by CommandManager.SendCommand</param>
+        /// <param name="answer">Answer provided by CommandManager.SendCommand</param>
         private CommandStatus DecodeStatus(CommandManager.CommandManagerStatus localStatus, string answer)
         {
             CommandStatus status = CommandStatus.Success;
 
+            // if timeout occures, return CommandStatus.CommunicationLostWithServer
             if (localStatus == CommandManager.CommandManagerStatus.Timeout) status = CommandStatus.CommunicationLostWithServer;
+            // if a command is currently processed, return Busy
             else if (localStatus == CommandManager.CommandManagerStatus.Busy) status = CommandStatus.Busy;
             else
             {
                 if (answer != null)
                 {
+                    // if command is not acknowledged, return Rejected
                     if (answer.ToUpper().Contains(DestijlCommandList.HeaderStmNoAck)) status = CommandStatus.Rejected;
+                    // if communication is lost with robot, return CommunicationLostWithRobot
                     else if (answer.ToUpper().Contains(DestijlCommandList.HeaderStmLostDmb)) status = CommandStatus.CommunicationLostWithRobot;
+                    // if answer is empty, communication with robot is lost
                     else if (answer.Length == 0) status = CommandStatus.CommunicationLostWithServer;
                     //else status = CommandStatus.InvalidAnswer;
                 }
@@ -141,6 +227,10 @@ namespace monitor
             return status;
         }
 
+        /// <summary>
+        /// Open communication with robot and wait acknowledge
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
         public CommandStatus RobotOpenCom()
         {
             CommandManager.CommandManagerStatus localStatus;
@@ -154,6 +244,10 @@ namespace monitor
             return DecodeStatus(localStatus, answer);
         }
 
+        /// <summary>
+        /// Close communication with robot and wait acknowledge
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
         public CommandStatus RobotCloseCom()
         {
             CommandManager.CommandManagerStatus localStatus;
@@ -167,6 +261,10 @@ namespace monitor
             return DecodeStatus(localStatus, answer);
         }
 
+        /// <summary>
+        /// Ping the robot.
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
         public CommandStatus RobotPing()
         {
             CommandManager.CommandManagerStatus localStatus;
@@ -180,6 +278,10 @@ namespace monitor
             return DecodeStatus(localStatus, answer);
         }
 
+        /// <summary>
+        /// Reset robot and let it in idle mode
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
         public CommandStatus RobotReset()
         {
             CommandManager.CommandManagerStatus localStatus;
@@ -193,6 +295,10 @@ namespace monitor
             return DecodeStatus(localStatus, answer);
         }
 
+        /// <summary>
+        /// Start robot, enabling watchdog
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
         public CommandStatus RobotStartWithWatchdog()
         {
             CommandManager.CommandManagerStatus localStatus;
@@ -206,6 +312,10 @@ namespace monitor
             return DecodeStatus(localStatus, answer);
         }
 
+        /// <summary>
+        /// Start robot, without enabling watchdog 
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
         public CommandStatus RobotStartWithoutWatchdog()
         {
             CommandManager.CommandManagerStatus localStatus;
@@ -219,6 +329,11 @@ namespace monitor
             return DecodeStatus(localStatus, answer);
         }
 
+        /// <summary>
+        /// Move robot forward or backward, for a distance expressed in millimeter
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
+        /// <param name="distance">Distance of mouvment, in millimeter</param>
         public CommandStatus RobotMove(int distance)
         {
             CommandManager.CommandManagerStatus localStatus;
@@ -232,6 +347,11 @@ namespace monitor
             return DecodeStatus(localStatus, answer);
         }
 
+        /// <summary>
+        /// Make robot turn left or right, for a given angle
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
+        /// <param name="angle">Angle of turn, in degree (negative for left, positive for right)</param>
         public CommandStatus RobotTurn(int angle)
         {
             CommandManager.CommandManagerStatus localStatus;
@@ -245,14 +365,13 @@ namespace monitor
             return DecodeStatus(localStatus, answer);
         }
 
-        //public CommandStatus RobotGetBattery(out int battery)
+        /// <summary>
+        /// Request robot battery level
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
         public CommandStatus RobotGetBattery()
         {
             CommandManager.CommandManagerStatus localStatus;
-            //CommandStatus status = CommandStatus.Success;
-
-            //battery = -1;
-
             string answer;
 
             localStatus = commandManager.SendCommand(
@@ -260,32 +379,18 @@ namespace monitor
                 out answer,
                 0);
 
-            //if (localStatus == CommandManager.CommandManagerStatus.AnswerReceived) {
-            //    string[] msg = answer.Split(':');
-
-            //    if (msg.Length > 1)
-            //    {
-            //        try
-            //        {
-            //            battery = Convert.ToInt32(msg[1]);
-            //        }
-            //        catch (Exception) { }
-            //    }
-            //}
-            //else if (localStatus == CommandManager.CommandManagerStatus.Timeout)
-            //{
-            //    status = CommandStatus.CommunicationLostWithServer;
-            //}
-
-            //return status;
             return DecodeStatus(localStatus, answer);
         }
 
+        /// <summary>
+        /// Request robot firmware version
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
+        /// <param name="version">todo</param>
         public CommandStatus RobotGetVersion(out string version)
         {
             CommandManager.CommandManagerStatus localStatus;
             CommandStatus status = CommandStatus.Success;
-
             version = "";
 
             string answer;
@@ -312,6 +417,10 @@ namespace monitor
             return status;
         }
 
+        /// <summary>
+        /// Power off robot
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
         public CommandStatus RobotPowerOff()
         {
             CommandManager.CommandManagerStatus localStatus;
@@ -325,6 +434,10 @@ namespace monitor
             return DecodeStatus(localStatus, answer);
         }
 
+        /// <summary>
+        /// Open camera on remote device
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
         public CommandStatus CameraOpen()
         {
             CommandManager.CommandManagerStatus localStatus;
@@ -338,6 +451,10 @@ namespace monitor
             return DecodeStatus(localStatus, answer);
         }
 
+        /// <summary>
+        /// Close camera on remote device
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
         public CommandStatus CameraClose()
         {
             CommandManager.CommandManagerStatus localStatus;
@@ -351,6 +468,10 @@ namespace monitor
             return DecodeStatus(localStatus, answer);
         }
 
+        /// <summary>
+        /// Request still image of detected arena
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
         public CommandStatus CameraAskArena()
         {
             CommandManager.CommandManagerStatus localStatus;
@@ -364,6 +485,10 @@ namespace monitor
             return DecodeStatus(localStatus, answer);
         }
 
+        /// <summary>
+        /// Confirm arena detection (after requesting image of detected arena, using CameraAskArena
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
         public CommandStatus CameraArenaConfirm()
         {
             CommandManager.CommandManagerStatus localStatus;
@@ -377,6 +502,10 @@ namespace monitor
             return DecodeStatus(localStatus, answer);
         }
 
+        /// <summary>
+        /// Reject arena detected (after requesting image of detected arena, using CameraAskArena
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
         public CommandStatus CameraArenaInfirm()
         {
             CommandManager.CommandManagerStatus localStatus;
@@ -390,6 +519,10 @@ namespace monitor
             return DecodeStatus(localStatus, answer);
         }
 
+        /// <summary>
+        /// Request robot position computing
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
         public CommandStatus CameraComputePosition()
         {
             CommandManager.CommandManagerStatus localStatus;
@@ -403,6 +536,10 @@ namespace monitor
             return DecodeStatus(localStatus, answer);
         }
 
+        /// <summary>
+        /// Stop robot position computing
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
         public CommandStatus CameraStopComputePosition()
         {
             CommandManager.CommandManagerStatus localStatus;

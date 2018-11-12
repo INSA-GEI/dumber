@@ -50,8 +50,7 @@ bool sendPos = false;
 
 Image monImage;
 Jpg imageCompressed;
-
-pthread_t thread;
+Camera cam;
 
 typedef struct {
     char header[4];
@@ -63,6 +62,8 @@ MessageToMon messageAnswered;
 
 std::thread *threadTimer;
 std::thread *threadServer;
+
+char* imgMsg = NULL;
 
 using namespace std;
 
@@ -81,7 +82,8 @@ void ThreadTimer(void) {
     struct timespec tim, tim2;
     tim.tv_sec = 0;
     tim.tv_nsec = 100000000;
-
+    int cnt =0;
+    
     while (1) {
         //std::this_thread::sleep_for(std::chrono::seconds )
         //sleep(1);
@@ -90,24 +92,32 @@ void ThreadTimer(void) {
             return;
         }
         
-        sysTick = true;
+        cnt++;
+        
+        if (cnt>=1)
+        {     
+            sysTick = true;
+            cnt=0;
+        }
     }
 }
 
 void printReceivedMessage(MessageFromMon *mes) {
-    cout << "Received " + to_string(receivedLength) + " data\n";
+    cout << "Received " + to_string(receivedLength) + " data";
+    cout << std::endl;
     cout << "Header: ";
 
     for (int i = 0; i < 4; i++) {
         cout << mes->header[i];
     }
 
-    cout << "\nData: ";
+    cout << std::endl;
+    cout << "Data: ";
     for (int i = 0; i < receivedLength - 4; i++) {
         cout << mes->data[i];
     }
 
-    cout << "\n";
+    cout << std::endl;
 }
 
 int sendAnswer(string cmd, string data) {
@@ -116,7 +126,7 @@ int sendAnswer(string cmd, string data) {
 
     msg = cmd + ':' + data;
     cout << "Answer: " + msg;
-    cout << "\n";
+    cout << std::endl;
     sendDataToServer((char*) msg.c_str(), msg.length());
 
     return status;
@@ -124,20 +134,23 @@ int sendAnswer(string cmd, string data) {
 
 int sendBinaryData(string cmd, char* data, int length) {
     int status = 0;
-    char* msg;
+    int lengthSend;
+    
+    if (imgMsg != NULL) free((void*) imgMsg);
+    imgMsg = (char*) malloc(length + 4);
+    imgMsg[0] = cmd[0];
+    imgMsg[1] = cmd[1];
+    imgMsg[2] = cmd[2];
+    imgMsg[3] = ':';
 
-    msg = (char*) malloc(length + 4);
-    msg[0] = cmd[0];
-    msg[1] = cmd[1];
-    msg[2] = cmd[2];
-    msg[3] = ':';
-
-    memcpy((void*) &msg[4], (const void *) data, length);
+    memcpy((void*) &imgMsg[4], (const void *) data, length);
     cout << "Answer: " + cmd;
-    cout << "\n";
-    sendDataToServer(msg, length + 4);
+    cout << std::endl;
 
-    free((void*) msg);
+    lengthSend=sendDataToServer(imgMsg, length + 4);
+
+    cout << "Requested Length: " + to_string(length) + " / Send Length: " + to_string(lengthSend);
+    cout << std::endl;
     return status;
 }
 
@@ -193,40 +206,51 @@ int decodeMessage(MessageFromMon *mes, int dataLength) {
 
 int main(int argc, char** argv) {
 
-    namedWindow("Sortie Camera");
-
     // Ouverture de la com robot
-    /*if (open_communication_robot("/dev/ttyUSB0") != 0) {
-        cerr << "Unable to open /dev/ttyUSB0: abort\n";
+#ifdef __FOR_PC__
+    if (open_communication_robot("/dev/ttyUSB0") != 0) {
+#else
+    if (open_communication_robot("/dev/ttyS0") != 0) {
+#endif /*__FOR_PC__ */
+        cerr << "Unable to open /dev/ttyUSB0: abort";
+        cout << std::endl;
         return -1;
     }
-    cout << "/dev/ttyUSB0 opened\n";
-     */
+    cout << "Com port opened";
+    cout << std::endl;
+     
     // Ouverture de la camera
-    if (open_camera(0) == -1) {
-        cerr << "Unable to open camera: abort\n";
+    if (open_camera(&cam) == -1) {
+        cerr << "Unable to open camera: abort";
+        cout << std::endl;
+        
         return -1;
     }
-    cout << "Camera opened\n";
+    cout << "Camera opened";
+    cout << std::endl;
 
     // Ouverture du serveur
     socketID = openServer(5544);
-    cout << "Server opened on port 5544\n";
+    cout << "Server opened on port 5544";
+    cout << std::endl;
 
     threadTimer = new std::thread(ThreadTimer);
 
     for (;;) {
-        cout << "Waiting for client to connect ...\n";
+        cout << "Waiting for client to connect ...";
+        cout << std::endl;
         acceptClient();
         disconnected = false;
         dataReady = false;
-        cout << "Client connected\n";
+        cout << "Client connected";
+        cout << std::endl;
+        
         threadServer = new std::thread(ThreadServer);
 
         while (disconnected == false) {
 
             // Recuperation de l'image
-            get_image(0, &monImage, "");
+            get_image(&cam, &monImage, "");
 
             if (dataReady == true) // des données ont été recu par le serveur
             {

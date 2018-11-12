@@ -22,6 +22,14 @@ CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux/testeur
 CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux/package
 CND_PACKAGE_NAME_Release=testeur.tar
 CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux/package/testeur.tar
+# Debug-rpi configuration
+CND_PLATFORM_Debug-rpi=GNU-Linux
+CND_ARTIFACT_DIR_Debug-rpi=dist/Debug-rpi/GNU-Linux
+CND_ARTIFACT_NAME_Debug-rpi=testeur
+CND_ARTIFACT_PATH_Debug-rpi=dist/Debug-rpi/GNU-Linux/testeur
+CND_PACKAGE_DIR_Debug-rpi=dist/Debug-rpi/GNU-Linux/package
+CND_PACKAGE_NAME_Debug-rpi=testeur.tar
+CND_PACKAGE_PATH_Debug-rpi=dist/Debug-rpi/GNU-Linux/package/testeur.tar
 #
 # include compiler specific variables
 #

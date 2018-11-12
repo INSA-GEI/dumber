@@ -47,9 +47,9 @@ int open_camera(Camera  *camera)
     if(!cap.open(0))
         return -1;
     
-    sleep(1);
     return 0;
 #else // for raspberry
+    
     camera->set(CV_CAP_PROP_FORMAT, CV_8UC3);
     camera->set(CV_CAP_PROP_FRAME_WIDTH,WIDTH);
     camera->set(CV_CAP_PROP_FRAME_HEIGHT,HEIGHT);

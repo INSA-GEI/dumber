@@ -1,4 +1,25 @@
-﻿using System.Threading;
+﻿//
+//  CommandManager.cs
+//
+//  Author:
+//       Di MERCURIO Sébastien <dimercur@insa-toulouse.fr>
+//
+//  Copyright (c) 2018 INSA - DGEI
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+using System.Threading;
 
 namespace monitor
 {
@@ -158,24 +179,31 @@ namespace monitor
             {
                 isBusy = true;
 
+                // Send command to server
                 Client.Write(cmd);
 
-                if (timeout > 0) // la commande attend un acquitement
+                if (timeout > 0) // Command request an acknowledge
                 {
-                    waitForAcknowledge = true;
+                    
+                    waitForAcknowledge = true;  // Flag used in OnMessageReception callback to avoid
+                                                // sending acknowledge message to upper level
                     waitTimer.Interval = timeout;
-                    waitTimer.Start();
+                    waitTimer.Start();          // Start timeout timer
 
-                    waitEvent.WaitOne();
-                    waitEvent.Reset(); // remise à zero pour une prochaine commande
+                    waitEvent.WaitOne();        // Stop current thread, waiting for waitEvent semaphore 
+                                                // produced in OnMessageReception when either a message is received
+                                                // or a timeout occur
 
-                    if (this.messageReceived == null) // timeout: connection au serveur defectueuse
+                    waitEvent.Reset();          // reset semaphore for next message
+
+                    if (this.messageReceived == null) // timeout: server connection error
                     {
                         status = CommandManagerStatus.Timeout;
                     }
                 }
                 else isBusy = false;
 
+                // return received answer, null in case of timeout
                 answer = this.messageReceived;
                 this.messageReceived = null;
             }

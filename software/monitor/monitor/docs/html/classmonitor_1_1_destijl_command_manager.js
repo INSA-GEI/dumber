@@ -35,7 +35,6 @@ var classmonitor_1_1_destijl_command_manager =
     [ "RobotStartWithoutWatchdog", "classmonitor_1_1_destijl_command_manager.html#a0c964baa3ecd4ff9d19857061413938b", null ],
     [ "RobotStartWithWatchdog", "classmonitor_1_1_destijl_command_manager.html#ade46aceeb79556e31fe632e9602e1636", null ],
     [ "RobotTurn", "classmonitor_1_1_destijl_command_manager.html#a3f7ee6f1803cfb8b2eb4290f9e9acced", null ],
-    [ "SplitCommand", "classmonitor_1_1_destijl_command_manager.html#ad6fc73806e924e73dcf07c5cf3c81a66", null ],
     [ "commandManager", "classmonitor_1_1_destijl_command_manager.html#a9efdcd3d35f46329e7aa167ad60062a9", null ],
     [ "commandReceivedEvent", "classmonitor_1_1_destijl_command_manager.html#a5c10e8aaae48b83be0267aefa23eb62d", null ],
     [ "receivedData", "classmonitor_1_1_destijl_command_manager.html#a88f907fc9c5fd8cd8d5976f45c323903", null ],

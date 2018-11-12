@@ -22,6 +22,14 @@ CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux/superviseur
 CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux/package
 CND_PACKAGE_NAME_Release=superviseur.tar
 CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux/package/superviseur.tar
+# Debug__RPI_ configuration
+CND_PLATFORM_Debug__RPI_=GNU-Linux
+CND_ARTIFACT_DIR_Debug__RPI_=dist/Debug__RPI_/GNU-Linux
+CND_ARTIFACT_NAME_Debug__RPI_=superviseur
+CND_ARTIFACT_PATH_Debug__RPI_=dist/Debug__RPI_/GNU-Linux/superviseur
+CND_PACKAGE_DIR_Debug__RPI_=dist/Debug__RPI_/GNU-Linux/package
+CND_PACKAGE_NAME_Debug__RPI_=superviseur.tar
+CND_PACKAGE_PATH_Debug__RPI_=dist/Debug__RPI_/GNU-Linux/package/superviseur.tar
 #
 # include compiler specific variables
 #
