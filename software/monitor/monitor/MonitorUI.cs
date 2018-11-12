@@ -200,6 +200,9 @@ public partial class MainWindow : Gtk.Window
         a.RetVal = true;
     }
 
+    private byte[] imageComplete;
+    private byte[] imageInProgress;
+
     /// <summary>
     /// Callback called when new message is received from server
     /// </summary>
@@ -208,17 +211,47 @@ public partial class MainWindow : Gtk.Window
     /// <param name="buffer">Raw buffer corresponding of received message</param>
     public void OnCommandReceivedEvent(string header, string data, byte[] buffer)
     {
+        if (buffer==null)
+        {
+            // we have lost server
+            ChangeState(SystemState.NotConnected);
+
+            MessagePopup(MessageType.Error,
+                     ButtonsType.Ok, "Server lost",
+                         "Server is down: disconnecting");
+            cmdManager.Close();
+        }
+
         // if we have received a valid message
         if (header != null)
         {
 #if DEBUG
             // print message content
-            Console.WriteLine("Received header (" + header.Length + "): " + header);
-            if (header.ToUpper() != DestijlCommandList.HeaderStmImage)
-            {
-                if (data != null) Console.WriteLine("Received data (" + data.Length + "): " + data);
-            }
+            if (header.Length > 4)
+                Console.WriteLine("Bad header(" + buffer.Length + ")");
+            else
+                Console.WriteLine("Received header (" + header.Length + "): " + header);
+            //if (header.ToUpper() != DestijlCommandList.HeaderStmImage)
+            //{
+            //    if (data != null) Console.WriteLine("Received data (" + data.Length + "): " + data);
+            //}
 #endif
+            // Image management
+            if (header == DestijlCommandList.HeaderStmImage)
+            {
+                imageComplete = imageInProgress;
+                imageInProgress = buffer;
+            }
+            else
+            {
+                if (imageInProgress == null) imageInProgress = buffer;
+                else
+                {
+                    Array.Resize<byte>(ref imageInProgress, imageInProgress.Length + buffer.Length);
+                    System.Buffer.BlockCopy(buffer, 0, imageInProgress, imageInProgress.Length - buffer.Length, buffer.Length);
+                }
+            }
+
             // depending on message received (based on header)
             // launch correponding action
             if (header.ToUpper() == DestijlCommandList.HeaderStmBat)
@@ -243,23 +276,26 @@ public partial class MainWindow : Gtk.Window
             {
                 // if message is an image, convert it to a pixbuf
                 // that can be displayed
-                byte[] image = new byte[buffer.Length - 4];
-                System.Buffer.BlockCopy(buffer, 4, image, 0, image.Length);
+                if (imageComplete != null)
+                {
+                    byte[] image = new byte[imageComplete.Length - 4];
+                    System.Buffer.BlockCopy(imageComplete, 4, image, 0, image.Length);
 
-                imageReceivedCounter++;
-                try
-                {
-                    drawingareaCameraPixbuf = new Pixbuf(image);
-                    drawingAreaCamera.QueueDraw();
-                }
-                catch (GLib.GException)
-                {
-                    badImageReceivedCounter++;
+                    imageReceivedCounter++;
+                    try
+                    {
+                        drawingareaCameraPixbuf = new Pixbuf(image);
+                        drawingAreaCamera.QueueDraw();
+                    }
+                    catch (GLib.GException)
+                    {
+                        badImageReceivedCounter++;
 #if DEBUG
-                    Console.WriteLine("Bad Image: " + badImageReceivedCounter +
-                                      " / " + imageReceivedCounter +
-                                      " (" + badImageReceivedCounter * 100 / imageReceivedCounter + "%)");
-#endif                    
+                        Console.WriteLine("Bad Image: " + badImageReceivedCounter +
+                                          " / " + imageReceivedCounter +
+                                          " (" + badImageReceivedCounter * 100 / imageReceivedCounter + "%)");
+#endif
+                    }
                 }
             }
         }
