@@ -1,0 +1,283 @@
+\hypertarget{image_8cpp}{}\section{src/image.cpp File Reference}
+\label{image_8cpp}\index{src/image.\+cpp@{src/image.\+cpp}}
+
+
+Fonctions de traitement d\textquotesingle{}image utilisable pour la détection du robot.  
+
+
+{\ttfamily \#include \char`\"{}image.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+Include dependency graph for image.\+cpp\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{image_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+float \hyperlink{image_8cpp_afe015c86402c7d09d9d7b28587c7fd1b}{calcul\+Angle} (\hyperlink{struct_position}{Position} $\ast$position\+Robot)
+\item 
+int \hyperlink{image_8cpp_a41fa265b5f57fcd2a13e726880297d12}{crop\+Arena} (\hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$img\+Input, \hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$img\+Output, \hyperlink{image_8h_aa856a7cb8a1535c9f13096bede6c8586}{Arene} $\ast$Arene\+Input)
+\item 
+float \hyperlink{image_8cpp_a73f53d1da08f1f8123da89585d16c7ef}{euclidean\+Dist} (Point \&p, Point \&q)
+\item 
+void \hyperlink{image_8cpp_a5ffd032a466af45a505fb46252194bbf}{draw\+\_\+arena} (\hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$img\+Input, \hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$img\+Output, \hyperlink{image_8h_aa856a7cb8a1535c9f13096bede6c8586}{Arene} $\ast$mon\+Arene)
+\begin{DoxyCompactList}\small\item\em Dessine le plus petit rectangle contenant l\textquotesingle{}arène. \end{DoxyCompactList}\item 
+int \hyperlink{image_8cpp_aca0662ab31eac7fdb2d64fecc52ff1da}{open\+\_\+camera} (\hyperlink{image_8h_a739dda3f6f6ddbab22617837b43a692a}{Camera} $\ast$camera)
+\begin{DoxyCompactList}\small\item\em Ouvre une camera. \end{DoxyCompactList}\item 
+void \hyperlink{image_8cpp_a864afddf57678b37b99d9eca70405d63}{get\+\_\+image} (\hyperlink{image_8h_a739dda3f6f6ddbab22617837b43a692a}{Camera} $\ast$camera, \hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$mon\+Image, const char $\ast$fichier)
+\begin{DoxyCompactList}\small\item\em Capture une image avec la camera passée en entrée. En cas de test sans camera, la fonction charge une image. \end{DoxyCompactList}\item 
+void \hyperlink{image_8cpp_a19eac11a04cb4b86fd32e6a36445ad5d}{close\+\_\+camera} (\hyperlink{image_8h_a739dda3f6f6ddbab22617837b43a692a}{Camera} $\ast$camera)
+\begin{DoxyCompactList}\small\item\em Ferme la camera passé en paramètre. \end{DoxyCompactList}\item 
+int \hyperlink{image_8cpp_acad45df4061a55f17be0db97c1406249}{detect\+\_\+arena} (\hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$mon\+Image, \hyperlink{image_8h_aa856a7cb8a1535c9f13096bede6c8586}{Arene} $\ast$rectangle)
+\begin{DoxyCompactList}\small\item\em Détecte une arène dans une image fournis en paramètre. \end{DoxyCompactList}\item 
+void \hyperlink{image_8cpp_a909ca7577f0ac2e4bd0ea21291690dce}{compress\+\_\+image} (\hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$img\+Input, \hyperlink{image_8h_a9ac2855e21920c676a108df386ff9415}{Jpg} $\ast$image\+Compress)
+\begin{DoxyCompactList}\small\item\em Détecte la position d\textquotesingle{}un robot. \end{DoxyCompactList}\item 
+int \hyperlink{image_8cpp_ac813f76084a0d9d252fb5c01830ab7df}{detect\+\_\+position} (\hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$img\+Input, \hyperlink{struct_position}{Position} $\ast$pos\+Triangle, \hyperlink{image_8h_aa856a7cb8a1535c9f13096bede6c8586}{Arene} $\ast$mon\+Arene)
+\begin{DoxyCompactList}\small\item\em Détecte la position d\textquotesingle{}un robot. \end{DoxyCompactList}\item 
+void \hyperlink{image_8cpp_a869c3946d4a414b8730ca4f91fbd9556}{draw\+\_\+position} (\hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$img\+Input, \hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$img\+Output, \hyperlink{struct_position}{Position} $\ast$position\+Robot)
+\begin{DoxyCompactList}\small\item\em Dessine sur une image en entrée la position d\textquotesingle{}un robot et sa direction. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Fonctions de traitement d\textquotesingle{}image utilisable pour la détection du robot. 
+
+\begin{DoxyAuthor}{Author}
+L.\+Senaneuch 
+\end{DoxyAuthor}
+\begin{DoxyVersion}{Version}
+1.\+0 
+\end{DoxyVersion}
+\begin{DoxyDate}{Date}
+06/06/2017
+\end{DoxyDate}
+Ce fichier utilise la libraire open\+C\+V2 pour faciliter le traitement d\textquotesingle{}image dans le projet Destijl. Il permet de faciliter la détection de l\textquotesingle{}arène et la détection du robot. /!\textbackslash{} Attention Bien que celui-\/ci soit un .cpp la structure du code n\textquotesingle{}est pas sous forme d\textquotesingle{}objet. 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{image_8cpp_afe015c86402c7d09d9d7b28587c7fd1b}\label{image_8cpp_afe015c86402c7d09d9d7b28587c7fd1b}} 
+\index{image.\+cpp@{image.\+cpp}!calcul\+Angle@{calcul\+Angle}}
+\index{calcul\+Angle@{calcul\+Angle}!image.\+cpp@{image.\+cpp}}
+\subsubsection{\texorpdfstring{calcul\+Angle()}{calculAngle()}}
+{\footnotesize\ttfamily float calcul\+Angle (\begin{DoxyParamCaption}\item[{\hyperlink{struct_position}{Position} $\ast$}]{position\+Robot }\end{DoxyParamCaption})}
+
+
+
+Definition at line 253 of file image.\+cpp.
+
+\mbox{\Hypertarget{image_8cpp_a19eac11a04cb4b86fd32e6a36445ad5d}\label{image_8cpp_a19eac11a04cb4b86fd32e6a36445ad5d}} 
+\index{image.\+cpp@{image.\+cpp}!close\+\_\+camera@{close\+\_\+camera}}
+\index{close\+\_\+camera@{close\+\_\+camera}!image.\+cpp@{image.\+cpp}}
+\subsubsection{\texorpdfstring{close\+\_\+camera()}{close\_camera()}}
+{\footnotesize\ttfamily void close\+\_\+camera (\begin{DoxyParamCaption}\item[{\hyperlink{image_8h_a739dda3f6f6ddbab22617837b43a692a}{Camera} $\ast$}]{camera }\end{DoxyParamCaption})}
+
+
+
+Ferme la camera passé en paramètre. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em $\ast$\+Camera} & Pointeur sur la camera à fermer \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 112 of file image.\+cpp.
+
+\mbox{\Hypertarget{image_8cpp_a909ca7577f0ac2e4bd0ea21291690dce}\label{image_8cpp_a909ca7577f0ac2e4bd0ea21291690dce}} 
+\index{image.\+cpp@{image.\+cpp}!compress\+\_\+image@{compress\+\_\+image}}
+\index{compress\+\_\+image@{compress\+\_\+image}!image.\+cpp@{image.\+cpp}}
+\subsubsection{\texorpdfstring{compress\+\_\+image()}{compress\_image()}}
+{\footnotesize\ttfamily void compress\+\_\+image (\begin{DoxyParamCaption}\item[{\hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$}]{img\+Input,  }\item[{\hyperlink{image_8h_a9ac2855e21920c676a108df386ff9415}{Jpg} $\ast$}]{image\+Compress }\end{DoxyParamCaption})}
+
+
+
+Détecte la position d\textquotesingle{}un robot. 
+
+Détecte la position de triangles blanc sur une image /a img\+Input passé en paramètre d\textquotesingle{}entrer.
+
+
+\begin{DoxyParams}{Parameters}
+{\em $\ast$img\+Input} & Pointeur sur l\textquotesingle{}image à sauvegarder en mémoire sous format jpg. \\
+\hline
+{\em $\ast$image\+Compress} & Pointeur sur une image .jpg. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 164 of file image.\+cpp.
+
+\mbox{\Hypertarget{image_8cpp_a41fa265b5f57fcd2a13e726880297d12}\label{image_8cpp_a41fa265b5f57fcd2a13e726880297d12}} 
+\index{image.\+cpp@{image.\+cpp}!crop\+Arena@{crop\+Arena}}
+\index{crop\+Arena@{crop\+Arena}!image.\+cpp@{image.\+cpp}}
+\subsubsection{\texorpdfstring{crop\+Arena()}{cropArena()}}
+{\footnotesize\ttfamily int crop\+Arena (\begin{DoxyParamCaption}\item[{\hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$}]{img\+Input,  }\item[{\hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$}]{img\+Output,  }\item[{\hyperlink{image_8h_aa856a7cb8a1535c9f13096bede6c8586}{Arene} $\ast$}]{Arene\+Input }\end{DoxyParamCaption})}
+
+
+
+Definition at line 150 of file image.\+cpp.
+
+\mbox{\Hypertarget{image_8cpp_acad45df4061a55f17be0db97c1406249}\label{image_8cpp_acad45df4061a55f17be0db97c1406249}} 
+\index{image.\+cpp@{image.\+cpp}!detect\+\_\+arena@{detect\+\_\+arena}}
+\index{detect\+\_\+arena@{detect\+\_\+arena}!image.\+cpp@{image.\+cpp}}
+\subsubsection{\texorpdfstring{detect\+\_\+arena()}{detect\_arena()}}
+{\footnotesize\ttfamily int detect\+\_\+arena (\begin{DoxyParamCaption}\item[{\hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$}]{mon\+Image,  }\item[{\hyperlink{image_8h_aa856a7cb8a1535c9f13096bede6c8586}{Arene} $\ast$}]{rectangle }\end{DoxyParamCaption})}
+
+
+
+Détecte une arène dans une image fournis en paramètre. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em $\ast$mon\+Image} & Pointeur sur l\textquotesingle{}image d\textquotesingle{}entrée \\
+\hline
+{\em $\ast$rectangle} & Pointeur sur les coordonnées du rectangles trouvé. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Retourne -\/1 si aucune arène n\textquotesingle{}est détectée. Sinon retourne 0 
+\end{DoxyReturn}
+
+
+Definition at line 126 of file image.\+cpp.
+
+\mbox{\Hypertarget{image_8cpp_ac813f76084a0d9d252fb5c01830ab7df}\label{image_8cpp_ac813f76084a0d9d252fb5c01830ab7df}} 
+\index{image.\+cpp@{image.\+cpp}!detect\+\_\+position@{detect\+\_\+position}}
+\index{detect\+\_\+position@{detect\+\_\+position}!image.\+cpp@{image.\+cpp}}
+\subsubsection{\texorpdfstring{detect\+\_\+position()}{detect\_position()}}
+{\footnotesize\ttfamily int detect\+\_\+position (\begin{DoxyParamCaption}\item[{\hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$}]{img\+Input,  }\item[{\hyperlink{struct_position}{Position} $\ast$}]{pos\+Triangle,  }\item[{\hyperlink{image_8h_aa856a7cb8a1535c9f13096bede6c8586}{Arene} $\ast$}]{mon\+Arene = {\ttfamily NULL} }\end{DoxyParamCaption})}
+
+
+
+Détecte la position d\textquotesingle{}un robot. 
+
+Détecte la position de triangles blanc sur une image /a img\+Input passé en paramètre d\textquotesingle{}entrer.
+
+
+\begin{DoxyParams}{Parameters}
+{\em $\ast$img\+Input} & Pointeur sur l\textquotesingle{}image sur laquelle chercher la position du des robots. \\
+\hline
+{\em $\ast$pos\+Triangle} & Pointeur sur un tableau de position ou seront stocké les positions des triangles détectés. \\
+\hline
+{\em $\ast$mon\+Arene} & Pointeur de type Arène si nécessaire d\textquotesingle{}affiner la recherche (optionnel) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Le nombre de triangles détectés. 
+\end{DoxyReturn}
+
+
+Definition at line 170 of file image.\+cpp.
+
+\mbox{\Hypertarget{image_8cpp_a5ffd032a466af45a505fb46252194bbf}\label{image_8cpp_a5ffd032a466af45a505fb46252194bbf}} 
+\index{image.\+cpp@{image.\+cpp}!draw\+\_\+arena@{draw\+\_\+arena}}
+\index{draw\+\_\+arena@{draw\+\_\+arena}!image.\+cpp@{image.\+cpp}}
+\subsubsection{\texorpdfstring{draw\+\_\+arena()}{draw\_arena()}}
+{\footnotesize\ttfamily void draw\+\_\+arena (\begin{DoxyParamCaption}\item[{\hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$}]{img\+Input,  }\item[{\hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$}]{img\+Output,  }\item[{\hyperlink{image_8h_aa856a7cb8a1535c9f13096bede6c8586}{Arene} $\ast$}]{mon\+Arene }\end{DoxyParamCaption})}
+
+
+
+Dessine le plus petit rectangle contenant l\textquotesingle{}arène. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em $\ast$img\+Input} & Pointeur sur l\textquotesingle{}image d\textquotesingle{}entrée. \\
+\hline
+{\em $\ast$img\+Output} & Pointeur sur l\textquotesingle{}image de sortie (image d\textquotesingle{}entrée + arène marquée) \\
+\hline
+{\em $\ast$mon\+Arene} & Pointeur de type Arène contenant les information à dessiner \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 51 of file image.\+cpp.
+
+\mbox{\Hypertarget{image_8cpp_a869c3946d4a414b8730ca4f91fbd9556}\label{image_8cpp_a869c3946d4a414b8730ca4f91fbd9556}} 
+\index{image.\+cpp@{image.\+cpp}!draw\+\_\+position@{draw\+\_\+position}}
+\index{draw\+\_\+position@{draw\+\_\+position}!image.\+cpp@{image.\+cpp}}
+\subsubsection{\texorpdfstring{draw\+\_\+position()}{draw\_position()}}
+{\footnotesize\ttfamily void draw\+\_\+position (\begin{DoxyParamCaption}\item[{\hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$}]{img\+Input,  }\item[{\hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$}]{img\+Output,  }\item[{\hyperlink{struct_position}{Position} $\ast$}]{position\+Robot }\end{DoxyParamCaption})}
+
+
+
+Dessine sur une image en entrée la position d\textquotesingle{}un robot et sa direction. 
+
+Sauvegarde l\textquotesingle{}image des coordonnées passées par position\+Robot superposée à l\textquotesingle{}image d\textquotesingle{}entrée sur img\+Output.
+
+
+\begin{DoxyParams}{Parameters}
+{\em $\ast$img\+Input} & Pointeur sur l\textquotesingle{}image d\textquotesingle{}entrée \\
+\hline
+{\em $\ast$img\+Output} & Pointeur sur l\textquotesingle{}image de sortie ( image d\textquotesingle{}entrée + dessin de la position) \\
+\hline
+{\em $\ast$position\+Robot} & Pointeur sur la structure position d\textquotesingle{}un robot. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 244 of file image.\+cpp.
+
+\mbox{\Hypertarget{image_8cpp_a73f53d1da08f1f8123da89585d16c7ef}\label{image_8cpp_a73f53d1da08f1f8123da89585d16c7ef}} 
+\index{image.\+cpp@{image.\+cpp}!euclidean\+Dist@{euclidean\+Dist}}
+\index{euclidean\+Dist@{euclidean\+Dist}!image.\+cpp@{image.\+cpp}}
+\subsubsection{\texorpdfstring{euclidean\+Dist()}{euclideanDist()}}
+{\footnotesize\ttfamily float euclidean\+Dist (\begin{DoxyParamCaption}\item[{Point \&}]{p,  }\item[{Point \&}]{q }\end{DoxyParamCaption})}
+
+
+
+Definition at line 159 of file image.\+cpp.
+
+\mbox{\Hypertarget{image_8cpp_a864afddf57678b37b99d9eca70405d63}\label{image_8cpp_a864afddf57678b37b99d9eca70405d63}} 
+\index{image.\+cpp@{image.\+cpp}!get\+\_\+image@{get\+\_\+image}}
+\index{get\+\_\+image@{get\+\_\+image}!image.\+cpp@{image.\+cpp}}
+\subsubsection{\texorpdfstring{get\+\_\+image()}{get\_image()}}
+{\footnotesize\ttfamily void get\+\_\+image (\begin{DoxyParamCaption}\item[{\hyperlink{image_8h_a739dda3f6f6ddbab22617837b43a692a}{Camera} $\ast$}]{camera,  }\item[{\hyperlink{image_8h_a466446fef9c0348568bc6743186d1a38}{Image} $\ast$}]{mon\+Image,  }\item[{const char $\ast$}]{fichier = {\ttfamily NULL} }\end{DoxyParamCaption})}
+
+
+
+Capture une image avec la camera passée en entrée. En cas de test sans camera, la fonction charge une image. 
+
+La camera doit préalablement être ouverte via {\itshape open\+Camera}(...)
+
+
+\begin{DoxyParams}{Parameters}
+{\em $\ast$\+Camera} & Pointeur sur la camera passée en entrée. \\
+\hline
+{\em $\ast$mon\+Image} & Pointeur sur une image capturée. \\
+\hline
+{\em $\ast$fichier} & chemin du fichier d\textquotesingle{}image \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Retourne -\/1 si une erreur survient. 
+\end{DoxyReturn}
+
+
+Definition at line 93 of file image.\+cpp.
+
+\mbox{\Hypertarget{image_8cpp_aca0662ab31eac7fdb2d64fecc52ff1da}\label{image_8cpp_aca0662ab31eac7fdb2d64fecc52ff1da}} 
+\index{image.\+cpp@{image.\+cpp}!open\+\_\+camera@{open\+\_\+camera}}
+\index{open\+\_\+camera@{open\+\_\+camera}!image.\+cpp@{image.\+cpp}}
+\subsubsection{\texorpdfstring{open\+\_\+camera()}{open\_camera()}}
+{\footnotesize\ttfamily int open\+\_\+camera (\begin{DoxyParamCaption}\item[{\hyperlink{image_8h_a739dda3f6f6ddbab22617837b43a692a}{Camera} $\ast$}]{camera }\end{DoxyParamCaption})}
+
+
+
+Ouvre une camera. 
+
+Met à jour le descripteur de fichier passé en paramètre pour correspondre à la camera ouverte
+
+
+\begin{DoxyParams}{Parameters}
+{\em $\ast$\+Camera} & Pointeur d\textquotesingle{}un file descriptor d\textquotesingle{}une camera ouverte \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+retourne 0 si la camera a été ouverte correctement et -\/1 si une erreur survient. 
+\end{DoxyReturn}
+
+
+Definition at line 58 of file image.\+cpp.
+

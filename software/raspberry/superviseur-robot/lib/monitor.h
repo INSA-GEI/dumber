@@ -1,9 +1,30 @@
-//
-// Created by lucien on 05/04/17.
-//
+/*
+ * Copyright (C) 2018 dimercur
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#ifndef TCPSERVER_H
-#define TCPSERVER_H
+/**
+ * \file      monitor.h
+ * \author    L.senaneuch
+ * \version   1.0
+ * \date      06/06/2017
+ * \brief     Library for sending message to monitor or receiving message
+ */
+
+#ifndef _MONITOR_H_
+#define _MONITOR_H_
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -55,45 +76,17 @@ typedef struct {
     char data[100];
 } MessageFromMon;
 
-
-/**
- * \brief    Lance nodejs .
- * \param    path    chemin de l'executable nodejs (défaut /usr/bin/nodejs)
- * \param    file  chemin du fichier de l'interface (défaut ./interface.js)
- * \return   retourne 0 si le process a été lancé et -1 sinon.
- */
-int run_nodejs(const char *path = (const char*)DEFAULT_NODEJS_PATH, char *file = (const char*)DEFAULT_INTERFACE_FILE);
-
-/**
- * \brief    Tue le process exécutant nodejs.
- * \return   retourne 0 en cas de succès et -1 sinon.
- */
-int kill_nodejs();
-
-/**
- * \brief      Mise en place du serveur (port 8080 par défaut).
- * \param    port    numéro du port utilisé par le serveur (8080 par défaut).
- * \return   retourne 0 si le serveur est mis en place et -1 en cas de problème.
- */
-int open_server(int port = DEFAULT_PORT); //public
-
-/**
- * \brief    Ferme le serveur.
- * \return   retourne 0 si le serveur est fermé et -1 en cas de problème.
- */
-int close_server(void); // public
-
 /**
  * \brief    Envoi d'un message vers l'interface graphique
  * \param    typeMessage     Type du message envoyé. Les valeurs possibles sont 
  * IMG pour une image, MES pour un message à afficher dans la console, POS pour
  * la position du robot, BAT pour une valeur de la batterie et ACK pour valider
  * un message de l'interface.
- * \param  data   données associées au message. Le type de la donnée doit
+ * \param   data   données associées au message. Le type de la donnée doit
  * correspondre au message : Image pour IMG, char * MES, Position pour POS, 
  * char * pour BAT et rien pour ACK. Attention, il n'y a aucune vérification
  * a posterio.
- * \return   retourne 0 si l'envoie a bien été réalisé et -1 en cas de problème.
+ * \return   Retourne 0 si l'envoie a bien été réalisé et -1 en cas de problème.
  */
 int send_message_to_monitor(const char* typeMessage, const void * data = NULL);
 
@@ -105,11 +98,11 @@ int send_message_to_monitor(const char* typeMessage, const void * data = NULL);
  * \param    typeMessage     Type du message reçu : DMB pour un ordre au robot, 
  * ARN pour la demande de détection de l'arène, POS pour un calcul de position
  * et MSG pour un message de l'interface
- * \param  data   données associées au message reçu.
- * \return   retourne 0 la taille du message reçu ou une valeur négative si la
+ * \param   data   données associées au message reçu.
+ * \return   Retourne 0 la taille du message reçu ou une valeur négative si la
  * connexion est perdue.
  */
 int receive_message_from_monitor(char *typeMessage, char *data);
 
 
-#endif // TCPSERVER_H
+#endif // _MONITOR_H_

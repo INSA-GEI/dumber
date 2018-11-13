@@ -45,11 +45,11 @@ OBJECTFILES= \
 
 
 # C Compiler Flags
-CFLAGS=
+CFLAGS=-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy
+CXXFLAGS=-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -58,7 +58,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=
+LDLIBSOPTIONS=`pkg-config --libs opencv` -lraspicam_cv -lraspicam  
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -66,42 +66,42 @@ LDLIBSOPTIONS=
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/superviseur: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/superviseur ${OBJECTFILES} ${LDLIBSOPTIONS}
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/superviseur ${OBJECTFILES} ${LDLIBSOPTIONS} -Wl,--no-as-needed -lalchemy -lcopperplate /usr/xenomai/lib/xenomai/bootstrap.o -Wl,--wrap=main -Wl,--dynamic-list=/usr/xenomai/lib/dynlist.ld -L/usr/xenomai/lib -lmercury -lpthread -lrt
 
 ${OBJECTDIR}/_ext/a59f760b/image.o: ../lib/src/image.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/a59f760b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/a59f760b/image.o ../lib/src/image.cpp
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -Isrc -I../lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/a59f760b/image.o ../lib/src/image.cpp
 
 ${OBJECTDIR}/_ext/a59f760b/message.o: ../lib/src/message.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/a59f760b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/a59f760b/message.o ../lib/src/message.cpp
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -Isrc -I../lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/a59f760b/message.o ../lib/src/message.cpp
 
 ${OBJECTDIR}/_ext/a59f760b/monitor.o: ../lib/src/monitor.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/a59f760b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/a59f760b/monitor.o ../lib/src/monitor.cpp
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -Isrc -I../lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/a59f760b/monitor.o ../lib/src/monitor.cpp
 
 ${OBJECTDIR}/_ext/a59f760b/robot.o: ../lib/src/robot.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/a59f760b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/a59f760b/robot.o ../lib/src/robot.cpp
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -Isrc -I../lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/a59f760b/robot.o ../lib/src/robot.cpp
 
 ${OBJECTDIR}/_ext/a59f760b/server.o: ../lib/src/server.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/a59f760b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/a59f760b/server.o ../lib/src/server.cpp
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -Isrc -I../lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/a59f760b/server.o ../lib/src/server.cpp
 
 ${OBJECTDIR}/src/functions.o: src/functions.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/functions.o src/functions.cpp
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -Isrc -I../lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/functions.o src/functions.cpp
 
 ${OBJECTDIR}/src/main.o: src/main.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/main.o src/main.cpp
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -Isrc -I../lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/main.o src/main.cpp
 
 # Subprojects
 .build-subprojects:

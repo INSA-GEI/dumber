@@ -1,14 +1,26 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2018 dimercur
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
- * File:   functions.h
- * Author: pehladik
- *
- * Created on 15 janvier 2018, 12:50
+/**
+ * \file      functions.h
+ * \author    PE.Hladik
+ * \version   1.0
+ * \date      06/06/2017
+ * \brief     Miscellaneous functions used for destijl project.
  */
 
 #ifndef FUNCTIONS_H
@@ -61,11 +73,34 @@ extern int PRIORITY_TSENDTOMON;
 extern int PRIORITY_TRECEIVEFROMMON;
 extern int PRIORITY_TSTARTROBOT;
 
+/**
+ * \brief       Thread handling server communication.
+ */ 
 void f_server(void *arg);
+
+/**
+ * \brief       Thread handling communication to monitor.
+ */ 
 void f_sendToMon(void *arg);
+
+/**
+ * \brief       Thread handling communication from monitor.
+ */ 
 void f_receiveFromMon(void *arg);
+
+/**
+ * \brief       Thread handling opening of robot communication.
+ */ 
 void f_openComRobot(void * arg);
+
+/**
+ * \brief       Thread handling robot mouvements.
+ */ 
 void f_move(void *arg);
+
+/**
+ * \brief       Thread handling robot activation.
+ */ 
 void f_startRobot(void *arg);
 
 #endif /* FUNCTIONS_H */

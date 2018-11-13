@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>../lib/definitions.h</itemPath>
       <itemPath>./src/functions.h</itemPath>
       <itemPath>../lib/image.h</itemPath>
       <itemPath>../lib/message.h</itemPath>
@@ -65,6 +66,7 @@
           <commandLine>-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy</commandLine>
           <preprocessorList>
             <Elem>_WITH_TRACE_</Elem>
+            <Elem>__FOR_PC__</Elem>
           </preprocessorList>
         </ccTool>
         <linkerTool>
@@ -74,6 +76,8 @@
           <commandLine>-Wl,--no-as-needed -lalchemy -lcopperplate /usr/xenomai/lib/xenomai/bootstrap.o -Wl,--wrap=main -Wl,--dynamic-list=/usr/xenomai/lib/dynlist.ld -L/usr/xenomai/lib -lmercury -lpthread -lrt</commandLine>
         </linkerTool>
       </compileType>
+      <item path="../lib/definitions.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../lib/image.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../lib/message.h" ex="false" tool="3" flavor2="0">
@@ -123,6 +127,8 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="../lib/definitions.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../lib/image.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../lib/message.h" ex="false" tool="3" flavor2="0">
@@ -159,7 +165,38 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <cTool>
+          <incDir>
+            <pElem>src</pElem>
+            <pElem>../lib</pElem>
+            <pElem>/usr/xenomai/include</pElem>
+            <pElem>/usr/xenomai/include/mercury</pElem>
+          </incDir>
+          <commandLine>-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy</commandLine>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>src</pElem>
+            <pElem>../lib</pElem>
+            <pElem>/usr/xenomai/include</pElem>
+            <pElem>/usr/xenomai/include/mercury</pElem>
+          </incDir>
+          <commandLine>-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy</commandLine>
+          <preprocessorList>
+            <Elem>_WITH_TRACE_</Elem>
+          </preprocessorList>
+        </ccTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerOptionItem>`pkg-config --libs opencv`</linkerOptionItem>
+            <linkerLibLibItem>raspicam_cv</linkerLibLibItem>
+            <linkerLibLibItem>raspicam</linkerLibLibItem>
+          </linkerLibItems>
+          <commandLine>-Wl,--no-as-needed -lalchemy -lcopperplate /usr/xenomai/lib/xenomai/bootstrap.o -Wl,--wrap=main -Wl,--dynamic-list=/usr/xenomai/lib/dynlist.ld -L/usr/xenomai/lib -lmercury -lpthread -lrt</commandLine>
+        </linkerTool>
       </compileType>
+      <item path="../lib/definitions.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../lib/image.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../lib/message.h" ex="false" tool="3" flavor2="0">

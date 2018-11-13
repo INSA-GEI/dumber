@@ -1,21 +1,34 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2018 dimercur
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
- * File:   msg.h
- * Author: pehladik
- *
- * Created on 15 janvier 2018, 20:45
+/**
+ * \file      definitions.h
+ * \author    PE.Hladik
+ * \version   1.0
+ * \date      06/06/2017
+ * \brief     Various constants used in destjil project
  */
+
 
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
 
-#define OPEN_COM_DMB  'o'
-#define CLOSE_COM_DMB 'C'
+#define OPEN_COM_DMB            'o'
+#define CLOSE_COM_DMB           'C'
 
 #define DMB_PING                'p'
 #define DMB_IDLE                'r'
@@ -32,11 +45,11 @@
 #define DMB_GO_RIGHT            'R'
 #define DMB_STOP_MOVE           'S'
 
-#define ROBOT_TIMED_OUT -3
-#define ROBOT_UKNOWN_CMD -2
-#define ROBOT_ERROR  -1
-#define ROBOT_CHECKSUM  -4
-#define ROBOT_OK    0
+#define ROBOT_TIMED_OUT         -3
+#define ROBOT_UKNOWN_CMD        -2
+#define ROBOT_ERROR             -1
+#define ROBOT_CHECKSUM          -4
+#define ROBOT_OK                0
 
 #define CAM_OPEN                    'A'
 #define CAM_CLOSE                   'I'
@@ -46,12 +59,12 @@
 #define CAM_COMPUTE_POSITION        'p'
 #define CAM_STOP_COMPUTE_POSITION   's'
 
-#define DMB_BAT_LOW 0
-#define DMB_BAT_MEDIUM 1
-#define DMB_BAT_HIGH 2
+#define DMB_BAT_LOW             0
+#define DMB_BAT_MEDIUM          1
+#define DMB_BAT_HIGH            2
 
-#define DMB_BUSY 1
-#define DMB_DO_NOTHING 0
+#define DMB_BUSY                1
+#define DMB_DO_NOTHING          0
 
 #endif /* MSG_H */
 

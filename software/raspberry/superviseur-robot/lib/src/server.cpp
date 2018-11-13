@@ -1,14 +1,26 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2018 dimercur
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
- * File:   server.cpp
- * Author: dimercur
- * 
- * Created on 19 octobre 2018, 14:24
+/**
+ * \file      server.cpp
+ * \author    PE.Hladik
+ * \version   1.0
+ * \date      06/06/2017
+ * \brief     Library for opening a TCP server, receiving data and sending message to monitor
  */
 
 #include "server.h"
@@ -20,10 +32,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "image.h"
+#include "monitor.h"
+
 #define NB_CONNECTION_MAX 1
 
 int socketFD = -1;
 int clientID = -1;
+
+char* imgMsg = NULL;
 
 int openServer(int port) {
     struct sockaddr_in server;
@@ -96,6 +113,24 @@ int receiveDataFromServerFromClient(int client, char *data, int size) {
     return length;
 }
 
+int sendImage(Jpg *image)
+{
+    int status = 0;
+    int lengthSend;
+    
+    if (imgMsg != NULL) free((void*) imgMsg);
+    imgMsg = (char*) malloc(image->size()+ 4);
+    imgMsg[0] = HEADER_STM_IMAGE[0];
+    imgMsg[1] = HEADER_STM_IMAGE[1];
+    imgMsg[2] = HEADER_STM_IMAGE[2];
+    imgMsg[3] = ':';
+
+    memcpy((void*) &imgMsg[4], (const void *) reinterpret_cast<char*> (image->data()), image->size());
+    
+    lengthSend=sendDataToServer(imgMsg, image->size() + 4);
+
+    return status;
+}
 
 
 

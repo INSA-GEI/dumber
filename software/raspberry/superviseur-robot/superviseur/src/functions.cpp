@@ -1,3 +1,28 @@
+/*
+ * Copyright (C) 2018 dimercur
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * \file      functions.h
+ * \author    PE.Hladik
+ * \version   1.0
+ * \date      06/06/2017
+ * \brief     Miscellaneous functions used for destijl project.
+ */
+
 #include "functions.h"
 
 char mode_start;
@@ -58,7 +83,7 @@ void f_sendToMon(void * arg) {
 #endif
         if (rt_queue_read(&q_messageToMon, &msg, sizeof (MessageToRobot), TM_INFINITE) >= 0) {
 #ifdef _WITH_TRACE_
-            printf("%s : message {%s,%s} in queue\n", info.name, msg.header, msg.data);
+            printf("%s : message {%s,%s} in queue\n", info.name, msg.header, (char*)msg.data);
 #endif
 
             send_message_to_monitor(msg.header, msg.data);
@@ -148,11 +173,11 @@ void f_openComRobot(void * arg) {
             printf("%s : the communication is opened\n", info.name);
 #endif
             MessageToMon msg;
-            set_msgToMon_header(&msg, HEADER_STM_ACK);
+            set_msgToMon_header(&msg, (char*)HEADER_STM_ACK);
             write_in_queue(&q_messageToMon, msg);
         } else {
             MessageToMon msg;
-            set_msgToMon_header(&msg, HEADER_STM_NO_ACK);
+            set_msgToMon_header(&msg, (char*)HEADER_STM_NO_ACK);
             write_in_queue(&q_messageToMon, msg);
         }
     }
@@ -184,11 +209,11 @@ void f_startRobot(void * arg) {
             robotStarted = 1;
             rt_mutex_release(&mutex_robotStarted);
             MessageToMon msg;
-            set_msgToMon_header(&msg, HEADER_STM_ACK);
+            set_msgToMon_header(&msg, (char*)HEADER_STM_ACK);
             write_in_queue(&q_messageToMon, msg);
         } else {
             MessageToMon msg;
-            set_msgToMon_header(&msg, HEADER_STM_NO_ACK);
+            set_msgToMon_header(&msg, (char*)HEADER_STM_NO_ACK);
             write_in_queue(&q_messageToMon, msg);
         }
     }
