@@ -1,0 +1,163 @@
+\hypertarget{monitor_8cpp}{}\section{src/monitor.cpp File Reference}
+\label{monitor_8cpp}\index{src/monitor.\+cpp@{src/monitor.\+cpp}}
+
+
+Library for sending message to monitor or receiving message.  
+
+
+{\ttfamily \#include \char`\"{}monitor.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}server.\+h\char`\"{}}\newline
+Include dependency graph for monitor.\+cpp\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{monitor_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+string \hyperlink{monitor_8cpp_a04c8d7ed93b301fafe6dcc08d64ba21b}{server\+Receive} (int size)
+\item 
+int \hyperlink{monitor_8cpp_a7265ec937de7d9ca68b81e5bd8203962}{send\+Message} (const char $\ast$data, int data\+Length)
+\item 
+int \hyperlink{monitor_8cpp_aef87d80a1e44bf1953b3282967282ef0}{receive} (char $\ast$data)
+\item 
+int \hyperlink{monitor_8cpp_af49d46447ce41019bd13a2c07a000644}{send\+\_\+message\+\_\+to\+\_\+monitor} (const char $\ast$type\+Message, const void $\ast$data)
+\begin{DoxyCompactList}\small\item\em Envoi d\textquotesingle{}un message vers l\textquotesingle{}interface graphique. \end{DoxyCompactList}\item 
+int \hyperlink{monitor_8cpp_a61eca0d5b49118350db39583e1bd1032}{receive\+\_\+message\+\_\+from\+\_\+monitor} (char $\ast$type\+Message, char $\ast$data)
+\begin{DoxyCompactList}\small\item\em Réception d\textquotesingle{}un message. La fonction est bloquante et retourne par référence le type de message reçu (D\+MB pour un ordre au robot, A\+RN pour la détection des arènes et P\+OS pour un calcul de position) ainsi que les données associées. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{monitor_8h_a29046dc0232f0e5c70adbc25090d77b8}{S\+O\+C\+K\+A\+D\+D\+R\+\_\+\+IN} \hyperlink{monitor_8cpp_a1f38ae3a59ce304779ebbca10378654a}{ssin}
+\item 
+\hyperlink{monitor_8h_a8dc8083897335125630f1af5dafd5831}{S\+O\+C\+K\+ET} \hyperlink{monitor_8cpp_a6e91849780a994f2adde299b33642829}{sock}
+\item 
+socklen\+\_\+t \hyperlink{monitor_8cpp_acd1a03adb2455aaacbd886642518d569}{recsize} = sizeof (\hyperlink{monitor_8cpp_a1f38ae3a59ce304779ebbca10378654a}{ssin})
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Library for sending message to monitor or receiving message. 
+
+\begin{DoxyAuthor}{Author}
+L.\+senaneuch 
+\end{DoxyAuthor}
+\begin{DoxyVersion}{Version}
+1.\+0 
+\end{DoxyVersion}
+\begin{DoxyDate}{Date}
+06/06/2017 
+\end{DoxyDate}
+
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{monitor_8cpp_aef87d80a1e44bf1953b3282967282ef0}\label{monitor_8cpp_aef87d80a1e44bf1953b3282967282ef0}} 
+\index{monitor.\+cpp@{monitor.\+cpp}!receive@{receive}}
+\index{receive@{receive}!monitor.\+cpp@{monitor.\+cpp}}
+\subsubsection{\texorpdfstring{receive()}{receive()}}
+{\footnotesize\ttfamily int receive (\begin{DoxyParamCaption}\item[{char $\ast$}]{data }\end{DoxyParamCaption})}
+
+
+
+Definition at line 90 of file monitor.\+cpp.
+
+\mbox{\Hypertarget{monitor_8cpp_a61eca0d5b49118350db39583e1bd1032}\label{monitor_8cpp_a61eca0d5b49118350db39583e1bd1032}} 
+\index{monitor.\+cpp@{monitor.\+cpp}!receive\+\_\+message\+\_\+from\+\_\+monitor@{receive\+\_\+message\+\_\+from\+\_\+monitor}}
+\index{receive\+\_\+message\+\_\+from\+\_\+monitor@{receive\+\_\+message\+\_\+from\+\_\+monitor}!monitor.\+cpp@{monitor.\+cpp}}
+\subsubsection{\texorpdfstring{receive\+\_\+message\+\_\+from\+\_\+monitor()}{receive\_message\_from\_monitor()}}
+{\footnotesize\ttfamily int receive\+\_\+message\+\_\+from\+\_\+monitor (\begin{DoxyParamCaption}\item[{char $\ast$}]{type\+Message,  }\item[{char $\ast$}]{data }\end{DoxyParamCaption})}
+
+
+
+Réception d\textquotesingle{}un message. La fonction est bloquante et retourne par référence le type de message reçu (D\+MB pour un ordre au robot, A\+RN pour la détection des arènes et P\+OS pour un calcul de position) ainsi que les données associées. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em type\+Message} & Type du message reçu \+: D\+MB pour un ordre au robot, A\+RN pour la demande de détection de l\textquotesingle{}arène, P\+OS pour un calcul de position et M\+SG pour un message de l\textquotesingle{}interface \\
+\hline
+{\em data} & données associées au message reçu. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+retourne 0 la taille du message reçu ou une valeur négative si la connexion est perdue. 
+\end{DoxyReturn}
+
+
+Definition at line 83 of file monitor.\+cpp.
+
+\mbox{\Hypertarget{monitor_8cpp_af49d46447ce41019bd13a2c07a000644}\label{monitor_8cpp_af49d46447ce41019bd13a2c07a000644}} 
+\index{monitor.\+cpp@{monitor.\+cpp}!send\+\_\+message\+\_\+to\+\_\+monitor@{send\+\_\+message\+\_\+to\+\_\+monitor}}
+\index{send\+\_\+message\+\_\+to\+\_\+monitor@{send\+\_\+message\+\_\+to\+\_\+monitor}!monitor.\+cpp@{monitor.\+cpp}}
+\subsubsection{\texorpdfstring{send\+\_\+message\+\_\+to\+\_\+monitor()}{send\_message\_to\_monitor()}}
+{\footnotesize\ttfamily int send\+\_\+message\+\_\+to\+\_\+monitor (\begin{DoxyParamCaption}\item[{const char $\ast$}]{type\+Message,  }\item[{const void $\ast$}]{data = {\ttfamily NULL} }\end{DoxyParamCaption})}
+
+
+
+Envoi d\textquotesingle{}un message vers l\textquotesingle{}interface graphique. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em type\+Message} & Type du message envoyé. Les valeurs possibles sont I\+MG pour une image, M\+ES pour un message à afficher dans la console, P\+OS pour la position du robot, B\+AT pour une valeur de la batterie et A\+CK pour valider un message de l\textquotesingle{}interface. \\
+\hline
+{\em data} & données associées au message. Le type de la donnée doit correspondre au message \+: Image pour I\+MG, char $\ast$ M\+ES, \hyperlink{struct_position}{Position} pour P\+OS, char $\ast$ pour B\+AT et rien pour A\+CK. Attention, il n\textquotesingle{}y a aucune vérification a posterio. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+retourne 0 si l\textquotesingle{}envoie a bien été réalisé et -\/1 en cas de problème. 
+\end{DoxyReturn}
+
+
+Definition at line 40 of file monitor.\+cpp.
+
+\mbox{\Hypertarget{monitor_8cpp_a7265ec937de7d9ca68b81e5bd8203962}\label{monitor_8cpp_a7265ec937de7d9ca68b81e5bd8203962}} 
+\index{monitor.\+cpp@{monitor.\+cpp}!send\+Message@{send\+Message}}
+\index{send\+Message@{send\+Message}!monitor.\+cpp@{monitor.\+cpp}}
+\subsubsection{\texorpdfstring{send\+Message()}{sendMessage()}}
+{\footnotesize\ttfamily int send\+Message (\begin{DoxyParamCaption}\item[{const char $\ast$}]{data,  }\item[{int}]{data\+Length }\end{DoxyParamCaption})}
+
+
+
+Definition at line 97 of file monitor.\+cpp.
+
+\mbox{\Hypertarget{monitor_8cpp_a04c8d7ed93b301fafe6dcc08d64ba21b}\label{monitor_8cpp_a04c8d7ed93b301fafe6dcc08d64ba21b}} 
+\index{monitor.\+cpp@{monitor.\+cpp}!server\+Receive@{server\+Receive}}
+\index{server\+Receive@{server\+Receive}!monitor.\+cpp@{monitor.\+cpp}}
+\subsubsection{\texorpdfstring{server\+Receive()}{serverReceive()}}
+{\footnotesize\ttfamily string server\+Receive (\begin{DoxyParamCaption}\item[{int}]{size }\end{DoxyParamCaption})}
+
+
+
+\subsection{Variable Documentation}
+\mbox{\Hypertarget{monitor_8cpp_acd1a03adb2455aaacbd886642518d569}\label{monitor_8cpp_acd1a03adb2455aaacbd886642518d569}} 
+\index{monitor.\+cpp@{monitor.\+cpp}!recsize@{recsize}}
+\index{recsize@{recsize}!monitor.\+cpp@{monitor.\+cpp}}
+\subsubsection{\texorpdfstring{recsize}{recsize}}
+{\footnotesize\ttfamily socklen\+\_\+t recsize = sizeof (\hyperlink{monitor_8cpp_a1f38ae3a59ce304779ebbca10378654a}{ssin})}
+
+
+
+Definition at line 33 of file monitor.\+cpp.
+
+\mbox{\Hypertarget{monitor_8cpp_a6e91849780a994f2adde299b33642829}\label{monitor_8cpp_a6e91849780a994f2adde299b33642829}} 
+\index{monitor.\+cpp@{monitor.\+cpp}!sock@{sock}}
+\index{sock@{sock}!monitor.\+cpp@{monitor.\+cpp}}
+\subsubsection{\texorpdfstring{sock}{sock}}
+{\footnotesize\ttfamily \hyperlink{monitor_8h_a8dc8083897335125630f1af5dafd5831}{S\+O\+C\+K\+ET} sock}
+
+
+
+Definition at line 32 of file monitor.\+cpp.
+
+\mbox{\Hypertarget{monitor_8cpp_a1f38ae3a59ce304779ebbca10378654a}\label{monitor_8cpp_a1f38ae3a59ce304779ebbca10378654a}} 
+\index{monitor.\+cpp@{monitor.\+cpp}!ssin@{ssin}}
+\index{ssin@{ssin}!monitor.\+cpp@{monitor.\+cpp}}
+\subsubsection{\texorpdfstring{ssin}{ssin}}
+{\footnotesize\ttfamily \hyperlink{monitor_8h_a29046dc0232f0e5c70adbc25090d77b8}{S\+O\+C\+K\+A\+D\+D\+R\+\_\+\+IN} ssin}
+
+
+
+Definition at line 31 of file monitor.\+cpp.
+

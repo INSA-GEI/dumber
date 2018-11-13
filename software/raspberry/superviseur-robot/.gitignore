@@ -1,5 +1,11 @@
-/.cproject
-/.project
-/Debug/
-/Release/
-/.settings/
+build/
+src.sav/
+cmake-build-debug/
+futur/
+build/
+CMakeFiles/
+
+Makefile
+*.cmake
+CMakeCache.txt
+

@@ -1,0 +1,4 @@
+<map id="image.h" name="image.h">
+<area shape="rect" id="node2" href="$monitor_8h.html" title="Library for sending message to monitor or receiving message. " alt="" coords="5,80,81,107"/>
+<area shape="rect" id="node3" href="$server_8h.html" title="Library for opening a TCP server, receiving data and sending message to monitor. " alt="" coords="106,80,175,107"/>
+</map>

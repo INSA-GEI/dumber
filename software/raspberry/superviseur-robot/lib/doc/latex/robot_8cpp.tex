@@ -1,0 +1,175 @@
+\hypertarget{robot_8cpp}{}\section{src/robot.cpp File Reference}
+\label{robot_8cpp}\index{src/robot.\+cpp@{src/robot.\+cpp}}
+{\ttfamily \#include \char`\"{}robot.\+h\char`\"{}}\newline
+Include dependency graph for robot.\+cpp\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{robot_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{robot_8cpp_a116eceb372bf4bda7e6a360286e762b1}{get\+Char} (char $\ast$c)
+\item 
+int \hyperlink{robot_8cpp_a2e1339c58b604c970f67096c7d143c2a}{read\+Serial} (char $\ast$msg)
+\item 
+char \hyperlink{robot_8cpp_ab87123df26d91967d4d7507ad10326ac}{check\+Sum\+GO} (char $\ast$msg)
+\item 
+int \hyperlink{robot_8cpp_adf885bd17005f841896acf2e49350db7}{receive\+Msg} (void)
+\item 
+int \hyperlink{robot_8cpp_ac9d64c6d05c20ae9fdb8c158e2ee7098}{send\+Cmd} (char cmd, const char $\ast$arg)
+\item 
+int \hyperlink{robot_8cpp_a9360e75fe324da14faaa87105771140e}{open\+\_\+communication\+\_\+robot} (const char $\ast$path)
+\begin{DoxyCompactList}\small\item\em Ouvre la communication avec le robot. \end{DoxyCompactList}\item 
+int \hyperlink{robot_8cpp_a3fbce7530a62f9287f8a3b85b9c7e4d7}{close\+\_\+communication\+\_\+robot} (void)
+\begin{DoxyCompactList}\small\item\em Ferme la communication avec le robot. \end{DoxyCompactList}\item 
+int \hyperlink{robot_8cpp_a68c01c5d6226d21fc0d141f681806677}{send\+\_\+command\+\_\+to\+\_\+robot} (char cmd, const char $\ast$arg)
+\begin{DoxyCompactList}\small\item\em Envoi une commande au robot et attends sa réponse. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{robot_8cpp_a6f8059414f0228f0256115e024eeed4b}{fd}
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{robot_8cpp_ab87123df26d91967d4d7507ad10326ac}\label{robot_8cpp_ab87123df26d91967d4d7507ad10326ac}} 
+\index{robot.\+cpp@{robot.\+cpp}!check\+Sum\+GO@{check\+Sum\+GO}}
+\index{check\+Sum\+GO@{check\+Sum\+GO}!robot.\+cpp@{robot.\+cpp}}
+\subsubsection{\texorpdfstring{check\+Sum\+G\+O()}{checkSumGO()}}
+{\footnotesize\ttfamily char check\+Sum\+GO (\begin{DoxyParamCaption}\item[{char $\ast$}]{msg }\end{DoxyParamCaption})}
+
+
+
+Definition at line 237 of file robot.\+cpp.
+
+\mbox{\Hypertarget{robot_8cpp_a3fbce7530a62f9287f8a3b85b9c7e4d7}\label{robot_8cpp_a3fbce7530a62f9287f8a3b85b9c7e4d7}} 
+\index{robot.\+cpp@{robot.\+cpp}!close\+\_\+communication\+\_\+robot@{close\+\_\+communication\+\_\+robot}}
+\index{close\+\_\+communication\+\_\+robot@{close\+\_\+communication\+\_\+robot}!robot.\+cpp@{robot.\+cpp}}
+\subsubsection{\texorpdfstring{close\+\_\+communication\+\_\+robot()}{close\_communication\_robot()}}
+{\footnotesize\ttfamily int close\+\_\+communication\+\_\+robot (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Ferme la communication avec le robot. 
+
+Ferme le descripteur de fichier du port serie contrôlant le robot.
+
+
+\begin{DoxyParams}{Parameters}
+{\em void} & aucun \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Retourne -\/1 en cas d\textquotesingle{}erreur ou 0 en cas de fermeture effectué 
+\end{DoxyReturn}
+
+
+Definition at line 64 of file robot.\+cpp.
+
+\mbox{\Hypertarget{robot_8cpp_a116eceb372bf4bda7e6a360286e762b1}\label{robot_8cpp_a116eceb372bf4bda7e6a360286e762b1}} 
+\index{robot.\+cpp@{robot.\+cpp}!get\+Char@{get\+Char}}
+\index{get\+Char@{get\+Char}!robot.\+cpp@{robot.\+cpp}}
+\subsubsection{\texorpdfstring{get\+Char()}{getChar()}}
+{\footnotesize\ttfamily int get\+Char (\begin{DoxyParamCaption}\item[{char $\ast$}]{c }\end{DoxyParamCaption})}
+
+
+
+Definition at line 199 of file robot.\+cpp.
+
+\mbox{\Hypertarget{robot_8cpp_a9360e75fe324da14faaa87105771140e}\label{robot_8cpp_a9360e75fe324da14faaa87105771140e}} 
+\index{robot.\+cpp@{robot.\+cpp}!open\+\_\+communication\+\_\+robot@{open\+\_\+communication\+\_\+robot}}
+\index{open\+\_\+communication\+\_\+robot@{open\+\_\+communication\+\_\+robot}!robot.\+cpp@{robot.\+cpp}}
+\subsubsection{\texorpdfstring{open\+\_\+communication\+\_\+robot()}{open\_communication\_robot()}}
+{\footnotesize\ttfamily int open\+\_\+communication\+\_\+robot (\begin{DoxyParamCaption}\item[{const char $\ast$}]{path = {\ttfamily \hyperlink{robot_8h_a32c8768c18732c59b503f8ee7515a693}{serial\+Port}} }\end{DoxyParamCaption})}
+
+
+
+Ouvre la communication avec le robot. 
+
+Ouvre le serial port passé en paramétre. Par defaut cette fonction ouvre le port tty\+SO connecté au module xbee.
+
+
+\begin{DoxyParams}{Parameters}
+{\em $\ast$path} & chaine de caractère indiquant le path du port serie à ouvrir. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Return -\/1 si l\textquotesingle{}ouverture c\textquotesingle{}est mal passé et 0 si le port est ouvert. 
+\end{DoxyReturn}
+
+
+Definition at line 36 of file robot.\+cpp.
+
+\mbox{\Hypertarget{robot_8cpp_a2e1339c58b604c970f67096c7d143c2a}\label{robot_8cpp_a2e1339c58b604c970f67096c7d143c2a}} 
+\index{robot.\+cpp@{robot.\+cpp}!read\+Serial@{read\+Serial}}
+\index{read\+Serial@{read\+Serial}!robot.\+cpp@{robot.\+cpp}}
+\subsubsection{\texorpdfstring{read\+Serial()}{readSerial()}}
+{\footnotesize\ttfamily int read\+Serial (\begin{DoxyParamCaption}\item[{char $\ast$}]{msg }\end{DoxyParamCaption})}
+
+
+
+Definition at line 216 of file robot.\+cpp.
+
+\mbox{\Hypertarget{robot_8cpp_adf885bd17005f841896acf2e49350db7}\label{robot_8cpp_adf885bd17005f841896acf2e49350db7}} 
+\index{robot.\+cpp@{robot.\+cpp}!receive\+Msg@{receive\+Msg}}
+\index{receive\+Msg@{receive\+Msg}!robot.\+cpp@{robot.\+cpp}}
+\subsubsection{\texorpdfstring{receive\+Msg()}{receiveMsg()}}
+{\footnotesize\ttfamily int receive\+Msg (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Definition at line 168 of file robot.\+cpp.
+
+\mbox{\Hypertarget{robot_8cpp_a68c01c5d6226d21fc0d141f681806677}\label{robot_8cpp_a68c01c5d6226d21fc0d141f681806677}} 
+\index{robot.\+cpp@{robot.\+cpp}!send\+\_\+command\+\_\+to\+\_\+robot@{send\+\_\+command\+\_\+to\+\_\+robot}}
+\index{send\+\_\+command\+\_\+to\+\_\+robot@{send\+\_\+command\+\_\+to\+\_\+robot}!robot.\+cpp@{robot.\+cpp}}
+\subsubsection{\texorpdfstring{send\+\_\+command\+\_\+to\+\_\+robot()}{send\_command\_to\_robot()}}
+{\footnotesize\ttfamily int send\+\_\+command\+\_\+to\+\_\+robot (\begin{DoxyParamCaption}\item[{char}]{cmd,  }\item[{const char $\ast$}]{arg = {\ttfamily NULL} }\end{DoxyParamCaption})}
+
+
+
+Envoi une commande au robot et attends sa réponse. 
+
+Envoi une commande au robot en ajoutant le checksum et lis la réponse du robot en verifiant le checksum. Le premier paramétre {\itshape cmd} correspond au type de commande ex \+: P\+I\+NG, S\+E\+T\+M\+O\+VE ... Le second paramétre {\itshape $\ast$arg} correspond aux arguments à la commande ex \+: S\+E\+T\+M\+O\+VE, \char`\"{}100\char`\"{} La fonction retourne un code confirmation transmise par le robot (R\+O\+B\+O\+T\+\_\+\+C\+H\+E\+K\+S\+UM, R\+O\+B\+O\+T\+\_\+\+E\+R\+R\+OR, R\+O\+B\+O\+T\+\_\+\+T\+I\+M\+E\+D\+\_\+\+O\+UT, R\+O\+B\+O\+T\+\_\+\+OK, R\+O\+B\+O\+T\+\_\+\+U\+K\+N\+O\+W\+\_\+\+C\+MD)
+
+
+\begin{DoxyParams}{Parameters}
+{\em cmd} & Entête de la commande \\
+\hline
+{\em $\ast$arg} & Argument de la commande \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+retourne un code confirmation. 
+\end{DoxyReturn}
+
+
+Definition at line 74 of file robot.\+cpp.
+
+\mbox{\Hypertarget{robot_8cpp_ac9d64c6d05c20ae9fdb8c158e2ee7098}\label{robot_8cpp_ac9d64c6d05c20ae9fdb8c158e2ee7098}} 
+\index{robot.\+cpp@{robot.\+cpp}!send\+Cmd@{send\+Cmd}}
+\index{send\+Cmd@{send\+Cmd}!robot.\+cpp@{robot.\+cpp}}
+\subsubsection{\texorpdfstring{send\+Cmd()}{sendCmd()}}
+{\footnotesize\ttfamily int send\+Cmd (\begin{DoxyParamCaption}\item[{char}]{cmd,  }\item[{const char $\ast$}]{arg }\end{DoxyParamCaption})}
+
+
+
+Definition at line 138 of file robot.\+cpp.
+
+
+
+\subsection{Variable Documentation}
+\mbox{\Hypertarget{robot_8cpp_a6f8059414f0228f0256115e024eeed4b}\label{robot_8cpp_a6f8059414f0228f0256115e024eeed4b}} 
+\index{robot.\+cpp@{robot.\+cpp}!fd@{fd}}
+\index{fd@{fd}!robot.\+cpp@{robot.\+cpp}}
+\subsubsection{\texorpdfstring{fd}{fd}}
+{\footnotesize\ttfamily int fd}
+
+
+
+Definition at line 28 of file robot.\+cpp.
+

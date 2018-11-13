@@ -1,0 +1,347 @@
+\section{monitor.\+Client Class Reference}
+\label{classmonitor_1_1_client}\index{monitor.\+Client@{monitor.\+Client}}
+
+
+Static class for T\+CP client  
+
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+delegate void \textbf{ Read\+Event} (string msg, byte[$\,$] \textbf{ buffer})
+\begin{DoxyCompactList}\small\item\em Callback to send received message to upper level \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static bool \textbf{ Open} (string host)
+\begin{DoxyCompactList}\small\item\em Open connection to server \char`\"{}host\char`\"{}, on default port number. \end{DoxyCompactList}\item 
+static bool \textbf{ Open} (string host, int port)
+\begin{DoxyCompactList}\small\item\em Open connection to server \char`\"{}host\char`\"{}, with port number \char`\"{}port\char`\"{} \end{DoxyCompactList}\item 
+static void \textbf{ Close} ()
+\begin{DoxyCompactList}\small\item\em Close connection to server \end{DoxyCompactList}\item 
+static void \textbf{ Write} (string mes)
+\begin{DoxyCompactList}\small\item\em Write a string to server \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+const string \textbf{ default\+IP} = \char`\"{}localhost\char`\"{}
+\begin{DoxyCompactList}\small\item\em Default server name \end{DoxyCompactList}\item 
+const int \textbf{ default\+Port} = 4500
+\begin{DoxyCompactList}\small\item\em Default server port number \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static \textbf{ Read\+Event} \textbf{ read\+Event} = null
+\end{DoxyCompactItemize}
+\subsection*{Static Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \textbf{ Read\+Callback} (I\+Async\+Result ar)
+\begin{DoxyCompactList}\small\item\em Callback call by stream.\+Begin\+Read after reception of new\+Length data \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+const int \textbf{ Buffer\+Max\+Size} = 512
+\begin{DoxyCompactList}\small\item\em Size of internal buffer used when reading data from server \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static Tcp\+Client \textbf{ client} = null
+\begin{DoxyCompactList}\small\item\em Tcp client object \end{DoxyCompactList}\item 
+static Network\+Stream \textbf{ stream} = null
+\begin{DoxyCompactList}\small\item\em Stream object used for communication \end{DoxyCompactList}\item 
+static byte [$\,$] \textbf{ buffer} = new byte[\textbf{ Buffer\+Max\+Size}]
+\begin{DoxyCompactList}\small\item\em Internal buffer used when reading data from server \end{DoxyCompactList}\item 
+static byte [$\,$] \textbf{ receive\+Buffer}
+\begin{DoxyCompactList}\small\item\em buffer containing received message from T\+CP server Used to concatenate internal buffers into one \end{DoxyCompactList}\item 
+static int \textbf{ initial\+Receive\+Buffer\+Index} = 0
+\item 
+static String\+Builder \textbf{ message} = new String\+Builder()
+\begin{DoxyCompactList}\small\item\em String containing received message from tcp server \end{DoxyCompactList}\item 
+static int \textbf{ new\+Length} = 1
+\item 
+static int \textbf{ packet\+Counter} = 0
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Static class for T\+CP client 
+
+
+
+Definition at line 31 of file Client.\+cs.
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\label{classmonitor_1_1_client_ae6c0cbe19d622b008fd1f6d01d9cb315}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!Close@{Close}}
+\index{Close@{Close}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{Close()}
+{\footnotesize\ttfamily static void monitor.\+Client.\+Close (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Close connection to server 
+
+
+
+Definition at line 141 of file Client.\+cs.
+
+\mbox{\label{classmonitor_1_1_client_af802cd428aa08b9604e2246f11e1fe61}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!Open@{Open}}
+\index{Open@{Open}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{Open()\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily static bool monitor.\+Client.\+Open (\begin{DoxyParamCaption}\item[{string}]{host }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Open connection to server \char`\"{}host\char`\"{}, on default port number. 
+
+\begin{DoxyReturn}{Returns}
+true if connection succeded, false otherwise
+\end{DoxyReturn}
+
+\begin{DoxyParams}{Parameters}
+{\em host} & Hostname to connect to\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 89 of file Client.\+cs.
+
+\mbox{\label{classmonitor_1_1_client_aee6f8f594a9496600b78c37d6da457d4}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!Open@{Open}}
+\index{Open@{Open}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{Open()\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily static bool monitor.\+Client.\+Open (\begin{DoxyParamCaption}\item[{string}]{host,  }\item[{int}]{port }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Open connection to server \char`\"{}host\char`\"{}, with port number \char`\"{}port\char`\"{} 
+
+\begin{DoxyReturn}{Returns}
+true if connection succeded, false otherwise
+\end{DoxyReturn}
+
+\begin{DoxyParams}{Parameters}
+{\em host} & Hostname to connect to\\
+\hline
+{\em port} & Port number for connection\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 100 of file Client.\+cs.
+
+\mbox{\label{classmonitor_1_1_client_a8dd2eb26c164d0f566dd6c679ba340e0}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!Read\+Callback@{Read\+Callback}}
+\index{Read\+Callback@{Read\+Callback}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{Read\+Callback()}
+{\footnotesize\ttfamily static void monitor.\+Client.\+Read\+Callback (\begin{DoxyParamCaption}\item[{I\+Async\+Result}]{ar }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [private]}}
+
+
+
+Callback call by stream.\+Begin\+Read after reception of new\+Length data 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ar} & Not sure of what is it, but needed for terminate reading\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 151 of file Client.\+cs.
+
+\mbox{\label{classmonitor_1_1_client_ae85f4aa567a41488d5c65e470ae15378}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!Read\+Event@{Read\+Event}}
+\index{Read\+Event@{Read\+Event}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{Read\+Event()}
+{\footnotesize\ttfamily delegate void monitor.\+Client.\+Read\+Event (\begin{DoxyParamCaption}\item[{string}]{msg,  }\item[{byte [$\,$]}]{buffer }\end{DoxyParamCaption})}
+
+
+
+Callback to send received message to upper level 
+
+\mbox{\label{classmonitor_1_1_client_a081413295e7a96662b39b2ddec854b02}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!Write@{Write}}
+\index{Write@{Write}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{Write()}
+{\footnotesize\ttfamily static void monitor.\+Client.\+Write (\begin{DoxyParamCaption}\item[{string}]{mes }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Write a string to server 
+
+\begin{DoxyReturn}{Returns}
+Nothing
+\end{DoxyReturn}
+
+\begin{DoxyParams}{Parameters}
+{\em mes} & Message to send to server\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 219 of file Client.\+cs.
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\label{classmonitor_1_1_client_abd5c33a23e0fab7b369b59ac296c7762}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!buffer@{buffer}}
+\index{buffer@{buffer}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{buffer}
+{\footnotesize\ttfamily byte [$\,$] monitor.\+Client.\+buffer = new byte[\textbf{ Buffer\+Max\+Size}]\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [private]}}
+
+
+
+Internal buffer used when reading data from server 
+
+
+
+Definition at line 61 of file Client.\+cs.
+
+\mbox{\label{classmonitor_1_1_client_acbc4cae14536eccb5297aacdadb84f29}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!Buffer\+Max\+Size@{Buffer\+Max\+Size}}
+\index{Buffer\+Max\+Size@{Buffer\+Max\+Size}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{Buffer\+Max\+Size}
+{\footnotesize\ttfamily const int monitor.\+Client.\+Buffer\+Max\+Size = 512\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Size of internal buffer used when reading data from server 
+
+
+
+Definition at line 56 of file Client.\+cs.
+
+\mbox{\label{classmonitor_1_1_client_a4867b48ebfa930a80662c552f2911430}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!client@{client}}
+\index{client@{client}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{client}
+{\footnotesize\ttfamily Tcp\+Client monitor.\+Client.\+client = null\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [private]}}
+
+
+
+Tcp client object 
+
+
+
+Definition at line 46 of file Client.\+cs.
+
+\mbox{\label{classmonitor_1_1_client_a326a20fe68a86757e16a6e45b8012640}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!default\+IP@{default\+IP}}
+\index{default\+IP@{default\+IP}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{default\+IP}
+{\footnotesize\ttfamily const string monitor.\+Client.\+default\+IP = \char`\"{}localhost\char`\"{}}
+
+
+
+Default server name 
+
+
+
+Definition at line 36 of file Client.\+cs.
+
+\mbox{\label{classmonitor_1_1_client_ad0a9bfc361ccef7443625f399e67f84a}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!default\+Port@{default\+Port}}
+\index{default\+Port@{default\+Port}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{default\+Port}
+{\footnotesize\ttfamily const int monitor.\+Client.\+default\+Port = 4500}
+
+
+
+Default server port number 
+
+
+
+Definition at line 41 of file Client.\+cs.
+
+\mbox{\label{classmonitor_1_1_client_afbbf4cf14d1a11747f6103e726dee77e}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!initial\+Receive\+Buffer\+Index@{initial\+Receive\+Buffer\+Index}}
+\index{initial\+Receive\+Buffer\+Index@{initial\+Receive\+Buffer\+Index}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{initial\+Receive\+Buffer\+Index}
+{\footnotesize\ttfamily int monitor.\+Client.\+initial\+Receive\+Buffer\+Index = 0\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [private]}}
+
+
+
+Definition at line 69 of file Client.\+cs.
+
+\mbox{\label{classmonitor_1_1_client_a2ddb7073c4bf8a42c231939d5c21d68e}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!message@{message}}
+\index{message@{message}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{message}
+{\footnotesize\ttfamily String\+Builder monitor.\+Client.\+message = new String\+Builder()\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [private]}}
+
+
+
+String containing received message from tcp server 
+
+
+
+Definition at line 74 of file Client.\+cs.
+
+\mbox{\label{classmonitor_1_1_client_a7083940b8fea9df2b080e3844549e805}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!new\+Length@{new\+Length}}
+\index{new\+Length@{new\+Length}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{new\+Length}
+{\footnotesize\ttfamily int monitor.\+Client.\+new\+Length = 1\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [private]}}
+
+
+
+Definition at line 75 of file Client.\+cs.
+
+\mbox{\label{classmonitor_1_1_client_a7eb13840c83beb2ab191cae3ba3210c9}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!packet\+Counter@{packet\+Counter}}
+\index{packet\+Counter@{packet\+Counter}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{packet\+Counter}
+{\footnotesize\ttfamily int monitor.\+Client.\+packet\+Counter = 0\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [private]}}
+
+
+
+Definition at line 76 of file Client.\+cs.
+
+\mbox{\label{classmonitor_1_1_client_a01cb2a551d81fd82d2f7015e177f0f18}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!read\+Event@{read\+Event}}
+\index{read\+Event@{read\+Event}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{read\+Event}
+{\footnotesize\ttfamily \textbf{ Read\+Event} monitor.\+Client.\+read\+Event = null\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Definition at line 82 of file Client.\+cs.
+
+\mbox{\label{classmonitor_1_1_client_aade32a6043e0dc629509f0e1c0112a24}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!receive\+Buffer@{receive\+Buffer}}
+\index{receive\+Buffer@{receive\+Buffer}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{receive\+Buffer}
+{\footnotesize\ttfamily byte [$\,$] monitor.\+Client.\+receive\+Buffer\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [private]}}
+
+
+
+buffer containing received message from T\+CP server Used to concatenate internal buffers into one 
+
+
+
+Definition at line 67 of file Client.\+cs.
+
+\mbox{\label{classmonitor_1_1_client_a8de2a9e4fe2c2e896849ddd33d80d759}} 
+\index{monitor\+::\+Client@{monitor\+::\+Client}!stream@{stream}}
+\index{stream@{stream}!monitor\+::\+Client@{monitor\+::\+Client}}
+\subsubsection{stream}
+{\footnotesize\ttfamily Network\+Stream monitor.\+Client.\+stream = null\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [private]}}
+
+
+
+Stream object used for communication 
+
+
+
+Definition at line 51 of file Client.\+cs.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\textbf{ Client.\+cs}\end{DoxyCompactItemize}

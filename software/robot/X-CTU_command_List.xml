@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<data>
+  <loop>false</loop>
+  <repeat_times>1</repeat_times>
+  <repeat_period>500</repeat_period>
+  <packets_list>
+    <packet name="Move">
+      <payload>4D3D313030410D</payload>
+    </packet>
+    <packet name="Turn">
+      <payload>543D313030580D</payload>
+    </packet>
+    <packet name="Ping">
+      <payload>70700D</payload>
+    </packet>
+    <packet name="Start without watchdog">
+      <payload>75750D</payload>
+    </packet>
+    <packet name="GetVersion">
+      <payload>56560D</payload>
+    </packet>
+    <packet name="Reset">
+      <payload>72720D</payload>
+    </packet>
+    <packet name="Start With Wtachdog">
+      <payload>57570D</payload>
+    </packet>
+    <packet name="Reset Watchdog">
+      <payload>77770D</payload>
+    </packet>
+    <packet name="GetState">
+      <payload>62620D</payload>
+    </packet>
+    <packet name="LongMove">
+      <payload>4D3D31303030710D</payload>
+    </packet>
+    <packet name="GetBattery">
+      <payload>76760D</payload>
+    </packet>
+    <packet name="PowerOff">
+      <payload>7A7A0D</payload>
+    </packet>
+  </packets_list>
+</data>

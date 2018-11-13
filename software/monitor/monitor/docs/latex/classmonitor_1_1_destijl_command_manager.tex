@@ -1,0 +1,730 @@
+\section{monitor.\+Destijl\+Command\+Manager Class Reference}
+\label{classmonitor_1_1_destijl_command_manager}\index{monitor.\+Destijl\+Command\+Manager@{monitor.\+Destijl\+Command\+Manager}}
+
+
+Specialization class for command manager, which implemnent destijl protocol between monitor and server  
+
+
+
+
+Collaboration diagram for monitor.\+Destijl\+Command\+Manager\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=245pt]{classmonitor_1_1_destijl_command_manager__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+enum \textbf{ Command\+Status} \{ \newline
+\textbf{ Command\+Status.\+Success}, 
+\textbf{ Command\+Status.\+Rejected}, 
+\textbf{ Command\+Status.\+Invalid\+Answer}, 
+\textbf{ Command\+Status.\+Busy}, 
+\newline
+\textbf{ Command\+Status.\+Communication\+Lost\+With\+Robot}, 
+\textbf{ Command\+Status.\+Communication\+Lost\+With\+Server}
+ \}\begin{DoxyCompactList}\small\item\em List of available return status \end{DoxyCompactList}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+delegate void \textbf{ Command\+Received\+Event} (string header, string data, byte[$\,$] buffer)
+\begin{DoxyCompactList}\small\item\em Callback for sending received data to application level \end{DoxyCompactList}\item 
+\textbf{ Destijl\+Command\+Manager} (\textbf{ Command\+Received\+Event} callback)
+\begin{DoxyCompactList}\small\item\em Initializes a new instance of the \doxyref{monitor.\+Destijl\+Command\+Manager}{p.}{classmonitor_1_1_destijl_command_manager} class. \end{DoxyCompactList}\item 
+bool \textbf{ Open} (string hostname)
+\begin{DoxyCompactList}\small\item\em Open the specified hostname server, using default port number. \end{DoxyCompactList}\item 
+bool \textbf{ Open} (string hostname, int port)
+\begin{DoxyCompactList}\small\item\em Open connection to server \char`\"{}host\char`\"{}, with port number \char`\"{}port\char`\"{} \end{DoxyCompactList}\item 
+void \textbf{ Close} ()
+\begin{DoxyCompactList}\small\item\em Close connection to server \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Robot\+Open\+Com} ()
+\begin{DoxyCompactList}\small\item\em Open communication with robot and wait acknowledge \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Robot\+Close\+Com} ()
+\begin{DoxyCompactList}\small\item\em Close communication with robot and wait acknowledge \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Robot\+Ping} ()
+\begin{DoxyCompactList}\small\item\em Ping the robot. \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Robot\+Reset} ()
+\begin{DoxyCompactList}\small\item\em Reset robot and let it in idle mode \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Robot\+Start\+With\+Watchdog} ()
+\begin{DoxyCompactList}\small\item\em Start robot, enabling watchdog \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Robot\+Start\+Without\+Watchdog} ()
+\begin{DoxyCompactList}\small\item\em Start robot, without enabling watchdog \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Robot\+Move} (int distance)
+\begin{DoxyCompactList}\small\item\em Move robot forward or backward, for a distance expressed in millimeter \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Robot\+Turn} (int angle)
+\begin{DoxyCompactList}\small\item\em Make robot turn left or right, for a given angle \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Robot\+Get\+Battery} ()
+\begin{DoxyCompactList}\small\item\em Request robot battery level \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Robot\+Get\+Version} (out string version)
+\begin{DoxyCompactList}\small\item\em Request robot firmware version \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Robot\+Power\+Off} ()
+\begin{DoxyCompactList}\small\item\em Power off robot \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Camera\+Open} ()
+\begin{DoxyCompactList}\small\item\em Open camera on remote device \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Camera\+Close} ()
+\begin{DoxyCompactList}\small\item\em Close camera on remote device \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Camera\+Ask\+Arena} ()
+\begin{DoxyCompactList}\small\item\em Request still image of detected arena \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Camera\+Arena\+Confirm} ()
+\begin{DoxyCompactList}\small\item\em Confirm arena detection (after requesting image of detected arena, using Camera\+Ask\+Arena \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Camera\+Arena\+Infirm} ()
+\begin{DoxyCompactList}\small\item\em Reject arena detected (after requesting image of detected arena, using Camera\+Ask\+Arena \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Camera\+Compute\+Position} ()
+\begin{DoxyCompactList}\small\item\em Request robot position computing \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Camera\+Stop\+Compute\+Position} ()
+\begin{DoxyCompactList}\small\item\em Stop robot position computing \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\textbf{ Command\+Received\+Event} \textbf{ command\+Received\+Event} = null
+\item 
+double \textbf{ timeout} = 100
+\begin{DoxyCompactList}\small\item\em Timeout used for command with acknowledge \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\textbf{ $\sim$\+Destijl\+Command\+Manager} ()
+\begin{DoxyCompactList}\small\item\em Releases unmanaged resources and performs other cleanup operations before the \doxyref{monitor.\+Destijl\+Command\+Manager}{p.}{classmonitor_1_1_destijl_command_manager} is reclaimed by garbage collection. \end{DoxyCompactList}\item 
+void \textbf{ On\+Command\+Received} (string msg, byte[$\,$] buffer)
+\begin{DoxyCompactList}\small\item\em Callback used for receiving data from lower layer (\doxyref{Command\+Manager}{p.}{classmonitor_1_1_command_manager} class) \end{DoxyCompactList}\item 
+string \textbf{ Create\+Command} (string header, string data)
+\begin{DoxyCompactList}\small\item\em Creates the command to send to server, based on header and data provided \end{DoxyCompactList}\item 
+\textbf{ Command\+Status} \textbf{ Decode\+Status} (\textbf{ Command\+Manager.\+Command\+Manager\+Status} local\+Status, string answer)
+\begin{DoxyCompactList}\small\item\em Provide \doxyref{Destijl\+Command\+Manager.\+Command\+Status}{p.}{classmonitor_1_1_destijl_command_manager_a9cb23e7493a32872ac808f3b63200fb0} based on status received by \doxyref{Command\+Manager.\+Send\+Command}{p.}{classmonitor_1_1_command_manager_a3cd1f2303e47e5148fd3e927a7957363} and answer string \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\textbf{ Command\+Manager} \textbf{ command\+Manager} = null
+\begin{DoxyCompactList}\small\item\em Command Manager object \end{DoxyCompactList}\item 
+string \textbf{ received\+Header} = null
+\begin{DoxyCompactList}\small\item\em Part of received message corresponding to command header \end{DoxyCompactList}\item 
+string \textbf{ received\+Data} = null
+\begin{DoxyCompactList}\small\item\em Part of received message corresponding to command data \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Specialization class for command manager, which implemnent destijl protocol between monitor and server 
+
+
+
+Definition at line 76 of file Destijl\+Command\+Manager.\+cs.
+
+
+
+\subsection{Member Enumeration Documentation}
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a9cb23e7493a32872ac808f3b63200fb0}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Command\+Status@{Command\+Status}}
+\index{Command\+Status@{Command\+Status}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Command\+Status}
+{\footnotesize\ttfamily enum \textbf{ monitor.\+Destijl\+Command\+Manager.\+Command\+Status}\hspace{0.3cm}{\ttfamily [strong]}}
+
+
+
+List of available return status 
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Success@{Success}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Success@{Success}}}\mbox{\label{classmonitor_1_1_destijl_command_manager_a9cb23e7493a32872ac808f3b63200fb0a505a83f220c02df2f85c3810cd9ceb38}} 
+Success&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Rejected@{Rejected}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Rejected@{Rejected}}}\mbox{\label{classmonitor_1_1_destijl_command_manager_a9cb23e7493a32872ac808f3b63200fb0ad37b1f6c0512e2118cee17fea015b699}} 
+Rejected&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Invalid\+Answer@{Invalid\+Answer}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Invalid\+Answer@{Invalid\+Answer}}}\mbox{\label{classmonitor_1_1_destijl_command_manager_a9cb23e7493a32872ac808f3b63200fb0ad410f0b6f9dc2f2b271f9cf2fc78eb34}} 
+Invalid\+Answer&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Busy@{Busy}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Busy@{Busy}}}\mbox{\label{classmonitor_1_1_destijl_command_manager_a9cb23e7493a32872ac808f3b63200fb0ad8a942ef2b04672adfafef0ad817a407}} 
+Busy&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Communication\+Lost\+With\+Robot@{Communication\+Lost\+With\+Robot}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Communication\+Lost\+With\+Robot@{Communication\+Lost\+With\+Robot}}}\mbox{\label{classmonitor_1_1_destijl_command_manager_a9cb23e7493a32872ac808f3b63200fb0a37039bce065223d632b6974daa612656}} 
+Communication\+Lost\+With\+Robot&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Communication\+Lost\+With\+Server@{Communication\+Lost\+With\+Server}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Communication\+Lost\+With\+Server@{Communication\+Lost\+With\+Server}}}\mbox{\label{classmonitor_1_1_destijl_command_manager_a9cb23e7493a32872ac808f3b63200fb0ae7009a5c717d5d4d361433a9915e697e}} 
+Communication\+Lost\+With\+Server&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+Definition at line 107 of file Destijl\+Command\+Manager.\+cs.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a78bf0be922afbd9c5f8f4115fa83ad47}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Destijl\+Command\+Manager@{Destijl\+Command\+Manager}}
+\index{Destijl\+Command\+Manager@{Destijl\+Command\+Manager}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Destijl\+Command\+Manager()}
+{\footnotesize\ttfamily monitor.\+Destijl\+Command\+Manager.\+Destijl\+Command\+Manager (\begin{DoxyParamCaption}\item[{\textbf{ Command\+Received\+Event}}]{callback }\end{DoxyParamCaption})}
+
+
+
+Initializes a new instance of the \doxyref{monitor.\+Destijl\+Command\+Manager}{p.}{classmonitor_1_1_destijl_command_manager} class. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em callback} & Callback reference for reception of data\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 121 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_abc51dc980d7ba7e59a571e579cb626b9}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!````~Destijl\+Command\+Manager@{$\sim$\+Destijl\+Command\+Manager}}
+\index{````~Destijl\+Command\+Manager@{$\sim$\+Destijl\+Command\+Manager}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{$\sim$\+Destijl\+Command\+Manager()}
+{\footnotesize\ttfamily monitor.\+Destijl\+Command\+Manager.$\sim$\+Destijl\+Command\+Manager (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Releases unmanaged resources and performs other cleanup operations before the \doxyref{monitor.\+Destijl\+Command\+Manager}{p.}{classmonitor_1_1_destijl_command_manager} is reclaimed by garbage collection. 
+
+
+
+Definition at line 131 of file Destijl\+Command\+Manager.\+cs.
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\label{classmonitor_1_1_destijl_command_manager_ac58ed9c19d8c9ed547c35fb96a983668}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Camera\+Arena\+Confirm@{Camera\+Arena\+Confirm}}
+\index{Camera\+Arena\+Confirm@{Camera\+Arena\+Confirm}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Camera\+Arena\+Confirm()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Camera\+Arena\+Confirm (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Confirm arena detection (after requesting image of detected arena, using Camera\+Ask\+Arena 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+
+Definition at line 492 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a614be7a565a3a10308f20b073b40383f}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Camera\+Arena\+Infirm@{Camera\+Arena\+Infirm}}
+\index{Camera\+Arena\+Infirm@{Camera\+Arena\+Infirm}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Camera\+Arena\+Infirm()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Camera\+Arena\+Infirm (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Reject arena detected (after requesting image of detected arena, using Camera\+Ask\+Arena 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+
+Definition at line 509 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a8d178480fc09d474760eae995c9aa096}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Camera\+Ask\+Arena@{Camera\+Ask\+Arena}}
+\index{Camera\+Ask\+Arena@{Camera\+Ask\+Arena}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Camera\+Ask\+Arena()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Camera\+Ask\+Arena (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Request still image of detected arena 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+
+Definition at line 475 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a94b085d9de512cd7e80bcefd516d460c}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Camera\+Close@{Camera\+Close}}
+\index{Camera\+Close@{Camera\+Close}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Camera\+Close()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Camera\+Close (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Close camera on remote device 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+
+Definition at line 458 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_ad04df7759d2698334a410fe32b78e21e}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Camera\+Compute\+Position@{Camera\+Compute\+Position}}
+\index{Camera\+Compute\+Position@{Camera\+Compute\+Position}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Camera\+Compute\+Position()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Camera\+Compute\+Position (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Request robot position computing 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+
+Definition at line 526 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a292d7e2961ff31a80d9abf79b7b41126}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Camera\+Open@{Camera\+Open}}
+\index{Camera\+Open@{Camera\+Open}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Camera\+Open()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Camera\+Open (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Open camera on remote device 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+
+Definition at line 441 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a928f987f8f5f12135614678585ab2726}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Camera\+Stop\+Compute\+Position@{Camera\+Stop\+Compute\+Position}}
+\index{Camera\+Stop\+Compute\+Position@{Camera\+Stop\+Compute\+Position}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Camera\+Stop\+Compute\+Position()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Camera\+Stop\+Compute\+Position (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Stop robot position computing 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+
+Definition at line 543 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_af1f57d8e3e980322e37da2cd3b61d1d7}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Close@{Close}}
+\index{Close@{Close}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Close()}
+{\footnotesize\ttfamily void monitor.\+Destijl\+Command\+Manager.\+Close (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Close connection to server 
+
+
+
+Definition at line 183 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_acc08ece6a89e842188364226299b3d43}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Command\+Received\+Event@{Command\+Received\+Event}}
+\index{Command\+Received\+Event@{Command\+Received\+Event}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Command\+Received\+Event()}
+{\footnotesize\ttfamily delegate void monitor.\+Destijl\+Command\+Manager.\+Command\+Received\+Event (\begin{DoxyParamCaption}\item[{string}]{header,  }\item[{string}]{data,  }\item[{byte [$\,$]}]{buffer }\end{DoxyParamCaption})}
+
+
+
+Callback for sending received data to application level 
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a47eb72ec1ae43505966bc5cf09c79e58}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Create\+Command@{Create\+Command}}
+\index{Create\+Command@{Create\+Command}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Create\+Command()}
+{\footnotesize\ttfamily string monitor.\+Destijl\+Command\+Manager.\+Create\+Command (\begin{DoxyParamCaption}\item[{string}]{header,  }\item[{string}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Creates the command to send to server, based on header and data provided 
+
+\begin{DoxyReturn}{Returns}
+The command string
+\end{DoxyReturn}
+
+\begin{DoxyParams}{Parameters}
+{\em header} & Header part of the command\\
+\hline
+{\em data} & Data part of the command\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 194 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a00c3fb9f163c4d9025b356a5a7e74012}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Decode\+Status@{Decode\+Status}}
+\index{Decode\+Status@{Decode\+Status}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Decode\+Status()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Decode\+Status (\begin{DoxyParamCaption}\item[{\textbf{ Command\+Manager.\+Command\+Manager\+Status}}]{local\+Status,  }\item[{string}]{answer }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Provide \doxyref{Destijl\+Command\+Manager.\+Command\+Status}{p.}{classmonitor_1_1_destijl_command_manager_a9cb23e7493a32872ac808f3b63200fb0} based on status received by \doxyref{Command\+Manager.\+Send\+Command}{p.}{classmonitor_1_1_command_manager_a3cd1f2303e47e5148fd3e927a7957363} and answer string 
+
+\begin{DoxyReturn}{Returns}
+Status compatible with \doxyref{Destijl\+Command\+Manager.\+Command\+Status}{p.}{classmonitor_1_1_destijl_command_manager_a9cb23e7493a32872ac808f3b63200fb0} type
+\end{DoxyReturn}
+
+\begin{DoxyParams}{Parameters}
+{\em local\+Status} & Status provided by \doxyref{Command\+Manager.\+Send\+Command}{p.}{classmonitor_1_1_command_manager_a3cd1f2303e47e5148fd3e927a7957363}\\
+\hline
+{\em answer} & Answer provided by \doxyref{Command\+Manager.\+Send\+Command}{p.}{classmonitor_1_1_command_manager_a3cd1f2303e47e5148fd3e927a7957363}\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 205 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_ab83dbda4196240c242a5ac101901bb19}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!On\+Command\+Received@{On\+Command\+Received}}
+\index{On\+Command\+Received@{On\+Command\+Received}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{On\+Command\+Received()}
+{\footnotesize\ttfamily void monitor.\+Destijl\+Command\+Manager.\+On\+Command\+Received (\begin{DoxyParamCaption}\item[{string}]{msg,  }\item[{byte [$\,$]}]{buffer }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Callback used for receiving data from lower layer (\doxyref{Command\+Manager}{p.}{classmonitor_1_1_command_manager} class) 
+
+
+\begin{DoxyParams}{Parameters}
+{\em msg} & String containing received message\\
+\hline
+{\em buffer} & Raw buffer to be used when data are not in ascii format (image for example)\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 141 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a5dd6b75386a554c2f026eee787477bb0}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Open@{Open}}
+\index{Open@{Open}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Open()\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily bool monitor.\+Destijl\+Command\+Manager.\+Open (\begin{DoxyParamCaption}\item[{string}]{hostname }\end{DoxyParamCaption})}
+
+
+
+Open the specified hostname server, using default port number. 
+
+\begin{DoxyReturn}{Returns}
+true if connection succeded, false otherwise
+\end{DoxyReturn}
+
+\begin{DoxyParams}{Parameters}
+{\em hostname} & Hostname to connect to\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 163 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a842300511efb20783c271764ee0e3336}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Open@{Open}}
+\index{Open@{Open}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Open()\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily bool monitor.\+Destijl\+Command\+Manager.\+Open (\begin{DoxyParamCaption}\item[{string}]{hostname,  }\item[{int}]{port }\end{DoxyParamCaption})}
+
+
+
+Open connection to server \char`\"{}host\char`\"{}, with port number \char`\"{}port\char`\"{} 
+
+\begin{DoxyReturn}{Returns}
+true if connection succeded, false otherwise
+\end{DoxyReturn}
+
+\begin{DoxyParams}{Parameters}
+{\em hostname} & Hostname to connect to\\
+\hline
+{\em port} & Port number for connection\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 174 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a0139bec493c965670226381f2ba63a23}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Robot\+Close\+Com@{Robot\+Close\+Com}}
+\index{Robot\+Close\+Com@{Robot\+Close\+Com}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Robot\+Close\+Com()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Robot\+Close\+Com (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Close communication with robot and wait acknowledge 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+
+Definition at line 251 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a2ec8021340de939318ace65b8462b930}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Robot\+Get\+Battery@{Robot\+Get\+Battery}}
+\index{Robot\+Get\+Battery@{Robot\+Get\+Battery}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Robot\+Get\+Battery()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Robot\+Get\+Battery (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Request robot battery level 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+
+Definition at line 372 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a7ddd552ed82382a09b4af075c34fb989}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Robot\+Get\+Version@{Robot\+Get\+Version}}
+\index{Robot\+Get\+Version@{Robot\+Get\+Version}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Robot\+Get\+Version()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Robot\+Get\+Version (\begin{DoxyParamCaption}\item[{out string}]{version }\end{DoxyParamCaption})}
+
+
+
+Request robot firmware version 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+\begin{DoxyParams}{Parameters}
+{\em version} & todo\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 390 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a5976fe792e270c63bd9f0f4c792df129}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Robot\+Move@{Robot\+Move}}
+\index{Robot\+Move@{Robot\+Move}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Robot\+Move()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Robot\+Move (\begin{DoxyParamCaption}\item[{int}]{distance }\end{DoxyParamCaption})}
+
+
+
+Move robot forward or backward, for a distance expressed in millimeter 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+\begin{DoxyParams}{Parameters}
+{\em distance} & Distance of mouvment, in millimeter\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 337 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_aa1440a571e6aaf11203b4e4a4ed116d5}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Robot\+Open\+Com@{Robot\+Open\+Com}}
+\index{Robot\+Open\+Com@{Robot\+Open\+Com}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Robot\+Open\+Com()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Robot\+Open\+Com (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Open communication with robot and wait acknowledge 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+
+Definition at line 234 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_ae1af16558213c3830ea3006e8e8c5e28}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Robot\+Ping@{Robot\+Ping}}
+\index{Robot\+Ping@{Robot\+Ping}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Robot\+Ping()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Robot\+Ping (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Ping the robot. 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+
+Definition at line 268 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_acb242a71fa40d4001dc1bc31d5bdc53f}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Robot\+Power\+Off@{Robot\+Power\+Off}}
+\index{Robot\+Power\+Off@{Robot\+Power\+Off}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Robot\+Power\+Off()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Robot\+Power\+Off (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Power off robot 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+
+Definition at line 424 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_abe223aa12456e3f1c2519e9c379d891a}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Robot\+Reset@{Robot\+Reset}}
+\index{Robot\+Reset@{Robot\+Reset}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Robot\+Reset()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Robot\+Reset (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Reset robot and let it in idle mode 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+
+Definition at line 285 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a0c964baa3ecd4ff9d19857061413938b}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Robot\+Start\+Without\+Watchdog@{Robot\+Start\+Without\+Watchdog}}
+\index{Robot\+Start\+Without\+Watchdog@{Robot\+Start\+Without\+Watchdog}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Robot\+Start\+Without\+Watchdog()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Robot\+Start\+Without\+Watchdog (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Start robot, without enabling watchdog 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+
+Definition at line 319 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_ade46aceeb79556e31fe632e9602e1636}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Robot\+Start\+With\+Watchdog@{Robot\+Start\+With\+Watchdog}}
+\index{Robot\+Start\+With\+Watchdog@{Robot\+Start\+With\+Watchdog}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Robot\+Start\+With\+Watchdog()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Robot\+Start\+With\+Watchdog (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Start robot, enabling watchdog 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+
+Definition at line 302 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a3f7ee6f1803cfb8b2eb4290f9e9acced}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!Robot\+Turn@{Robot\+Turn}}
+\index{Robot\+Turn@{Robot\+Turn}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{Robot\+Turn()}
+{\footnotesize\ttfamily \textbf{ Command\+Status} monitor.\+Destijl\+Command\+Manager.\+Robot\+Turn (\begin{DoxyParamCaption}\item[{int}]{angle }\end{DoxyParamCaption})}
+
+
+
+Make robot turn left or right, for a given angle 
+
+\begin{DoxyReturn}{Returns}
+Command status (see Decode\+Status)
+\end{DoxyReturn}
+
+\begin{DoxyParams}{Parameters}
+{\em angle} & Angle of turn, in degree (negative for left, positive for right)\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 355 of file Destijl\+Command\+Manager.\+cs.
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a9efdcd3d35f46329e7aa167ad60062a9}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!command\+Manager@{command\+Manager}}
+\index{command\+Manager@{command\+Manager}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{command\+Manager}
+{\footnotesize\ttfamily \textbf{ Command\+Manager} monitor.\+Destijl\+Command\+Manager.\+command\+Manager = null\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Command Manager object 
+
+
+
+Definition at line 81 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a5c10e8aaae48b83be0267aefa23eb62d}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!command\+Received\+Event@{command\+Received\+Event}}
+\index{command\+Received\+Event@{command\+Received\+Event}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{command\+Received\+Event}
+{\footnotesize\ttfamily \textbf{ Command\+Received\+Event} monitor.\+Destijl\+Command\+Manager.\+command\+Received\+Event = null}
+
+
+
+Definition at line 97 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a88f907fc9c5fd8cd8d5976f45c323903}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!received\+Data@{received\+Data}}
+\index{received\+Data@{received\+Data}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{received\+Data}
+{\footnotesize\ttfamily string monitor.\+Destijl\+Command\+Manager.\+received\+Data = null\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Part of received message corresponding to command data 
+
+
+
+Definition at line 91 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a1b99d771e7af8ffc8ced10d35e5e77ce}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!received\+Header@{received\+Header}}
+\index{received\+Header@{received\+Header}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{received\+Header}
+{\footnotesize\ttfamily string monitor.\+Destijl\+Command\+Manager.\+received\+Header = null\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Part of received message corresponding to command header 
+
+
+
+Definition at line 86 of file Destijl\+Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_destijl_command_manager_a86a1fb03dc480dab8d6758aa0d675cd3}} 
+\index{monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}!timeout@{timeout}}
+\index{timeout@{timeout}!monitor\+::\+Destijl\+Command\+Manager@{monitor\+::\+Destijl\+Command\+Manager}}
+\subsubsection{timeout}
+{\footnotesize\ttfamily double monitor.\+Destijl\+Command\+Manager.\+timeout = 100}
+
+
+
+Timeout used for command with acknowledge 
+
+
+
+Definition at line 102 of file Destijl\+Command\+Manager.\+cs.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\textbf{ Destijl\+Command\+Manager.\+cs}\end{DoxyCompactItemize}

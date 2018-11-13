@@ -1,0 +1,367 @@
+\section{monitor.\+Command\+Manager Class Reference}
+\label{classmonitor_1_1_command_manager}\index{monitor.\+Command\+Manager@{monitor.\+Command\+Manager}}
+
+
+Command Manager. Use for timeout managment during reception of data Used as intermediate layer between T\+CP client class (\doxyref{Client}{p.}{classmonitor_1_1_client}) and application level managment of command and answers  
+
+
+
+
+Collaboration diagram for monitor.\+Command\+Manager\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=214pt]{classmonitor_1_1_command_manager__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+enum \textbf{ Command\+Manager\+Status} \{ \textbf{ Command\+Manager\+Status.\+Answer\+Received}, 
+\textbf{ Command\+Manager\+Status.\+Timeout}, 
+\textbf{ Command\+Manager\+Status.\+Busy}
+ \}\begin{DoxyCompactList}\small\item\em Available status when sending command \end{DoxyCompactList}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+delegate void \textbf{ Command\+Received\+Event} (string msg, byte[$\,$] buffer)
+\begin{DoxyCompactList}\small\item\em Callback for sending received data to upper level \end{DoxyCompactList}\item 
+\textbf{ Command\+Manager} (\textbf{ Command\+Received\+Event} callback)
+\begin{DoxyCompactList}\small\item\em Initializes a new instance of the T\+:monitor.\+Command\+Manager class. \end{DoxyCompactList}\item 
+bool \textbf{ Open} (string hostname)
+\begin{DoxyCompactList}\small\item\em Open the specified hostname server, using default port number. \end{DoxyCompactList}\item 
+bool \textbf{ Open} (string hostname, int port)
+\begin{DoxyCompactList}\small\item\em Open connection to server \char`\"{}host\char`\"{}, with port number \char`\"{}port\char`\"{} \end{DoxyCompactList}\item 
+void \textbf{ Close} ()
+\begin{DoxyCompactList}\small\item\em Close connection to server \end{DoxyCompactList}\item 
+\textbf{ Command\+Manager\+Status} \textbf{ Send\+Command} (string cmd, out string answer, double timeout)
+\begin{DoxyCompactList}\small\item\em Sends a command to T\+CP server \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\textbf{ Command\+Received\+Event} \textbf{ command\+Received\+Event} = null
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\textbf{ $\sim$\+Command\+Manager} ()
+\begin{DoxyCompactList}\small\item\em Releases unmanaged resources and performs other cleanup operations before the T\+:monitor.\+Command\+Manager is reclaimed by garbage collection. \end{DoxyCompactList}\item 
+void \textbf{ On\+Message\+Reception} (string message, byte[$\,$] buffer)
+\begin{DoxyCompactList}\small\item\em Callback called by \doxyref{Client}{p.}{classmonitor_1_1_client} class after reception of new message \end{DoxyCompactList}\item 
+void \textbf{ On\+Message\+Timeout} (object sender, System.\+Timers.\+Elapsed\+Event\+Args e)
+\begin{DoxyCompactList}\small\item\em Callback called by stopwatch on timeout \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+System.\+Timers.\+Timer \textbf{ wait\+Timer} = new System.\+Timers.\+Timer()
+\begin{DoxyCompactList}\small\item\em Timer for managing timeout \end{DoxyCompactList}\item 
+Manual\+Reset\+Event \textbf{ wait\+Event} = new Manual\+Reset\+Event(false)
+\item 
+bool \textbf{ wait\+For\+Acknowledge} = false
+\begin{DoxyCompactList}\small\item\em Flag to tell rogram to wait for an acknowledge from server \end{DoxyCompactList}\item 
+string \textbf{ message\+Received} = null
+\begin{DoxyCompactList}\small\item\em received message \end{DoxyCompactList}\item 
+bool \textbf{ is\+Busy} = false
+\begin{DoxyCompactList}\small\item\em flag indicating command manager is currently busy waiting an acknowledge \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Command Manager. Use for timeout managment during reception of data Used as intermediate layer between T\+CP client class (\doxyref{Client}{p.}{classmonitor_1_1_client}) and application level managment of command and answers 
+
+
+
+Definition at line 31 of file Command\+Manager.\+cs.
+
+
+
+\subsection{Member Enumeration Documentation}
+\mbox{\label{classmonitor_1_1_command_manager_ac8ca53031468acc8be05c37586671a9b}} 
+\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!Command\+Manager\+Status@{Command\+Manager\+Status}}
+\index{Command\+Manager\+Status@{Command\+Manager\+Status}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}
+\subsubsection{Command\+Manager\+Status}
+{\footnotesize\ttfamily enum \textbf{ monitor.\+Command\+Manager.\+Command\+Manager\+Status}\hspace{0.3cm}{\ttfamily [strong]}}
+
+
+
+Available status when sending command 
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Answer\+Received@{Answer\+Received}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!Answer\+Received@{Answer\+Received}}}\mbox{\label{classmonitor_1_1_command_manager_ac8ca53031468acc8be05c37586671a9bae3e095863e3b99e11e8c18efb3901da3}} 
+Answer\+Received&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Timeout@{Timeout}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!Timeout@{Timeout}}}\mbox{\label{classmonitor_1_1_command_manager_ac8ca53031468acc8be05c37586671a9bac85a251cc457840f1e032f1b733e9398}} 
+Timeout&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Busy@{Busy}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!Busy@{Busy}}}\mbox{\label{classmonitor_1_1_command_manager_ac8ca53031468acc8be05c37586671a9bad8a942ef2b04672adfafef0ad817a407}} 
+Busy&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+Definition at line 63 of file Command\+Manager.\+cs.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\label{classmonitor_1_1_command_manager_ac2248c90d3a59bc2bf376cd876cece72}} 
+\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!Command\+Manager@{Command\+Manager}}
+\index{Command\+Manager@{Command\+Manager}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}
+\subsubsection{Command\+Manager()}
+{\footnotesize\ttfamily monitor.\+Command\+Manager.\+Command\+Manager (\begin{DoxyParamCaption}\item[{\textbf{ Command\+Received\+Event}}]{callback }\end{DoxyParamCaption})}
+
+
+
+Initializes a new instance of the T\+:monitor.\+Command\+Manager class. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em callback} & Callback used when new message are received\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 74 of file Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_command_manager_ad2a8eb1139a5a25a6993887c55b3da4e}} 
+\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!````~Command\+Manager@{$\sim$\+Command\+Manager}}
+\index{````~Command\+Manager@{$\sim$\+Command\+Manager}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}
+\subsubsection{$\sim$\+Command\+Manager()}
+{\footnotesize\ttfamily monitor.\+Command\+Manager.$\sim$\+Command\+Manager (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Releases unmanaged resources and performs other cleanup operations before the T\+:monitor.\+Command\+Manager is reclaimed by garbage collection. 
+
+
+
+Definition at line 86 of file Command\+Manager.\+cs.
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\label{classmonitor_1_1_command_manager_ab28b0e5a2641391e655aaaaa05a1fdf6}} 
+\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!Close@{Close}}
+\index{Close@{Close}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}
+\subsubsection{Close()}
+{\footnotesize\ttfamily void monitor.\+Command\+Manager.\+Close (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Close connection to server 
+
+
+
+Definition at line 115 of file Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_command_manager_a5afd16036cc3d0e69554f69dacad0bcc}} 
+\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!Command\+Received\+Event@{Command\+Received\+Event}}
+\index{Command\+Received\+Event@{Command\+Received\+Event}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}
+\subsubsection{Command\+Received\+Event()}
+{\footnotesize\ttfamily delegate void monitor.\+Command\+Manager.\+Command\+Received\+Event (\begin{DoxyParamCaption}\item[{string}]{msg,  }\item[{byte [$\,$]}]{buffer }\end{DoxyParamCaption})}
+
+
+
+Callback for sending received data to upper level 
+
+\mbox{\label{classmonitor_1_1_command_manager_a92e5d42afb61f29d9a4746b4446c2a65}} 
+\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!On\+Message\+Reception@{On\+Message\+Reception}}
+\index{On\+Message\+Reception@{On\+Message\+Reception}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}
+\subsubsection{On\+Message\+Reception()}
+{\footnotesize\ttfamily void monitor.\+Command\+Manager.\+On\+Message\+Reception (\begin{DoxyParamCaption}\item[{string}]{message,  }\item[{byte [$\,$]}]{buffer }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Callback called by \doxyref{Client}{p.}{classmonitor_1_1_client} class after reception of new message 
+
+
+\begin{DoxyParams}{Parameters}
+{\em message} & Message received from server\\
+\hline
+{\em buffer} & Raw buffer reived from server\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 125 of file Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_command_manager_a2f91bb775ba25855be007886b994a5df}} 
+\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!On\+Message\+Timeout@{On\+Message\+Timeout}}
+\index{On\+Message\+Timeout@{On\+Message\+Timeout}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}
+\subsubsection{On\+Message\+Timeout()}
+{\footnotesize\ttfamily void monitor.\+Command\+Manager.\+On\+Message\+Timeout (\begin{DoxyParamCaption}\item[{object}]{sender,  }\item[{System.\+Timers.\+Elapsed\+Event\+Args}]{e }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Callback called by stopwatch on timeout 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sender} & Sender object\\
+\hline
+{\em e} & Information on elapsed condition\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 156 of file Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_command_manager_a7329cbf8008bcb8a0280aa7ffa6aa43c}} 
+\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!Open@{Open}}
+\index{Open@{Open}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}
+\subsubsection{Open()\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily bool monitor.\+Command\+Manager.\+Open (\begin{DoxyParamCaption}\item[{string}]{hostname }\end{DoxyParamCaption})}
+
+
+
+Open the specified hostname server, using default port number. 
+
+\begin{DoxyReturn}{Returns}
+true if connection succeded, false otherwise
+\end{DoxyReturn}
+
+\begin{DoxyParams}{Parameters}
+{\em hostname} & Hostname to connect to\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 96 of file Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_command_manager_a0a0054ee87d293577fa39af1fcd5ffee}} 
+\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!Open@{Open}}
+\index{Open@{Open}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}
+\subsubsection{Open()\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily bool monitor.\+Command\+Manager.\+Open (\begin{DoxyParamCaption}\item[{string}]{hostname,  }\item[{int}]{port }\end{DoxyParamCaption})}
+
+
+
+Open connection to server \char`\"{}host\char`\"{}, with port number \char`\"{}port\char`\"{} 
+
+\begin{DoxyReturn}{Returns}
+true if connection succeded, false otherwise
+\end{DoxyReturn}
+
+\begin{DoxyParams}{Parameters}
+{\em hostname} & Hostname to connect to\\
+\hline
+{\em port} & Port number for connection\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 107 of file Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_command_manager_a3cd1f2303e47e5148fd3e927a7957363}} 
+\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!Send\+Command@{Send\+Command}}
+\index{Send\+Command@{Send\+Command}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}
+\subsubsection{Send\+Command()}
+{\footnotesize\ttfamily \textbf{ Command\+Manager\+Status} monitor.\+Command\+Manager.\+Send\+Command (\begin{DoxyParamCaption}\item[{string}]{cmd,  }\item[{out string}]{answer,  }\item[{double}]{timeout }\end{DoxyParamCaption})}
+
+
+
+Sends a command to T\+CP server 
+
+\begin{DoxyReturn}{Returns}
+status that is part of Command\+Manager\+Status enumerate
+\end{DoxyReturn}
+
+\begin{DoxyParams}{Parameters}
+{\em cmd} & Command message to send to server\\
+\hline
+{\em answer} & Answer from server, in case of acknowledge\\
+\hline
+{\em timeout} & Timeout (ms) waiting an acknowledge, 0 if no acknowledge needed\\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 171 of file Command\+Manager.\+cs.
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\label{classmonitor_1_1_command_manager_ab90d68a3d3a9b3935fa9f1a57e8dabfa}} 
+\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!command\+Received\+Event@{command\+Received\+Event}}
+\index{command\+Received\+Event@{command\+Received\+Event}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}
+\subsubsection{command\+Received\+Event}
+{\footnotesize\ttfamily \textbf{ Command\+Received\+Event} monitor.\+Command\+Manager.\+command\+Received\+Event = null}
+
+
+
+Definition at line 37 of file Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_command_manager_aea039cd0f99f5193c307b805077669db}} 
+\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!is\+Busy@{is\+Busy}}
+\index{is\+Busy@{is\+Busy}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}
+\subsubsection{is\+Busy}
+{\footnotesize\ttfamily bool monitor.\+Command\+Manager.\+is\+Busy = false\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+flag indicating command manager is currently busy waiting an acknowledge 
+
+
+
+Definition at line 58 of file Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_command_manager_aa610e72e8f23f0d26388f204c848ed57}} 
+\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!message\+Received@{message\+Received}}
+\index{message\+Received@{message\+Received}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}
+\subsubsection{message\+Received}
+{\footnotesize\ttfamily string monitor.\+Command\+Manager.\+message\+Received = null\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+received message 
+
+
+
+Definition at line 53 of file Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_command_manager_a0d27eb1a38efb01559f14a707ff86447}} 
+\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!wait\+Event@{wait\+Event}}
+\index{wait\+Event@{wait\+Event}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}
+\subsubsection{wait\+Event}
+{\footnotesize\ttfamily Manual\+Reset\+Event monitor.\+Command\+Manager.\+wait\+Event = new Manual\+Reset\+Event(false)\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 43 of file Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_command_manager_a39c2c03f93b309e65a45ac91c6eb39bd}} 
+\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!wait\+For\+Acknowledge@{wait\+For\+Acknowledge}}
+\index{wait\+For\+Acknowledge@{wait\+For\+Acknowledge}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}
+\subsubsection{wait\+For\+Acknowledge}
+{\footnotesize\ttfamily bool monitor.\+Command\+Manager.\+wait\+For\+Acknowledge = false\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Flag to tell rogram to wait for an acknowledge from server 
+
+
+
+Definition at line 48 of file Command\+Manager.\+cs.
+
+\mbox{\label{classmonitor_1_1_command_manager_a07639cd39445a379667a2450e78001b0}} 
+\index{monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}!wait\+Timer@{wait\+Timer}}
+\index{wait\+Timer@{wait\+Timer}!monitor\+::\+Command\+Manager@{monitor\+::\+Command\+Manager}}
+\subsubsection{wait\+Timer}
+{\footnotesize\ttfamily System.\+Timers.\+Timer monitor.\+Command\+Manager.\+wait\+Timer = new System.\+Timers.\+Timer()\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Timer for managing timeout 
+
+
+
+Definition at line 42 of file Command\+Manager.\+cs.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\textbf{ Command\+Manager.\+cs}\end{DoxyCompactItemize}

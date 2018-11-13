@@ -1,0 +1,10 @@
+bin/
+build/
+CMakeFiles/
+dist/
+
+.dep.inc
+Makefile
+*.cmake
+*.o
+
