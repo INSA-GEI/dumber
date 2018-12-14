@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="100">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>./lib/camera.h</itemPath>
+      <itemPath>./lib/definitions.h</itemPath>
+      <itemPath>./lib/image.h</itemPath>
+      <itemPath>./lib/img.h</itemPath>
+      <itemPath>./lib/message.h</itemPath>
+      <itemPath>./lib/messages.h</itemPath>
+      <itemPath>./lib/monitor.h</itemPath>
+      <itemPath>./lib/robot.h</itemPath>
+      <itemPath>./lib/server.h</itemPath>
+      <itemPath>./tasks.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+      <itemPath>./gdbsudo.sh</itemPath>
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>./lib/camera.cpp</itemPath>
+      <itemPath>./lib/image.cpp</itemPath>
+      <itemPath>./lib/img.cpp</itemPath>
+      <itemPath>./main.cpp</itemPath>
+      <itemPath>./lib/message.cpp</itemPath>
+      <itemPath>./lib/messages.cpp</itemPath>
+      <itemPath>./lib/monitor.cpp</itemPath>
+      <itemPath>./lib/robot.cpp</itemPath>
+      <itemPath>./lib/server.cpp</itemPath>
+      <itemPath>./tasks.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>./Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>./Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <incDir>
+            <pElem>./</pElem>
+            <pElem>./lib</pElem>
+          </incDir>
+          <commandLine>-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy</commandLine>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>./</pElem>
+            <pElem>./lib</pElem>
+            <pElem>/usr/xenomai/include</pElem>
+            <pElem>/usr/xenomai/include/mercury</pElem>
+          </incDir>
+          <commandLine>-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy</commandLine>
+          <preprocessorList>
+            <Elem>_WITH_TRACE_</Elem>
+            <Elem>__FOR_PC__</Elem>
+          </preprocessorList>
+        </ccTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerOptionItem>`pkg-config --libs opencv`</linkerOptionItem>
+          </linkerLibItems>
+          <commandLine>-Wl,--no-as-needed -lalchemy -lcopperplate /usr/xenomai/lib/xenomai/bootstrap.o -Wl,--wrap=main -Wl,--dynamic-list=/usr/xenomai/lib/dynlist.ld -L/usr/xenomai/lib -lmercury -lpthread -lrt</commandLine>
+        </linkerTool>
+      </compileType>
+      <item path="./gdbsudo.sh" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/camera.cpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/camera.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/definitions.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/image.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/img.cpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/img.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/message.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/message.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/messages.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/messages.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/monitor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/monitor.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/robot.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/robot.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/server.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/server.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./tasks.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./tasks.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+      </compileType>
+      <item path="./gdbsudo.sh" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/camera.cpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/camera.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/definitions.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/image.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/image.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/img.cpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/img.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/message.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/message.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/messages.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/messages.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/monitor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/monitor.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/robot.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/robot.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/server.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/server.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./tasks.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./tasks.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Debug__RPI_" type="1">
+      <toolsSet>
+        <compilerSet>GNU|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <incDir>
+            <pElem>./</pElem>
+            <pElem>./lib</pElem>
+            <pElem>/usr/xenomai/include</pElem>
+            <pElem>/usr/xenomai/include/mercury</pElem>
+          </incDir>
+          <commandLine>-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy</commandLine>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>./</pElem>
+            <pElem>./lib</pElem>
+            <pElem>/usr/xenomai/include</pElem>
+            <pElem>/usr/xenomai/include/mercury</pElem>
+          </incDir>
+          <commandLine>-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy</commandLine>
+          <preprocessorList>
+            <Elem>_WITH_TRACE_</Elem>
+          </preprocessorList>
+        </ccTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerOptionItem>`pkg-config --libs opencv`</linkerOptionItem>
+            <linkerLibLibItem>raspicam_cv</linkerLibLibItem>
+            <linkerLibLibItem>raspicam</linkerLibLibItem>
+          </linkerLibItems>
+          <commandLine>-Wl,--no-as-needed -lalchemy -lcopperplate /usr/xenomai/lib/xenomai/bootstrap.o -Wl,--wrap=main -Wl,--dynamic-list=/usr/xenomai/lib/dynlist.ld -L/usr/xenomai/lib -lmercury -lpthread -lrt</commandLine>
+        </linkerTool>
+      </compileType>
+      <item path="./gdbsudo.sh" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/camera.cpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/camera.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/definitions.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/image.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/image.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/img.cpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/img.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/message.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/message.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/messages.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/messages.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/monitor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/monitor.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/robot.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/robot.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/server.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/server.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./tasks.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./tasks.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

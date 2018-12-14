@@ -15,16 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * \file      image.h
- * \author    L.Senaneuch
- * \version   1.0
- * \date      06/06/2017
- * \brief     Functions for image treatment.
- *
- * \details   This file use openCV2 library for picture processing. This allow to detect arena and robot.
- */
-
 #ifndef _IMAGE_H_
 #define _IMAGE_H_
 
