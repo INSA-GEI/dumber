@@ -38,7 +38,10 @@ typedef enum {
     // messages for serial communication with robot
     MESSAGE_OPEN_COM,
     MESSAGE_CLOSE_COM,
-            
+         
+    // Messages specific to server
+    MESSAGE_MONITOR_LOST,
+    
     // Messages for camera   
     MESSAGE_CAM_OPEN,
     MESSAGE_CAM_CLOSE,
@@ -75,12 +78,13 @@ typedef enum {
     ANSWER_NACK,
     ANSWER_LOST_ROBOT,
     ANSWER_ROBOT_TIMEOUT,
-    ANSWER_ROBOT_UNKNWON_COMMAND,
+    ANSWER_ROBOT_UNKNOWN_COMMAND,
     ANSWER_ROBOT_ERROR,
     ANSWER_ROBOT_CHECKSUM
 } AnswerID;
 
 typedef enum {
+    BATTERY_UNKNOWN=-1,
     BATTERY_EMPTY=0,
     BATTERY_LOW,
     BATTERY_FULL
@@ -106,6 +110,11 @@ public:
      */
     Message();
 
+    /**
+     * Create a new, empty message
+     */
+    Message(MessageID id);
+    
     /**
      * Destroy message
      */
@@ -135,8 +144,7 @@ public:
      * Set message ID
      * @param id Message ID
      */
-    virtual void SetID(MessageID id) {
-    }
+    virtual void SetID(MessageID id);
 
     /**
      * Comparison operator
@@ -260,93 +268,6 @@ protected:
 };
 
 /**
- * Message class for holding float value, based on Message class
- * 
- * @brief Float message class
- * 
- */
-class MessageFloat : public Message {
-public:
-    /**
-     * Create a new, empty float message
-     */
-    MessageFloat();
-
-    /**
-     * Create a new float message, with given ID and value
-     * @param id Message ID
-     * @param val Message value
-     * @throw std::runtime_error if message ID is incompatible with float data
-     */
-    MessageFloat(MessageID id, float val);
-
-    /**
-     * Set message ID
-     * @param id Message ID
-     * @throw std::runtime_error if message ID is incompatible with float data
-     */
-    void SetID(MessageID id);
-
-    /**
-     * Get message value (float)
-     * @return Float value
-     */
-    float GetValue() {
-        return value;
-    }
-
-    /**
-     * Set message value (float)
-     * @param val Float value to store in message
-     */
-    void SetValue(float val) {
-        this->value = val;
-    }
-
-    /**
-     * Translate content of message into a string that can be displayed
-     * @return A string describing message contents
-     */
-    string ToString();
-
-    /**
-     * Allocate a new mesage and copy contents of current message
-     * @return A message, copy of current
-     */
-    Message* Copy();
-
-    /**
-     * Comparison operator
-     * @param msg Message to be compared
-     * @return true if message are equal, false otherwise
-     */
-    virtual bool operator==(const MessageFloat& msg) {
-        return ((messageID == msg.messageID) && (value == msg.value));
-    }
-
-    /**
-     * Difference operator
-     * @param msg Message to be compared
-     * @return true if message are different, false otherwise
-     */
-    virtual bool operator!=(const MessageFloat& msg) {
-        return !((messageID == msg.messageID) && (value == msg.value));
-    }
-protected:
-    /**
-     * Message float value
-     */
-    float value;
-
-    /**
-     * Verify if message ID is compatible with current message type
-     * @param id Message ID
-     * @return true, if message ID is acceptable, false otherwise
-     */
-    bool CheckID(MessageID id);
-};
-
-/**
  * Message class for holding string value, based on Message class
  * 
  * @brief String message class
@@ -455,6 +376,11 @@ public:
     MessageImg(MessageID id, Img* image);
 
     /**
+     * Destroy Image message
+     */
+    virtual ~MessageImg();
+    
+    /**
      * Set message ID
      * @param id Message ID
      * @throw std::runtime_error if message ID is incompatible withimage message
@@ -473,9 +399,7 @@ public:
      * Set message image
      * @param image Pointer to image object
      */
-    void SetImage(Img* image) {
-        this->image = image;
-    }
+    void SetImage(Img* image);
 
     /**
      * Translate content of message into a string that can be displayed
@@ -519,10 +443,10 @@ public:
     /**
      * Create a new image message, with given ID and boolean value
      * @param id Message ID
-     * @param image Pointer to image
+     * @param pos Position
      * @throw std::runtime_error if message ID is incompatible with image message
      */
-    MessagePosition(MessageID id, Position pos);
+    MessagePosition(MessageID id, Position& pos);
 
     /**
      * Set message ID
@@ -543,9 +467,7 @@ public:
      * Set message image
      * @param image Pointer to image object
      */
-    void SetPosition(Position pos) {
-        this->pos = pos;
-    }
+    void SetPosition(Position& pos);
 
     /**
      * Translate content of message into a string that can be displayed
@@ -613,9 +535,7 @@ public:
      * Set message image
      * @param image Pointer to image object
      */
-    void SetLevel(BatteryLevel level) {
-        this->level = level;
-    }
+    void SetLevel(BatteryLevel level);
 
     /**
      * Translate content of message into a string that can be displayed
@@ -659,10 +579,10 @@ public:
     /**
      * Create a new image message, with given ID and boolean value
      * @param id Message ID
-     * @param image Pointer to image
+     * @param ans Answer ID
      * @throw std::runtime_error if message ID is incompatible with image message
      */
-    MessageAnswer(MessageID id, AnswerID answer);
+    MessageAnswer(MessageID id, AnswerID ans);
 
     /**
      * Set message ID
@@ -680,12 +600,10 @@ public:
     }
 
     /**
-     * Set message image
-     * @param image Pointer to image object
+     * Set message answer
+     * @param ans Answer ID
      */
-    void SetAnswer(AnswerID answer) {
-        this->answer = answer;
-    }
+    void SetAnswer(AnswerID ans);
 
     /**
      * Translate content of message into a string that can be displayed
@@ -753,9 +671,7 @@ public:
      * Set message image
      * @param image Pointer to image object
      */
-    void SetState(RobotState state) {
-        this->state = state;
-    }
+    void SetState(RobotState state);
 
     /**
      * Translate content of message into a string that can be displayed
@@ -771,7 +687,7 @@ public:
 
 protected:
     /**
-     * Message answer
+     * Robot state
      */
    RobotState state;
 

@@ -18,7 +18,6 @@
 #include "img.h"
 
 bool Arene::empty() {
-
     if ((this->arene.height==0) || (this->arene.width==0)) return true;
     else return false;
 }
@@ -27,6 +26,14 @@ Img::Img(ImageMat imgMatrice) {
     this->img = imgMatrice.clone();
 }
 
+string Img::ToString() {
+    return "Image size: "+this->img.cols+"x"this->img.rows+" (dim="+this->img.dims+")";
+}
+    
+Img* Img::Copy() {
+    return new Img(this->img);
+}
+    
 float Img::calculAngle(Position robot) {
     float a = robot.direction.x - robot.center.x;
     float b = robot.direction.y - robot.center.y ;
@@ -91,6 +98,14 @@ Jpg Img::toJpg() {
     Jpg imgJpg;
     cv::imencode(".jpg",this->img,imgJpg);
     return imgJpg;
+}
+
+string Img::ToBase64() {
+    string imgBase64;
+    Jpg imgJpg = toJpg();
+    
+    /* faire la convertion Jpg vers base 64 */
+    return imgBase64;
 }
 
 std::list<Position> Img::search_robot(Arene monArene) {

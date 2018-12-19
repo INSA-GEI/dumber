@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <list>
+#include <string>
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -33,16 +34,18 @@
 
 #define ARENA_NOT_DETECTED -1
 
+using namespace std;
+
 typedef cv::Mat ImageMat;
 
-typedef std::vector<unsigned char> Jpg;
+typedef vector<unsigned char> Jpg;
 
-struct Position {
+typedef struct {
     cv::Point2f center;
     cv::Point2f direction;
     float angle;
     int robotId;
-};
+} Position;
 
 class Arene {
 public:
@@ -55,7 +58,12 @@ public:
 class Img {
 public:
     Img(ImageMat imgMatrice);
+    
+    string ToString();
+    Img* Copy();
+    
     Jpg toJpg();
+    string ToBase64();
     Arene search_arena();
 
     int draw_robot(Position robot);
@@ -63,11 +71,12 @@ public:
     int draw_arena(Arene areneToDraw);
     std::list<Position> search_robot(Arene monArene);
     
+    
 #ifdef __WITH_ARUCO__    
-    std::list<Position> search_aruco(Arene monArene = NULL);
+    list<Position> search_aruco(Arene monArene = NULL);
 #endif // __WITH_ARUCO__
 private:
-    cv::Mat img;
+    ImageMat img;
     
 #ifdef __WITH_ARUCO__
     Ptr<std::Dictionary> dictionary;

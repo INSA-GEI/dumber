@@ -26,16 +26,12 @@
 #ifndef __TASKS_H__
 #define __TASKS_H__
 
+#ifdef __WITH_PTHREAD__
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
 #include <sys/mman.h>
-#include <alchemy/task.h>
-#include <alchemy/timer.h>
-#include <alchemy/mutex.h>
-#include <alchemy/sem.h>
-#include <alchemy/queue.h>
 
 #include "monitor.h"
 #include "robot.h"
@@ -103,5 +99,6 @@ void f_move(void *arg);
  */ 
 void f_startRobot(void *arg);
 
-#endif /* FUNCTIONS_H */
+#endif // __WITH_PTHREAD__
+#endif /* __TASKS_H__ */
 

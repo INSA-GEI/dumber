@@ -31,7 +31,7 @@ DEFAULTCONF=Debug
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=Debug Release Debug__RPI_ 
+ALLCONFS=Debug Release Debug__RPI_ Debug__Pthread_ 
 
 
 # build
