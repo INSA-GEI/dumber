@@ -33,25 +33,25 @@
  */
 const string LABEL_MONITOR_ANSWER_ACK = "AACK";
 const string LABEL_MONITOR_ANSWER_NACK = "ANAK";
-const string LABEL_MONITOR_ANSWER_LOST_DMB= "ATIM";
-const string LABEL_MONITOR_ANSWER_TIMEOUT= "ATIM";
-const string LABEL_MONITOR_ANSWER_CMD_REJECTED= "ACRJ";
+const string LABEL_MONITOR_ANSWER_COM_ERROR = "ACER";
+const string LABEL_MONITOR_ANSWER_TIMEOUT = "ATIM";
+const string LABEL_MONITOR_ANSWER_CMD_REJECTED = "ACRJ";
 const string LABEL_MONITOR_MESSAGE = "MSSG";
-const string LABEL_MONITOR_CAMERA_OPEN= "COPN";
-const string LABEL_MONITOR_CAMERA_CLOSE= "CCLS";
+const string LABEL_MONITOR_CAMERA_OPEN = "COPN";
+const string LABEL_MONITOR_CAMERA_CLOSE = "CCLS";
 const string LABEL_MONITOR_CAMERA_IMAGE = "CIMG";
 const string LABEL_MONITOR_CAMERA_ARENA_ASK = "CASA";
 const string LABEL_MONITOR_CAMERA_ARENA_INFIRME = "CAIN";
 const string LABEL_MONITOR_CAMERA_ARENA_CONFIRM = "CACO";
-const string LABEL_MONITOR_CAMERA_POSITION_COMPUTE= "CPCO";
-const string LABEL_MONITOR_CAMERA_POSITION_STOP= "CPST";
+const string LABEL_MONITOR_CAMERA_POSITION_COMPUTE = "CPCO";
+const string LABEL_MONITOR_CAMERA_POSITION_STOP = "CPST";
 const string LABEL_MONITOR_CAMERA_POSITION = "CPOS";
 const string LABEL_MONITOR_ROBOT_COM_OPEN = "ROPN";
 const string LABEL_MONITOR_ROBOT_COM_CLOSE = "RCLS";
 const string LABEL_MONITOR_ROBOT_PING = "RPIN";
 const string LABEL_MONITOR_ROBOT_RESET = "RRST";
-const string LABEL_MONITOR_ROBOT_START_WITHOUT_WD= "RSOW";
-const string LABEL_MONITOR_ROBOT_START_WITH_WD= "RSWW";
+const string LABEL_MONITOR_ROBOT_START_WITHOUT_WD = "RSOW";
+const string LABEL_MONITOR_ROBOT_START_WITH_WD = "RSWW";
 const string LABEL_MONITOR_ROBOT_RELOAD_WD = "RLDW";
 const string LABEL_MONITOR_ROBOT_MOVE = "RMOV";
 const string LABEL_MONITOR_ROBOT_TURN = "RTRN";
@@ -80,7 +80,7 @@ int ComMonitor::Open(int port) {
 
     socketFD = socket(AF_INET, SOCK_STREAM, 0);
     if (socketFD < 0) {
-        throw std::runtime_error{"ComMonitor::Open : Can not create socket"};
+        throw std::runtime_error{"Can not create socket"};
     }
 
     server.sin_addr.s_addr = INADDR_ANY;
@@ -88,7 +88,8 @@ int ComMonitor::Open(int port) {
     server.sin_port = htons(port);
 
     if (bind(socketFD, (struct sockaddr *) &server, sizeof (server)) < 0) {
-        throw std::runtime_error{"ComMonitor::Open : Can not bind socket on port " + std::to_string(port)};
+        cerr<<"["<<__PRETTY_FUNCTION__<<"] Can not bind socket ("<<to_string(port)<<")"<<endl<<flush;
+        throw std::runtime_error{"Can not bind socket"};
     }
 
     listen(socketFD, 1);
@@ -117,9 +118,7 @@ int ComMonitor::AcceptClient() {
     clientID = accept(socketFD, (struct sockaddr *) &client, (socklen_t*) & c);
 
     if (clientID < 0)
-        throw std::runtime_error {
-        "ComMonitor::AcceptClient : Accept failed"
-    };
+        throw std::runtime_error {"Accept failed"};
 
     return clientID;
 }
@@ -144,7 +143,7 @@ void ComMonitor::Write(Message &msg) {
     write(clientID, str.c_str(), str.length());
 
     delete(&msg);
-    
+
     // Call user method after write
     Write_Post();
 }
@@ -160,9 +159,9 @@ Message *ComMonitor::Read() {
     char length = 0;
     string s;
     char data;
-    bool endReception=false;
+    bool endReception = false;
     Message *msg;
-    
+
     // Call user method before read
     Read_Pre();
 
@@ -170,20 +169,20 @@ Message *ComMonitor::Read() {
         while (!endReception) {
             if ((length = recv(clientID, (void*) &data, 1, MSG_WAITALL)) > 0) {
                 if (data != '\n') {
-                    s+=data;
+                    s += data;
                 } else endReception = true;
             }
         }
 
-        if (length<=0) msg = new Message(MESSAGE_MONITOR_LOST);
+        if (length <= 0) msg = new Message(MESSAGE_MONITOR_LOST);
         else {
-            msg=StringToMessage(s);
+            msg = StringToMessage(s);
         }
     }
 
     // Call user method after read
     Read_Post();
-    
+
     return msg;
 }
 
@@ -197,62 +196,56 @@ string ComMonitor::MessageToString(Message &msg) {
     string str;
     Message *localMsg = &msg;
     Position pos;
-    
+
     id = msg.GetID();
 
     switch (id) {
-        case MESSAGE_ANSWER:
-            switch (((MessageAnswer*)localMsg)->GetAnswer()) {
-                case ANSWER_ACK:
-                    str.append(LABEL_MONITOR_ANSWER_ACK);
-                    break;
-                case ANSWER_NACK:
-                    str.append(LABEL_MONITOR_ANSWER_NACK);
-                    break;
-                case ANSWER_LOST_ROBOT:
-                    str.append(LABEL_MONITOR_ANSWER_LOST_DMB);
-                    break;
-                case ANSWER_ROBOT_TIMEOUT:
-                    str.append(LABEL_MONITOR_ANSWER_TIMEOUT);
-                    break;
-                case ANSWER_ROBOT_UNKNOWN_COMMAND:
-                    str.append(LABEL_MONITOR_ANSWER_CMD_REJECTED);
-                    break;
-                case ANSWER_ROBOT_ERROR:
-                    str.append(LABEL_MONITOR_ANSWER_CMD_REJECTED);
-                    break;
-                default:
-                    str.append(LABEL_MONITOR_ANSWER_NACK);
-            };
-            
+        case MESSAGE_ANSWER_ACK :
+            str.append(LABEL_MONITOR_ANSWER_ACK);
             break;
-        case MESSAGE_POSITION:
-            pos = ((MessagePosition*)&msg)->GetPosition();
-            
+        case MESSAGE_ANSWER_NACK:
+            str.append(LABEL_MONITOR_ANSWER_NACK);
+            break;
+        case MESSAGE_ANSWER_ROBOT_TIMEOUT:
+            str.append(LABEL_MONITOR_ANSWER_TIMEOUT);
+            break;
+        case MESSAGE_ANSWER_ROBOT_UNKNOWN_COMMAND:
+            str.append(LABEL_MONITOR_ANSWER_CMD_REJECTED);
+            break;
+        case MESSAGE_ANSWER_ROBOT_ERROR:
+            str.append(LABEL_MONITOR_ANSWER_CMD_REJECTED);
+            break;
+        case MESSAGE_ANSWER_COM_ERROR:
+            str.append(LABEL_MONITOR_ANSWER_COM_ERROR);
+            break;
+        case MESSAGE_CAM_POSITION:
+            pos = ((MessagePosition*) & msg)->GetPosition();
+
             str.append(LABEL_MONITOR_CAMERA_POSITION + LABEL_SEPARATOR_CHAR + to_string(pos.robotId) + ";" +
                     to_string(pos.angle) + ";" + to_string(pos.center.x) + ";" + to_string(pos.center.y) + ";" +
                     to_string(pos.direction.x) + ";" + to_string(pos.direction.y));
             break;
-        case MESSAGE_IMAGE:
-            str.append(LABEL_MONITOR_CAMERA_IMAGE + LABEL_SEPARATOR_CHAR + ((MessageImg*) &msg)->GetImage()->ToBase64());
+        case MESSAGE_CAM_IMAGE:
+            str.append(LABEL_MONITOR_CAMERA_IMAGE + LABEL_SEPARATOR_CHAR + ((MessageImg*) & msg)->GetImage()->ToBase64());
             break;
         case MESSAGE_ROBOT_BATTERY_LEVEL:
-            str.append(LABEL_MONITOR_ROBOT_BATTERY_LEVEL + LABEL_SEPARATOR_CHAR + to_string(((MessageBattery*) &msg)->GetLevel()));
+            str.append(LABEL_MONITOR_ROBOT_BATTERY_LEVEL + LABEL_SEPARATOR_CHAR + to_string(((MessageBattery*) & msg)->GetLevel()));
             break;
-        case MESSAGE_ROBOT_CURRENT_STATE:
-            str.append(LABEL_MONITOR_ROBOT_CURRENT_STATE + LABEL_SEPARATOR_CHAR + to_string(((MessageState*) &msg)->GetState()));
+        case MESSAGE_ROBOT_STATE_BUSY:
+            str.append(LABEL_MONITOR_ROBOT_CURRENT_STATE + LABEL_SEPARATOR_CHAR + "1");
+            break;
+        case MESSAGE_ROBOT_STATE_NOT_BUSY:
+            str.append(LABEL_MONITOR_ROBOT_CURRENT_STATE + LABEL_SEPARATOR_CHAR + "0");
             break;
         case MESSAGE_LOG:
-            str.append(LABEL_MONITOR_MESSAGE + LABEL_SEPARATOR_CHAR + ((MessageString*) &msg)->GetString());
+            str.append(LABEL_MONITOR_MESSAGE + LABEL_SEPARATOR_CHAR + ((MessageString*) & msg)->GetString());
             break;
         case MESSAGE_EMPTY:
             str.append(""); //empty string
             break;
         default:
-            throw std::runtime_error
-        {
-            "ComMonitor::MessageToString (from ComMonitor::Write): Invalid message to send (" + msg.ToString()
-        };
+            cerr<<"["<<__PRETTY_FUNCTION__<<"] (from ComMonitor::Write): Invalid message to send ("<<msg.ToString()<<")"<<endl<<flush;
+            throw std::runtime_error {"Invalid message to send"};
     }
 
     str.append("\n");
@@ -268,69 +261,69 @@ string ComMonitor::MessageToString(Message &msg) {
 Message *ComMonitor::StringToMessage(string &s) {
     Message *msg;
     size_t pos;
-    string org =s;
+    string org = s;
     string tokenCmd;
     string tokenData;
-    
+
     /* Separate command from data if string contains a ':' */
-    if ((pos=org.find(LABEL_SEPARATOR_CHAR)) != string::npos) {
-        tokenCmd = org.substr(0,pos);
-        org.erase(0,pos+1);
-        tokenData=org;
-    } else tokenCmd=org;
-    
+    if ((pos = org.find(LABEL_SEPARATOR_CHAR)) != string::npos) {
+        tokenCmd = org.substr(0, pos);
+        org.erase(0, pos + 1);
+        tokenData = org;
+    } else tokenCmd = org;
+
     /* Convert command to message */
-    if (tokenCmd.find(LABEL_MONITOR_ROBOT_MOVE)!= string::npos) {
-        msg = new MessageInt(MESSAGE_ROBOT_MOVE,stoi(tokenData));
-    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_TURN)!= string::npos) {
-        msg = new MessageInt(MESSAGE_ROBOT_TURN,stoi(tokenData));
-    } else  if (tokenCmd.find(LABEL_MONITOR_ROBOT_START_WITHOUT_WD)!= string::npos) {
+    if (tokenCmd.find(LABEL_MONITOR_ROBOT_MOVE) != string::npos) {
+        msg = new MessageInt(MESSAGE_ROBOT_MOVE, stoi(tokenData));
+    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_TURN) != string::npos) {
+        msg = new MessageInt(MESSAGE_ROBOT_TURN, stoi(tokenData));
+    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_START_WITHOUT_WD) != string::npos) {
         msg = new Message(MESSAGE_ROBOT_START_WITHOUT_WD);
-    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_START_WITH_WD)!= string::npos) {
+    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_START_WITH_WD) != string::npos) {
         msg = new Message(MESSAGE_ROBOT_START_WITH_WD);
-    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_RELOAD_WD)!= string::npos) {
+    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_RELOAD_WD) != string::npos) {
         msg = new Message(MESSAGE_ROBOT_RELOAD_WD);
-    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_PING)!= string::npos) {
+    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_PING) != string::npos) {
         msg = new Message(MESSAGE_ROBOT_PING);
-    } else  if (tokenCmd.find(LABEL_MONITOR_ROBOT_RESET)!= string::npos) {
+    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_RESET) != string::npos) {
         msg = new Message(MESSAGE_ROBOT_RESET);
-    } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_ARENA_ASK)!= string::npos) {
-        msg = new Message(MESSAGE_ASK_ARENA);
-    } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_ARENA_CONFIRM)!= string::npos) {
-        msg = new Message(MESSAGE_ARENA_CONFIRM);
-    } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_ARENA_INFIRME)!= string::npos) {
-        msg = new Message(MESSAGE_ARENA_INFIRM);
-    } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_CLOSE)!= string::npos) {
+    } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_ARENA_ASK) != string::npos) {
+        msg = new Message(MESSAGE_CAM_ASK_ARENA);
+    } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_ARENA_CONFIRM) != string::npos) {
+        msg = new Message(MESSAGE_CAM_ARENA_CONFIRM);
+    } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_ARENA_INFIRME) != string::npos) {
+        msg = new Message(MESSAGE_CAM_ARENA_INFIRM);
+    } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_CLOSE) != string::npos) {
         msg = new Message(MESSAGE_CAM_CLOSE);
-    } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_OPEN)!= string::npos) {
+    } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_OPEN) != string::npos) {
         msg = new Message(MESSAGE_CAM_OPEN);
-    } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_POSITION_COMPUTE)!= string::npos) {
-        msg = new Message(MESSAGE_COMPUTE_POSITION);
-    } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_POSITION_STOP)!= string::npos) {
-        msg = new Message(MESSAGE_STOP_COMPUTE_POSITION);
-    } else if (tokenCmd.find(LABEL_MONITOR_MESSAGE)!= string::npos) {
-        msg = new MessageString(MESSAGE_LOG,tokenData);
-    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_COM_CLOSE)!= string::npos) {
-        msg = new Message(MESSAGE_CLOSE_COM);
-    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_COM_OPEN)!= string::npos) {
-        msg = new Message(MESSAGE_OPEN_COM);
-    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_GET_BATTERY)!= string::npos) {
-        msg = new Message(MESSAGE_ROBOT_GET_BATTERY);
-    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_GET_STATE)!= string::npos) {
-        msg = new Message(MESSAGE_ROBOT_GET_STATE);
-    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_GO_FORWARD)!= string::npos) {
+    } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_POSITION_COMPUTE) != string::npos) {
+        msg = new Message(MESSAGE_CAM_POSITION_COMPUTE_START);
+    } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_POSITION_STOP) != string::npos) {
+        msg = new Message(MESSAGE_CAM_POSITION_COMPUTE_STOP);
+    } else if (tokenCmd.find(LABEL_MONITOR_MESSAGE) != string::npos) {
+        msg = new MessageString(MESSAGE_LOG, tokenData);
+    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_COM_CLOSE) != string::npos) {
+        msg = new Message(MESSAGE_ROBOT_COM_CLOSE);
+    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_COM_OPEN) != string::npos) {
+        msg = new Message(MESSAGE_ROBOT_COM_OPEN);
+    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_GET_BATTERY) != string::npos) {
+        msg = new Message(MESSAGE_ROBOT_BATTERY_GET);
+    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_GET_STATE) != string::npos) {
+        msg = new Message(MESSAGE_ROBOT_STATE_GET);
+    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_GO_FORWARD) != string::npos) {
         msg = new Message(MESSAGE_ROBOT_GO_FORWARD);
-    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_GO_BACKWARD)!= string::npos) {
-        msg = new Message(MESSAGE_ROBOT_GO_BACK);
-    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_GO_LEFT)!= string::npos) {
+    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_GO_BACKWARD) != string::npos) {
+        msg = new Message(MESSAGE_ROBOT_GO_BACKWARD);
+    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_GO_LEFT) != string::npos) {
         msg = new Message(MESSAGE_ROBOT_GO_LEFT);
-    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_GO_RIGHT)!= string::npos) {
+    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_GO_RIGHT) != string::npos) {
         msg = new Message(MESSAGE_ROBOT_GO_RIGHT);
-    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_POWEROFF)!= string::npos) {
+    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_POWEROFF) != string::npos) {
         msg = new Message(MESSAGE_ROBOT_POWEROFF);
     } else {
         msg = new Message(MESSAGE_EMPTY);
     }
-    
+
     return msg;
 }

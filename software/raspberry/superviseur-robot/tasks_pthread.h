@@ -15,14 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * \file      functions.h
- * \author    PE.Hladik
- * \version   1.0
- * \date      06/06/2017
- * \brief     Miscellaneous functions used for destijl project.
- */
-
 #ifndef __TASKS_H__
 #define __TASKS_H__
 
@@ -31,73 +23,112 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include <sys/mman.h>
+//#include "monitor.h"
+//#include "robot.h"
+//#include "image.h"
+//#include "message.h"
+//#include "server.h"
 
-#include "monitor.h"
-#include "robot.h"
-#include "image.h"
-#include "message.h"
-#include "server.h"
+#include "camera.h"
+#include "img.h"
 
-extern RT_TASK th_server;
-extern RT_TASK th_sendToMon;
-extern RT_TASK th_receiveFromMon;
-extern RT_TASK th_openComRobot;
-extern RT_TASK th_startRobot;
-extern RT_TASK th_move;
+#include "messages.h"
+#include "commonitor.h"
+#include "comrobot.h"
 
-extern RT_MUTEX mutex_robotStarted;
-extern RT_MUTEX mutex_move;
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
-extern RT_SEM sem_barrier;
-extern RT_SEM sem_openComRobot;
-extern RT_SEM sem_serverOk;
-extern RT_SEM sem_startRobot;
-
-extern RT_QUEUE q_messageToMon;
-
-extern int etatCommMoniteur;
-extern int robotStarted;
-extern char robotMove;
-
-extern int MSG_QUEUE_SIZE;
-
-extern int PRIORITY_TSERVER;
-extern int PRIORITY_TOPENCOMROBOT;
-extern int PRIORITY_TMOVE;
-extern int PRIORITY_TSENDTOMON;
-extern int PRIORITY_TRECEIVEFROMMON;
-extern int PRIORITY_TSTARTROBOT;
-
+class Tasks {
+public:
 /**
- * \brief       Thread handling server communication.
- */ 
-void f_server(void *arg);
+     * @brief Initialisation des structures de l'application (tâches, mutex, 
+     * semaphore, etc.)
+     */
+    void Init();
 
-/**
- * \brief       Thread handling communication to monitor.
- */ 
-void f_sendToMon(void *arg);
+    /**
+     * @brief Démarrage des tâches
+     */
+    void Run();
 
-/**
- * \brief       Thread handling communication from monitor.
- */ 
-void f_receiveFromMon(void *arg);
+    /**
+     * @brief Arrêt des tâches
+     */
+    void Stop();
+    
+    /**
+     */
+    void Join() {
+        threadServer->join();
+        threadTimer->join();
+        threadSendToMon->join();
+    }
+    
+    /**
+     */
+    bool AcceptClient() {
+        return monitor.AcceptClient();
+    }
+    
+     /**
+     * @brief Thread handling server communication.
+     */
+    void ServerTask(void *arg);
 
-/**
- * \brief       Thread handling opening of robot communication.
- */ 
-void f_openComRobot(void * arg);
+    /**
+     * @brief Thread handling server communication.
+     */
+    void TimerTask(void *arg);
+    
+    /**
+     * @brief Thread handling communication to monitor.
+     */
+    void SendToMonTask(void *arg);
+private:
+    ComMonitor monitor;
+    ComRobot robot;
+    
+    thread *threadServer;
+    thread *threadSendToMon;
+    thread *threadTimer;
+//    thread *threadReceiveFromMon;
+//    thread *threadOpenComRobot;
+//    thread *threadStartRobot;
+//    thread *threadMove;
+//    thread *threadTimer;
+    
+    mutex mutexTimer;
+//    mutex mutexRobotStarted;
+//    mutex mutexMove;
+//    mutex semBarrier;
+//    mutex semOpenComRobot;
+//    mutex semServerOk;
+//    mutex semStartRobot;
 
-/**
- * \brief       Thread handling robot mouvements.
- */ 
-void f_move(void *arg);
-
-/**
- * \brief       Thread handling robot activation.
- */ 
-void f_startRobot(void *arg);
+    
+//
+//    /**
+//     * @brief Thread handling communication from monitor.
+//     */
+//    void ReceiveFromMonTask(void *arg);
+//
+//    /**
+//     * @brief Thread handling opening of robot communication.
+//     */
+//    void OpenComRobotTask(void * arg);
+//
+//    /**
+//     * @brief Thread handling robot mouvements.
+//     */
+//    void MoveTask(void *arg);
+//
+//    /**
+//     * @brief Thread handling robot activation.
+//     */
+//    void StartRobotTask(void *arg);
+};
 
 #endif // __WITH_PTHREAD__
 #endif /* __TASKS_H__ */

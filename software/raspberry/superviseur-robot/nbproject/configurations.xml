@@ -26,11 +26,11 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>./lib/camera.cpp</itemPath>
+      <itemPath>/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/camera.cpp</itemPath>
       <itemPath>/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/commonitor.cpp</itemPath>
       <itemPath>/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/comrobot.cpp</itemPath>
       <itemPath>./lib/image.cpp</itemPath>
-      <itemPath>./lib/img.cpp</itemPath>
+      <itemPath>/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/img.cpp</itemPath>
       <itemPath>./main.cpp</itemPath>
       <itemPath>./lib/message.cpp</itemPath>
       <itemPath>./lib/messages.cpp</itemPath>
@@ -93,15 +93,11 @@
       </compileType>
       <item path="./gdbsudo.sh" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/camera.cpp" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="./lib/camera.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="./lib/definitions.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="./lib/image.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/img.cpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="./lib/img.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -131,6 +127,11 @@
       </item>
       <item path="./tasks.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/camera.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/commonitor.cpp"
             ex="false"
             tool="1"
@@ -149,6 +150,11 @@
       <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/comrobot.h"
             ex="false"
             tool="3"
+            flavor2="0">
+      </item>
+      <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/img.cpp"
+            ex="false"
+            tool="1"
             flavor2="0">
       </item>
       <item path="tasks_pthread.cpp" ex="false" tool="1" flavor2="0">
@@ -178,8 +184,6 @@
       </compileType>
       <item path="./gdbsudo.sh" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/camera.cpp" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="./lib/camera.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="./lib/definitions.h" ex="false" tool="3" flavor2="0">
@@ -187,8 +191,6 @@
       <item path="./lib/image.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="./lib/image.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/img.cpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="./lib/img.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -218,6 +220,11 @@
       </item>
       <item path="./tasks.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/camera.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/commonitor.cpp"
             ex="false"
             tool="1"
@@ -236,6 +243,11 @@
       <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/comrobot.h"
             ex="false"
             tool="3"
+            flavor2="0">
+      </item>
+      <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/img.cpp"
+            ex="false"
+            tool="1"
             flavor2="0">
       </item>
       <item path="tasks_pthread.cpp" ex="false" tool="1" flavor2="0">
@@ -282,8 +294,6 @@
       </compileType>
       <item path="./gdbsudo.sh" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/camera.cpp" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="./lib/camera.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="./lib/definitions.h" ex="false" tool="3" flavor2="0">
@@ -291,8 +301,6 @@
       <item path="./lib/image.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="./lib/image.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/img.cpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="./lib/img.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -322,6 +330,11 @@
       </item>
       <item path="./tasks.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/camera.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/commonitor.cpp"
             ex="false"
             tool="1"
@@ -340,6 +353,11 @@
       <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/comrobot.h"
             ex="false"
             tool="3"
+            flavor2="0">
+      </item>
+      <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/img.cpp"
+            ex="false"
+            tool="1"
             flavor2="0">
       </item>
       <item path="tasks_pthread.cpp" ex="false" tool="1" flavor2="0">
@@ -366,7 +384,7 @@
             <pElem>./</pElem>
             <pElem>./lib</pElem>
           </incDir>
-          <commandLine>-D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables</commandLine>
+          <commandLine>-D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -Wno-pmf-conversions</commandLine>
           <preprocessorList>
             <Elem>_WITH_TRACE_</Elem>
             <Elem>__FOR_PC__</Elem>
@@ -382,8 +400,6 @@
       </compileType>
       <item path="./gdbsudo.sh" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/camera.cpp" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="./lib/camera.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="./lib/definitions.h" ex="false" tool="3" flavor2="0">
@@ -392,11 +408,9 @@
       </item>
       <item path="./lib/image.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/img.cpp" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="./lib/img.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/message.cpp" ex="false" tool="1" flavor2="9">
+      <item path="./lib/message.cpp" ex="true" tool="1" flavor2="9">
       </item>
       <item path="./lib/message.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -404,21 +418,26 @@
       </item>
       <item path="./lib/messages.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/monitor.cpp" ex="false" tool="1" flavor2="9">
+      <item path="./lib/monitor.cpp" ex="true" tool="1" flavor2="9">
       </item>
       <item path="./lib/monitor.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/robot.cpp" ex="false" tool="1" flavor2="9">
+      <item path="./lib/robot.cpp" ex="true" tool="1" flavor2="9">
       </item>
       <item path="./lib/robot.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/server.cpp" ex="false" tool="1" flavor2="9">
+      <item path="./lib/server.cpp" ex="true" tool="1" flavor2="9">
       </item>
       <item path="./lib/server.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="./main.cpp" ex="false" tool="1" flavor2="9">
       </item>
       <item path="./tasks.cpp" ex="true" tool="1" flavor2="9">
+      </item>
+      <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/camera.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
       </item>
       <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/commonitor.cpp"
             ex="false"
@@ -438,6 +457,11 @@
       <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/comrobot.h"
             ex="false"
             tool="3"
+            flavor2="0">
+      </item>
+      <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/img.cpp"
+            ex="false"
+            tool="1"
             flavor2="0">
       </item>
       <item path="tasks_pthread.cpp" ex="false" tool="1" flavor2="9">

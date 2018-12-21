@@ -15,15 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * \file      functions.h
- * \author    PE.Hladik
- * \version   1.0
- * \date      06/06/2017
- * \brief     Miscellaneous functions used for destijl project.
- */
-
 #include "tasks.h"
+
+#ifndef __WITH_PTHREAD__
+
+// Déclaration des priorités des taches
+#define PRIORITY_TSERVER 30
+#define PRIORITY_TOPENCOMROBOT 20
+#define PRIORITY_TMOVE 10
+#define PRIORITY_TSENDTOMON 25
+#define PRIORITY_TRECEIVEFROMMON 22
+#define PRIORITY_TSTARTROBOT 20
 
 char mode_start;
 
@@ -259,3 +261,5 @@ void write_in_queue(RT_QUEUE *queue, MessageToMon msg) {
     memcpy(buff, &msg, sizeof (MessageToMon));
     rt_queue_send(&q_messageToMon, buff, sizeof (MessageToMon), Q_NORMAL);
 }
+
+#endif // __WITH_PTHREAD__

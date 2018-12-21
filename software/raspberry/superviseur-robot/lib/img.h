@@ -49,7 +49,7 @@ typedef struct {
 
 class Arene {
 public:
-    Arene();
+    Arene() {}
     
     cv::Rect arene;
     bool empty();

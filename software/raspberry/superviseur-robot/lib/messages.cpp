@@ -27,7 +27,12 @@
 const string MESSAGE_ID_STRING[] = {
     "Empty",
     "Log",
-    "Answer",
+    "Answer [Acknowledge]",
+    "Answer [Not Acknowledge]",
+    "Answer [Command timeout]",
+    "Answer [Command unknown]",
+    "Answer [Command error]",
+    "Answer [Communication error]",
     "Monitor connection lost",
     "Open serial com",
     "Close serial com",
@@ -42,8 +47,8 @@ const string MESSAGE_ID_STRING[] = {
     "Image",
     "Robot ping",
     "Robot reset",
-    "Robot start with wtachdog",
-    "Robot start without wtachdog",
+    "Robot start with watchdog",
+    "Robot start without watchdog",
     "Robot reload watchdog",
     "Robot move",
     "Robot turn",
@@ -56,7 +61,9 @@ const string MESSAGE_ID_STRING[] = {
     "Robot get battery",
     "Robot battery level",
     "Robot get state",
-    "Robot current state"
+    "Robot current state",
+    "Robot state [Not busy]",
+    "Robot state [Busy]"
 };
 
 /*
@@ -108,7 +115,7 @@ void Message::SetID(MessageID id) {
  */
 string Message::ToString() {
     if (CheckID(this->messageID))
-        return "Id: \"" + MESSAGE_ID_STRING[this->messageID] + "\"";
+        return "Message: \"" + MESSAGE_ID_STRING[this->messageID] + "\"";
     else
         return "Invalid message";
 }
@@ -118,7 +125,7 @@ string Message::ToString() {
  * @return A message, copy of current
  */
 Message* Message::Copy() {
-    Message *msg = new Message();
+    Message *msg = new Message(this->messageID);
 
     return msg;
 }
@@ -128,30 +135,12 @@ Message* Message::Copy() {
  * @return Current message ID
  */
 bool Message::CheckID(MessageID id) {
-    if ((id != MESSAGE_EMPTY) &&
-            (id != MESSAGE_MONITOR_LOST) &&
-            (id != MESSAGE_ARENA_CONFIRM) &&
-            (id != MESSAGE_ARENA_INFIRM) &&
-            (id != MESSAGE_ASK_ARENA) &&
-            (id != MESSAGE_CAM_CLOSE) &&
-            (id != MESSAGE_CAM_OPEN) &&
-            (id != MESSAGE_CLOSE_COM) &&
-            (id != MESSAGE_COMPUTE_POSITION) &&
-            (id != MESSAGE_OPEN_COM) &&
-            (id != MESSAGE_ROBOT_GET_BATTERY) &&
-            (id != MESSAGE_ROBOT_GET_STATE) &&
-            (id != MESSAGE_ROBOT_GO_BACK) &&
-            (id != MESSAGE_ROBOT_GO_FORWARD) &&
-            (id != MESSAGE_ROBOT_GO_LEFT) &&
-            (id != MESSAGE_ROBOT_GO_RIGHT) &&
-            (id != MESSAGE_ROBOT_PING) &&
-            (id != MESSAGE_ROBOT_POWEROFF) &&
-            (id != MESSAGE_ROBOT_RELOAD_WD) &&
-            (id != MESSAGE_ROBOT_RESET) &&
-            (id != MESSAGE_ROBOT_START_WITHOUT_WD) &&
-            (id != MESSAGE_ROBOT_START_WITH_WD) &&
-            (id != MESSAGE_ROBOT_STOP) &&
-            (id != MESSAGE_STOP_COMPUTE_POSITION)) {
+    if ((id == MESSAGE_CAM_IMAGE) ||
+        (id == MESSAGE_CAM_POSITION) ||
+        (id == MESSAGE_ROBOT_MOVE) ||
+        (id == MESSAGE_ROBOT_TURN) ||
+        (id == MESSAGE_LOG) ||
+        (id == MESSAGE_ROBOT_BATTERY_LEVEL)) {
         return false;
     } else return true;
 }
@@ -197,7 +186,7 @@ void MessageInt::SetID(MessageID id) {
  */
 string MessageInt::ToString() {
     if (CheckID(this->messageID))
-        return "Id: \"" + MESSAGE_ID_STRING[this->messageID] + "\"\nValue: " + to_string(this->value);
+        return "Message: \"" + MESSAGE_ID_STRING[this->messageID] + "\"\nValue: " + to_string(this->value);
     else
         return "Invalid message";
 }
@@ -263,7 +252,7 @@ void MessageString::SetID(MessageID id) {
  */
 string MessageString::ToString() {
     if (CheckID(this->messageID))
-        return "Id: \"" + MESSAGE_ID_STRING[this->messageID] + "\"\nString: \"" + this->s + "\"";
+        return "Message: \"" + MESSAGE_ID_STRING[this->messageID] + "\"\nString: \"" + this->s + "\"";
     else
         return "Invalid message";
 }
@@ -342,7 +331,7 @@ void MessageImg::SetImage(Img* image) {
  */
 string MessageImg::ToString() {
     if (CheckID(this->messageID))
-        return "Id: \"" + MESSAGE_ID_STRING[this->messageID] + "\"\n" + this->image->ToString();
+        return "Message: \"" + MESSAGE_ID_STRING[this->messageID] + "\"\n" + this->image->ToString();
     else
         return "Invalid message";
 }
@@ -362,91 +351,7 @@ Message* MessageImg::Copy() {
  * @return true, if message ID is acceptable, false otherwise
  */
 bool MessageImg::CheckID(MessageID id) {
-    if (id != MESSAGE_IMAGE) {
-        return false;
-    } else return true;
-}
-
-/* class MessageAnswer*/
-
-/**
- * Create a new, empty answer message
- */
-MessageAnswer::MessageAnswer() {
-    answer=ANSWER_ACK;
-}
-
-/**
- * Create a new answer message, with given ID and answer
- * @param id Message ID
- * @param ans Answer ID
- * @throw std::runtime_error if message ID is incompatible with string data
- */
-MessageAnswer::MessageAnswer(MessageID id, AnswerID ans) {
-    MessageAnswer::SetID(id);
-    MessageAnswer::SetAnswer(ans);
-}
-
-/**
- * Set message ID
- * @param id Message ID
- * @throw std::runtime_error if message ID is incompatible with answer message
- */
-void MessageAnswer::SetID(MessageID id) {
-    if (CheckID(id))
-        messageID = id;
-    else
-        throw std::runtime_error {
-        "Invalid message id for MessageAnswer"
-    };
-}
-
-/**
- * Set message answer
- * @param ans Answer ID
- * @throw std::runtime_error if answer ID is incompatible with answer data
- */
-void MessageAnswer::SetAnswer(AnswerID ans) {
-    if ((ans != ANSWER_ACK) &&
-            (ans != ANSWER_NACK) &&
-            (ans != ANSWER_LOST_ROBOT) &&
-            (ans != ANSWER_ROBOT_CHECKSUM) &&
-            (ans != ANSWER_ROBOT_ERROR) &&
-            (ans != ANSWER_ROBOT_TIMEOUT) &&
-            (ans != ANSWER_ROBOT_UNKNOWN_COMMAND)) {
-        this->answer = answer;
-    } else {
-        throw std::runtime_error{
-            "Invalid answer for MessageAnswer"};
-    }
-}
-
-/**
- * Translate content of message into a string that can be displayed
- * @return A string describing message contents
- */
-string MessageAnswer::ToString() {
-    if (CheckID(this->messageID))
-        return "Id: \"" + MESSAGE_ID_STRING[this->messageID] + "\"\nAnswer: \"" + ANSWER_ID_STRING[this->answer] + "\"";
-    else
-        return "Invalid message";
-}
-
-/**
- * Allocate a new message and copy contents of current message
- * @return A message, copy of current
- */
-Message* MessageAnswer::Copy() {
-    return new MessageAnswer(this->messageID, this->answer);
-}
-
-/**
- * Verify if message ID is compatible with current message type
- * @param id Message ID
- * @return true, if message ID is acceptable, false otherwise
- */
-bool MessageAnswer::CheckID(MessageID id) {
-    if ((id != MESSAGE_ANSWER)) {
+    if (id != MESSAGE_CAM_IMAGE) {
         return false;
     } else return true;
 }
@@ -523,7 +428,7 @@ string MessageBattery::ToString() {
     }
     
     if (CheckID(this->messageID))
-        return "Id: \"" + MESSAGE_ID_STRING[this->messageID] + "\"\nBattery level: \"" + levelString + "\"";
+        return "Message: \"" + MESSAGE_ID_STRING[this->messageID] + "\"\nBattery level: \"" + levelString + "\"";
     else
         return "Invalid message";
 }
@@ -603,7 +508,7 @@ void MessagePosition::SetPosition(Position& pos) {
  */
 string MessagePosition::ToString() {
     if (CheckID(this->messageID))
-        return "Id: \"" + MESSAGE_ID_STRING[this->messageID] + "\"\nPosition: \"" + to_string(this->pos.center.x) + ";" + to_string(this->pos.center.y) + "\"";
+        return "Message: \"" + MESSAGE_ID_STRING[this->messageID] + "\"\nPosition: \"" + to_string(this->pos.center.x) + ";" + to_string(this->pos.center.y) + "\"";
     else
         return "Invalid message";
 }
@@ -622,91 +527,7 @@ Message* MessagePosition::Copy() {
  * @return true, if message ID is acceptable, false otherwise
  */
 bool MessagePosition::CheckID(MessageID id) {
-    if ((id != MESSAGE_POSITION)) {
-        return false;
-    } else return true;
-}
-
-
-/* class MessageState */
-
-/**
- * Create a new, empty state message
- */
-MessageState::MessageState() {
-    state = ROBOT_NOT_BUSY;
-}
-
-/**
- * Create a new string message, with given ID and string
- * @param id Message ID
- * @param s Message string
- * @throw std::runtime_error if message ID is incompatible with string data
- */
-MessageState::MessageState(MessageID id, RobotState state) {
-    MessageState::SetID(id);
-    MessageState::SetState(state);
-}
-
-/**
- * Set message ID
- * @param id Message ID
- * @throw std::runtime_error if message ID is incompatible with robot state
- */
-void MessageState::SetID(MessageID id) {
-    if (CheckID(id))
-        messageID = id;
-    else
-        throw std::runtime_error {
-        "Invalid message id for MessageState"
-    };
-}
-
-/**
- * Set robot state
- * @param state Robot state
- */
-void MessageState::SetState(RobotState state) {
-    if ((state != ROBOT_NOT_BUSY) && (state != ROBOT_BUSY)) {
-        throw std::runtime_error{
-            "Invalid state for MessageState"};
-    } else {
-        this->state = state;
-    }
-}
-    
-/**
- * Translate content of message into a string that can be displayed
- * @return A string describing message contents
- */
-string MessageState::ToString() {
-    string stateString;
-    
-    if (this->state == ROBOT_NOT_BUSY) stateString="Not busy";
-    else if (this->state == ROBOT_BUSY) stateString="Busy";
-    else stateString="Invalid state";
-    
-    if (CheckID(this->messageID))
-        return "Id: \"" + MESSAGE_ID_STRING[this->messageID] + "\"\nState: \"" + stateString + "\"";
-    else
-        return "Invalid message";
-}
-
-/**
- * Allocate a new message and copy contents of current message
- * @return A message, copy of current
- */
-Message* MessageState::Copy() {
-    return new MessageState(this->messageID, this->state);
-}
-
-/**
- * Verify if message ID is compatible with current message type
- * @param id Message ID
- * @return true, if message ID is acceptable, false otherwise
- */
-bool MessageState::CheckID(MessageID id) {
-    if ((id != MESSAGE_ROBOT_CURRENT_STATE)) {
+    if ((id != MESSAGE_CAM_POSITION)) {
         return false;
     } else return true;
 }

@@ -43,8 +43,10 @@ OBJECTFILES= \
 	${OBJECTDIR}/lib/server.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/tasks.o \
+	${OBJECTDIR}/_ext/6cc0dc4a/camera.o \
 	${OBJECTDIR}/_ext/6cc0dc4a/commonitor.o \
 	${OBJECTDIR}/_ext/6cc0dc4a/comrobot.o \
+	${OBJECTDIR}/_ext/6cc0dc4a/img.o \
 	${OBJECTDIR}/tasks_pthread.o
 
 
@@ -112,6 +114,11 @@ ${OBJECTDIR}/tasks.o: tasks.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_WITH_TRACE_ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tasks.o tasks.cpp
 
+${OBJECTDIR}/_ext/6cc0dc4a/camera.o: /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/camera.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/6cc0dc4a
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/6cc0dc4a/camera.o /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/camera.cpp
+
 ${OBJECTDIR}/_ext/6cc0dc4a/commonitor.o: /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/commonitor.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/6cc0dc4a
 	${RM} "$@.d"
@@ -121,6 +128,11 @@ ${OBJECTDIR}/_ext/6cc0dc4a/comrobot.o: /home/dimercur/Documents/Travail/git/dumb
 	${MKDIR} -p ${OBJECTDIR}/_ext/6cc0dc4a
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_WITH_TRACE_ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/6cc0dc4a/comrobot.o /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/comrobot.cpp
+
+${OBJECTDIR}/_ext/6cc0dc4a/img.o: /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/img.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/6cc0dc4a
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/6cc0dc4a/img.o /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/img.cpp
 
 ${OBJECTDIR}/tasks_pthread.o: tasks_pthread.cpp
 	${MKDIR} -p ${OBJECTDIR}

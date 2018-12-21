@@ -23,6 +23,8 @@
 
 using namespace std;
      
+#define SERVER_PORT 1234
+
 /**
  * Class used for generating a server and communicating through it with monitor
  * 

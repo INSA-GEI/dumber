@@ -15,17 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * \file      functions.h
- * \author    PE.Hladik
- * \version   1.0
- * \date      06/06/2017
- * \brief     Miscellaneous functions used for destijl project.
- */
-
 #ifndef __TASKS_H__
 #define __TASKS_H__
 
+#ifndef __WITH_PTHREAD__
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -37,71 +30,107 @@
 #include <alchemy/sem.h>
 #include <alchemy/queue.h>
 
-#include "monitor.h"
-#include "robot.h"
-#include "image.h"
-#include "message.h"
-#include "server.h"
+//#include "monitor.h"
+//#include "robot.h"
+//#include "image.h"
+//#include "message.h"
+//#include "server.h"
 
-extern RT_TASK th_server;
-extern RT_TASK th_sendToMon;
-extern RT_TASK th_receiveFromMon;
-extern RT_TASK th_openComRobot;
-extern RT_TASK th_startRobot;
-extern RT_TASK th_move;
+#include "messages.h"
+#include "commonitor.h"
+#include "comrobot.h"
 
-extern RT_MUTEX mutex_robotStarted;
-extern RT_MUTEX mutex_move;
+using namespace std;
 
-extern RT_SEM sem_barrier;
-extern RT_SEM sem_openComRobot;
-extern RT_SEM sem_serverOk;
-extern RT_SEM sem_startRobot;
+class Tasks {
+public:
+    /**
+     * @brief Initialisation des structures de l'application (tâches, mutex, 
+     * semaphore, etc.)
+     */
+    void Init();
 
-extern RT_QUEUE q_messageToMon;
+    /**
+     * @brief Démarrage des tâches
+     */
+    void Run();
 
-extern int etatCommMoniteur;
-extern int robotStarted;
-extern char robotMove;
+    /**
+     * @brief Arrêt des tâches
+     */
+    void Stop();
+    
+    /**
+     */
+    void Join() {
+        rt_sem_broadcast(&sem_barrier);
+        pause();
+    }
+    
+    /**
+     */
+    bool AcceptClient() {
+        return false;
+    }
+    
+private:
+    ComMonitor monitor;
+    ComRobot robot;
+    
+    RT_TASK th_server;
+    RT_TASK th_sendToMon;
+    RT_TASK th_receiveFromMon;
+    RT_TASK th_openComRobot;
+    RT_TASK th_startRobot;
+    RT_TASK th_move;
 
-extern int MSG_QUEUE_SIZE;
+    RT_MUTEX mutex_robotStarted;
+    RT_MUTEX mutex_move;
 
-extern int PRIORITY_TSERVER;
-extern int PRIORITY_TOPENCOMROBOT;
-extern int PRIORITY_TMOVE;
-extern int PRIORITY_TSENDTOMON;
-extern int PRIORITY_TRECEIVEFROMMON;
-extern int PRIORITY_TSTARTROBOT;
+    RT_SEM sem_barrier;
+    RT_SEM sem_openComRobot;
+    RT_SEM sem_serverOk;
+    RT_SEM sem_startRobot;
 
-/**
- * \brief       Thread handling server communication.
- */ 
-void f_server(void *arg);
+    RT_QUEUE q_messageToMon;
 
-/**
- * \brief       Thread handling communication to monitor.
- */ 
-void f_sendToMon(void *arg);
+    int etatCommMoniteur;
+    int robotStarted;
+    char robotMove;
 
-/**
- * \brief       Thread handling communication from monitor.
- */ 
-void f_receiveFromMon(void *arg);
+    int MSG_QUEUE_SIZE;
 
-/**
- * \brief       Thread handling opening of robot communication.
- */ 
-void f_openComRobot(void * arg);
+    /**
+     * \brief       Thread handling server communication.
+     */
+    void f_server(void *arg);
 
-/**
- * \brief       Thread handling robot mouvements.
- */ 
-void f_move(void *arg);
+    /**
+     * \brief       Thread handling communication to monitor.
+     */
+    void f_sendToMon(void *arg);
 
-/**
- * \brief       Thread handling robot activation.
- */ 
-void f_startRobot(void *arg);
+    /**
+     * \brief       Thread handling communication from monitor.
+     */
+    void f_receiveFromMon(void *arg);
 
-#endif /* FUNCTIONS_H */
+    /**
+     * \brief       Thread handling opening of robot communication.
+     */
+    void f_openComRobot(void * arg);
+
+    /**
+     * \brief       Thread handling robot mouvements.
+     */
+    void f_move(void *arg);
+
+    /**
+     * \brief       Thread handling robot activation.
+     */
+    void f_startRobot(void *arg);
+};
+
+#endif // __WITH_PTHREAD__
+#endif // __TASKS_H__ 
 

@@ -33,11 +33,16 @@ typedef enum {
     MESSAGE_LOG,
     
     // Message containing answer (after robot command, or for monitor)
-    MESSAGE_ANSWER,
+    MESSAGE_ANSWER_ACK,
+    MESSAGE_ANSWER_NACK,
+    MESSAGE_ANSWER_ROBOT_TIMEOUT,
+    MESSAGE_ANSWER_ROBOT_UNKNOWN_COMMAND,
+    MESSAGE_ANSWER_ROBOT_ERROR,
+    MESSAGE_ANSWER_COM_ERROR,
            
     // messages for serial communication with robot
-    MESSAGE_OPEN_COM,
-    MESSAGE_CLOSE_COM,
+    MESSAGE_ROBOT_COM_OPEN,
+    MESSAGE_ROBOT_COM_CLOSE,
          
     // Messages specific to server
     MESSAGE_MONITOR_LOST,
@@ -45,13 +50,13 @@ typedef enum {
     // Messages for camera   
     MESSAGE_CAM_OPEN,
     MESSAGE_CAM_CLOSE,
-    MESSAGE_ASK_ARENA,
-    MESSAGE_ARENA_CONFIRM,
-    MESSAGE_ARENA_INFIRM,
-    MESSAGE_COMPUTE_POSITION,
-    MESSAGE_STOP_COMPUTE_POSITION,
-    MESSAGE_POSITION,
-    MESSAGE_IMAGE,
+    MESSAGE_CAM_ASK_ARENA,
+    MESSAGE_CAM_ARENA_CONFIRM,
+    MESSAGE_CAM_ARENA_INFIRM,
+    MESSAGE_CAM_POSITION_COMPUTE_START,
+    MESSAGE_CAM_POSITION_COMPUTE_STOP,
+    MESSAGE_CAM_POSITION,
+    MESSAGE_CAM_IMAGE,
             
     // Messages for robot
     MESSAGE_ROBOT_PING,
@@ -62,26 +67,17 @@ typedef enum {
     MESSAGE_ROBOT_MOVE,
     MESSAGE_ROBOT_TURN,
     MESSAGE_ROBOT_GO_FORWARD,
-    MESSAGE_ROBOT_GO_BACK,
+    MESSAGE_ROBOT_GO_BACKWARD,
     MESSAGE_ROBOT_GO_LEFT,
     MESSAGE_ROBOT_GO_RIGHT,
     MESSAGE_ROBOT_STOP,
     MESSAGE_ROBOT_POWEROFF,
-    MESSAGE_ROBOT_GET_BATTERY,
+    MESSAGE_ROBOT_BATTERY_GET,
     MESSAGE_ROBOT_BATTERY_LEVEL,
-    MESSAGE_ROBOT_GET_STATE,
-    MESSAGE_ROBOT_CURRENT_STATE
+    MESSAGE_ROBOT_STATE_GET,
+    MESSAGE_ROBOT_STATE_NOT_BUSY,
+    MESSAGE_ROBOT_STATE_BUSY
 } MessageID;
-
-typedef enum {
-    ANSWER_ACK=0,
-    ANSWER_NACK,
-    ANSWER_LOST_ROBOT,
-    ANSWER_ROBOT_TIMEOUT,
-    ANSWER_ROBOT_UNKNOWN_COMMAND,
-    ANSWER_ROBOT_ERROR,
-    ANSWER_ROBOT_CHECKSUM
-} AnswerID;
 
 typedef enum {
     BATTERY_UNKNOWN=-1,
@@ -89,11 +85,6 @@ typedef enum {
     BATTERY_LOW,
     BATTERY_FULL
 } BatteryLevel;
-
-typedef enum {
-    ROBOT_NOT_BUSY=0,
-    ROBOT_BUSY
-} RobotState;
 
 using namespace std;
 
@@ -132,6 +123,15 @@ public:
      */
     virtual Message* Copy();
 
+    /**
+     * Compare message ID
+     * @param id Id to compare message to
+     * @return true if id is equal to message id, false otherwise
+     */
+    bool CompareID(MessageID id) {
+        return (this->messageID == id) ? true:false;
+    }
+    
     /**
      * Get message ID
      * @return Current message ID
@@ -563,140 +563,5 @@ protected:
     bool CheckID(MessageID id);
 };
 
-/**
- * Message class for holding answer, based on Message class
- * 
- * @brief Answer message class
- * 
- */
-class MessageAnswer : public Message {
-public:
-    /**
-     * Create a new, empty image message
-     */
-    MessageAnswer();
-
-    /**
-     * Create a new image message, with given ID and boolean value
-     * @param id Message ID
-     * @param ans Answer ID
-     * @throw std::runtime_error if message ID is incompatible with image message
-     */
-    MessageAnswer(MessageID id, AnswerID ans);
-
-    /**
-     * Set message ID
-     * @param id Message ID
-     * @throw std::runtime_error if message ID is incompatible withimage message
-     */
-    void SetID(MessageID id);
-
-    /**
-     * Get message image
-     * @return Pointer to image
-     */
-    AnswerID GetAnswer() {
-        return answer;
-    }
-
-    /**
-     * Set message answer
-     * @param ans Answer ID
-     */
-    void SetAnswer(AnswerID ans);
-
-    /**
-     * Translate content of message into a string that can be displayed
-     * @return A string describing message contents
-     */
-    string ToString();
-
-    /**
-     * Allocate a new message and copy contents of current message
-     * @return A message, copy of current
-     */
-    Message* Copy();
-
-protected:
-    /**
-     * Message answer
-     */
-   AnswerID answer;
-
-    /**
-     * Verify if message ID is compatible with current message type
-     * @param id Message ID
-     * @return true, if message ID is acceptable, false otherwise
-     */
-    bool CheckID(MessageID id);
-};
-
-/**
- * Message class for holding robot state, based on Message class
- * 
- * @brief Answer message class
- * 
- */
-class MessageState: public Message {
-public:
-    /**
-     * Create a new, empty image message
-     */
-    MessageState();
-
-    /**
-     * Create a new image message, with given ID and boolean value
-     * @param id Message ID
-     * @param image Pointer to image
-     * @throw std::runtime_error if message ID is incompatible with image message
-     */
-    MessageState(MessageID id, RobotState state);
-
-    /**
-     * Set message ID
-     * @param id Message ID
-     * @throw std::runtime_error if message ID is incompatible withimage message
-     */
-    void SetID(MessageID id);
-
-    /**
-     * Get message image
-     * @return Pointer to image
-     */
-    RobotState GetState() {
-        return state;
-    }
-
-    /**
-     * Set message image
-     * @param image Pointer to image object
-     */
-    void SetState(RobotState state);
-
-    /**
-     * Translate content of message into a string that can be displayed
-     * @return A string describing message contents
-     */
-    string ToString();
-
-    /**
-     * Allocate a new message and copy contents of current message
-     * @return A message, copy of current
-     */
-    Message* Copy();
-
-protected:
-    /**
-     * Robot state
-     */
-   RobotState state;
-
-    /**
-     * Verify if message ID is compatible with current message type
-     * @param id Message ID
-     * @return true, if message ID is acceptable, false otherwise
-     */
-    bool CheckID(MessageID id);
-};
 #endif /* __MESSAGES_H__ */
 

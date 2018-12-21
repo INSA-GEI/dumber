@@ -35,16 +35,23 @@
 /*
  * Constants to be used for communicating with robot. Contains command tag
  */
-typedef enum {
-    LABEL_ANGLE_POSITION = 'p',
-    LABEL_ANGULAR_SPEED = 's',
-    LABEL_BATTERY_LEVEL = 'b',
-    LABEL_BETA_ANGLE = 'v',
-    LABEL_USER_PRESENCE = 'u',
+const char LABEL_ROBOT_PING = 'p';
+const char LABEL_ROBOT_RESET = 'r';
+const char LABEL_ROBOT_START_WITH_WD = 'W';
+const char LABEL_ROBOT_START_WITHOUT_WD = 'u';
+const char LABEL_ROBOT_RELOAD_WD = 'w';
+const char LABEL_ROBOT_MOVE = 'M';
+const char LABEL_ROBOT_TURN = 'T';
+const char LABEL_ROBOT_GET_BATTERY = 'v';
+const char LABEL_ROBOT_GET_STATE = 'b';
+const char LABEL_ROBOT_POWEROFF = 'z';
 
-    LABEL_TORQUE = 'c',
-    LABEL_EMERGENCY_STOP = 'a'
-} LabelRobot;
+const char LABEL_ROBOT_OK = 'O';
+const char LABEL_ROBOT_ERROR = 'E';
+const char LABEL_ROBOT_UNKNOWN_COMMAND = 'C';
+
+const char LABEL_ROBOT_SEPARATOR_CHAR = '=';
+const char LABEL_ROBOT_ENDING_CHAR = 0x0D; // carriage return (\\r)
 
 /**
  * Open serial link with robot
@@ -52,22 +59,35 @@ typedef enum {
  * @throw std::runtime_error if it fails
  */
 int ComRobot::Open() {
-    fd = open(USART_FILENAME, O_RDWR | O_NOCTTY /*| O_NDELAY*/); //Open in blocking read/write mode
+    return this->Open(USART_FILENAME);
+}
+
+/**
+ * Open serial link with robot
+ * @param usart Filename of usart to open
+ * @return File descriptor
+ * @throw std::runtime_error if it fails
+ */
+int ComRobot::Open(string usart) {
+    struct termios options;
+    
+    fd = open(usart.c_str(), O_RDWR | O_NOCTTY /*| O_NDELAY*/); //Open in blocking read/write mode
     if (fd == -1) {
-        //ERROR - CAN'T OPEN SERIAL PORT
-        throw std::runtime_error{"Error - Unable to open UART " + string(USART_FILENAME) + ".  Ensure it is not in use by another application"};
+        cerr<<"["<<__PRETTY_FUNCTION__<<"] Unable to open UART ("<<usart<<"). Ensure it is not in use by another application"<<endl<<flush;
+        throw std::runtime_error{"Unable to open UART"};
         exit(EXIT_FAILURE);
     }
-
-    //Configuration of the serial port 115 520 Bauds
-    struct termios options;
-    tcgetattr(fd, &options);
-    options.c_cflag = B115200 | CS8 | CLOCAL | CREAD; //<Set baud rate
-    options.c_iflag = IGNPAR; // ignores bytes with bad parity
-    options.c_oflag = 0;
-    options.c_lflag = 0;
-    tcflush(fd, TCIFLUSH);
-    tcsetattr(fd, TCSANOW, &options);
+    else
+    {
+        fcntl(fd, F_SETFL, 0);
+        tcgetattr(fd, &options);
+        options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+        cfsetospeed (&options, B9600);
+        cfsetispeed (&options, B9600);
+        options.c_cc[VMIN]=0;
+        options.c_cc[VTIME]=1; /* Timeout of 100 ms per character*/
+        tcsetattr(fd, TCSANOW, &options);
+    }
 
     return fd;
 }
@@ -79,185 +99,6 @@ int ComRobot::Open() {
 int ComRobot::Close() {
     return close(fd);
 }
-
-/**
- * Get a message from robot
- * @return Message currently received
- * @attention A message object is created (new) when receiving data from robot. You MUST remember to destroy is (delete) after use
- * @attention Read method is blocking until a message is received
- * @warning Read is not thread safe : Do not call it in multiple tasks simultaneously
- */
-Message* ComRobot::Read() {
-    int rxLength;
-    unsigned char rxBuffer[6];
-    unsigned char receivedChar;
-    bool messageComplete = false;
-    Message *msg;
-    unsigned int i;
-
-    /* Call pre method for read */
-    Read_Pre();
-
-    /* a message is composed of 7 bytes.
-                the byte 0 should always be '<'
-                the byte 1 should be an ascii char that is the label. It define what the data represent
-                the bytes 2 to 5 are the float value
-                the byte 6 should always be a '\n'
-     */
-    while (messageComplete == false) {
-        rxLength = read(this->fd, (void*) &receivedChar, 1); //Filestream, buffer to store in, number of bytes to read (max)
-        //printf ("W=%02X ", receivedChar);
-
-        if (rxLength <= -1) {
-            this->lostCom = true;
-            printf("Warning: communication lost in ComStm32::Read\n");
-            msg = new Message();
-
-            return msg;
-        } else if (rxLength == 0) {
-            // nothing to do
-        } else if (receivedChar == '<') { // start of frame received
-            i = 0;
-
-            do {
-                rxLength = read(this->fd, (void*) &rxBuffer[i], 6 - i); //Filestream, buffer to store in, number of bytes to read (max)
-
-                if (rxLength >= 0)
-                    i = i + rxLength;
-                else {
-                    printf("Error while reading (%i)", rxLength);
-
-                    return NULL;
-                }
-            } while (i < 6);
-
-            if (rxBuffer[5] == '\n') {
-                messageComplete = true;
-            }
-        }
-    }
-
-    /* Treatment of received message */
-    msg = CharToMessage(rxBuffer);
-
-    /* Call Post method for read */
-    Read_Post();
-
-    return msg;
-}
-
-/**
- * Convert an array of char to its message representation (when receiving data from stm32)
- * @param bytes Array of char
- * @return Message corresponding to received array of char
- */
-Message* ComRobot::CharToMessage(unsigned char *bytes) {
-    Message *msg = __null;
-    MessageFloat *msgf;
-    MessageBool *msgb;
-
-    switch (bytes[0]) {
-        case LABEL_ANGLE_POSITION:
-            msgf = new MessageFloat();
-            msgf->SetID(MESSAGE_ANGLE_POSITION);
-            msgf->SetValue(CharToFloat(&bytes[1]));
-            msg = (Message*) msgf;
-
-            break;
-        case LABEL_ANGULAR_SPEED:
-            msgf = new MessageFloat();
-            msgf->SetID(MESSAGE_ANGULAR_SPEED);
-            msgf->SetValue(CharToFloat(&bytes[1]));
-            msg = (Message*) msgf;
-
-            break;
-        case LABEL_BATTERY_LEVEL:
-            msgf = new MessageFloat();
-            msgf->SetID(MESSAGE_BATTERY);
-            msgf->SetValue(CharToFloat(&bytes[1]));
-            msg = (Message*) msgf;
-
-            break;
-        case LABEL_BETA_ANGLE:
-            msgf = new MessageFloat();
-            msgf->SetID(MESSAGE_BETA);
-            msgf->SetValue(CharToFloat(&bytes[1]));
-            msg = (Message*) msgf;
-
-            break;
-        case LABEL_USER_PRESENCE:
-            msgb = new MessageBool();
-            msgb->SetID(MESSAGE_USER_PRESENCE);
-            msgb->SetState(CharToBool(&bytes[1]));
-            msg = (Message*) msgb;
-
-            break;
-        default:
-            printf("Unknown message received from robot (%i)\n", bytes[0]);
-            fflush(stdout);
-            msg = new Message();
-    }
-
-    if (msg == NULL) {
-        printf("Message is null (%02X)\n", bytes[0]);
-        fflush(stdout);
-        msg = new Message();
-    }
-
-    return msg;
-}
-
-/**
- * Convert an array of char to float
- * @param bytes Array of char, containing a binary image of a float
- * @return Float value
- */
-float ComRobot::CharToFloat(unsigned char *bytes) {
-    unsigned long value;
-
-    union {
-        unsigned char buffer[4];
-        float f;
-    } convert;
-
-    convert.buffer[0] = bytes[0];
-    convert.buffer[1] = bytes[1];
-    convert.buffer[2] = bytes[2];
-    convert.buffer[3] = bytes[3];
-
-    //value = (bytes[3] << 24) | (bytes[2] << 16) | (bytes[1] << 8) | (bytes[0]);
-
-    return convert.f;
-}
-
-/**
- * Convert an array of char to integer
- * @param bytes Array of char, containing a binary image of an integer
- * @return Integer value
- */
-unsigned int ComRobot::CharToInt(unsigned char *bytes) {
-    unsigned long value;
-
-    value = (bytes[3] << 24) | (bytes[2] << 16) | (bytes[1] << 8) | (bytes[0]);
-
-    return (unsigned int) value;
-}
-
-/**
- * Convert an array of char to boolean
- * @param bytes Array of char, containing a binary image of a boolean
- * @return Boolean value
- */
-bool ComRobot::CharToBool(unsigned char *bytes) {
-    unsigned long value;
-
-    value = (bytes[3] << 24) | (bytes[2] << 16) | (bytes[1] << 8) | (bytes[0]);
-
-    if (value == 0) return false;
-
-    else return true;
-}
-
 /**
  * Send a message to robot
  * @param msg Message to send to robot
@@ -266,29 +107,142 @@ bool ComRobot::CharToBool(unsigned char *bytes) {
  * @attention Write is blocking until message is written into buffer (linux side)
  * @warning Write is not thread save : check that multiple tasks can't access this method simultaneously  
  */
-int ComRobot::Write(Message* msg) {
-    unsigned char buffer[7];
-    int ret_val = 0;
-
-    MessageToChar(msg, buffer);
-
-    Write_Pre();
+Message *ComRobot::Write(Message* msg) {
+    Message *msgAnswer;
+    string s;
 
     if (this->fd != -1) {
-        int count = write(this->fd, &buffer[0], 7); //Filestream, bytes to write, number of bytes to write
+
+        Write_Pre();
+
+        s=MessageToString(msg);
+        AddChecksum(s);
+
+        //cout << "[" <<__PRETTY_FUNCTION__<<"] Send command: "<<s<<endl<<flush;
+        int count = write(this->fd, s.c_str(), s.length()); //Filestream, bytes to write, number of bytes to write
+
         if (count < 0) {
-            printf("Warning: UART TX error in ComStm32::Write\n");
-        } else {
-            ret_val = 1;
+            cerr << "[" << __PRETTY_FUNCTION__ << "] UART TX error (" << to_string(count) << ")" << endl << flush;
+            msgAnswer = new Message(MESSAGE_ANSWER_COM_ERROR);
+        } else { /* write successfull, read answer from robot */
+
+            try {
+                s = Read();
+                cout << "Answer = "<<s<<endl<<flush;
+                
+                if (VerifyChecksum(s)) {
+                    msgAnswer = StringToMessage(s);
+                } else msgAnswer = new Message(MESSAGE_ANSWER_ROBOT_UNKNOWN_COMMAND);
+
+            } catch (std::runtime_error &e) {
+                s = string(e.what());
+
+                if (s.find("imeout")) { // timeout detecté
+                    msgAnswer = new Message(MESSAGE_ANSWER_ROBOT_TIMEOUT);
+                } else {
+                    msgAnswer = new Message(MESSAGE_ANSWER_COM_ERROR);
+                }
+            }
         }
+    } else {
+        cerr << __PRETTY_FUNCTION__ << ": Com port not open" << endl << flush;
+        throw std::runtime_error{"Com port not open"};
     }
 
     // deallocation of msg
     delete(msg);
 
-    Write_Post();
+    return msgAnswer;
+}
 
-    return ret_val;
+/**
+ * Get a message from robot
+ * @return Message currently received
+ * @attention A message object is created (new) when receiving data from robot. You MUST remember to destroy is (delete) after use
+ * @attention Read method is blocking until a message is received
+ * @warning Read is not thread safe : Do not call it in multiple tasks simultaneously
+ */
+string ComRobot::Read() {
+    string s;
+    int rxLength;
+    unsigned char receivedChar;
+
+    do {
+        rxLength = read(this->fd, (void*) &receivedChar, 1); //Filestream, buffer to store in, number of bytes to read (max)
+        if (rxLength ==0) { // timeout
+            // try again
+            rxLength = read(this->fd, (void*) &receivedChar, 1); //Filestream, buffer to store in, number of bytes to read (max)
+            if (rxLength ==0) { // re-timeout: it sucks !
+                throw std::runtime_error {"ComRobot::Read: Timeout when reading from com port"};
+            }
+        } else if (rxLength <0) { // big pb !
+            throw std::runtime_error {"ComRobot::Read: Unknown problem when reading from com port"};
+        } else { // everything ok
+            if ((receivedChar != '\r') && (receivedChar != '\n')) s += receivedChar;
+        }
+    } while ((receivedChar != '\r') && (receivedChar != '\n'));
+
+    return s;
+}
+
+Message *ComRobot::SendCommand(Message* msg, MessageID answerID, int maxRetries) {
+    int counter = maxRetries;
+    Message *msgSend;
+    Message *msgRcv;
+    Message *msgTmp;
+    
+    do {
+        msgSend = msg->Copy();
+        cout << "S => " << msgSend->ToString() << endl << flush;
+        msgTmp = Write(msgSend);
+        cout << "R <= " << msgTmp->ToString() << endl << flush;
+
+        if (msgTmp->CompareID(answerID)) counter = 0;
+        else counter--;
+
+        if (counter == 0) msgRcv=msgTmp->Copy();
+        
+        delete(msgTmp);
+    } while (counter);
+    
+    delete (msg);
+    
+    return msgRcv;
+}
+
+/**
+ * Convert an array of char to its message representation (when receiving data from stm32)
+ * @param bytes Array of char
+ * @return Message corresponding to received array of char
+ */
+Message* ComRobot::StringToMessage(string s) {
+    Message *msg;
+
+    switch (s[0]) {
+        case LABEL_ROBOT_OK:
+            msg=new Message(MESSAGE_ANSWER_ACK);
+            break;
+        case LABEL_ROBOT_ERROR:
+            msg=new Message(MESSAGE_ANSWER_ROBOT_ERROR);
+            break;
+        case LABEL_ROBOT_UNKNOWN_COMMAND:
+            msg=new Message(MESSAGE_ANSWER_ROBOT_UNKNOWN_COMMAND);
+            break;
+        case '0':
+            msg=new MessageBattery(MESSAGE_ROBOT_BATTERY_LEVEL, BATTERY_EMPTY);
+            break;
+            case '1':
+            msg=new MessageBattery(MESSAGE_ROBOT_BATTERY_LEVEL, BATTERY_LOW);
+            break;
+            case '2':
+            msg=new MessageBattery(MESSAGE_ROBOT_BATTERY_LEVEL, BATTERY_FULL);
+            break;
+        default:
+            msg=new Message(MESSAGE_ANSWER_ROBOT_ERROR);
+            cerr<<"["<<__PRETTY_FUNCTION__<<"] Unknown message received from robot (" << s <<")"<<endl<<flush;
+    }
+
+    return msg;
 }
 
 /**
@@ -296,39 +250,107 @@ int ComRobot::Write(Message* msg) {
  * @param msg Message to be sent to robot
  * @param buffer Array of char, image of message to send
  */
-void ComRobot::MessageToChar(Message *msg, unsigned char *buffer) {
+string ComRobot::MessageToString(Message *msg) {
+    string s;
+    
     float val_f;
     int val_i;
     unsigned char *b;
 
-    buffer[0] = '<';
-    buffer[6] = '\n';
-
     switch (msg->GetID()) {
-        case MESSAGE_TORQUE:
-            buffer[1] = LABEL_TORQUE;
-            val_f = ((MessageFloat*) msg)->GetValue();
-            b = (unsigned char *) &val_f;
-
+        case MESSAGE_ROBOT_PING:
+            s+=LABEL_ROBOT_PING;
             break;
-        case MESSAGE_EMERGENCY_STOP:
-            buffer[1] = LABEL_EMERGENCY_STOP;
-            if (((MessageBool*) msg)->GetState())
-                val_i = 1;
-            else
-                val_i = 0;
-            b = (unsigned char *) &val_i;
-
+        case MESSAGE_ROBOT_RESET:
+            s+=LABEL_ROBOT_RESET;
+            break;
+        case MESSAGE_ROBOT_POWEROFF:
+            s+=LABEL_ROBOT_POWEROFF;
+            break;
+        case MESSAGE_ROBOT_START_WITHOUT_WD:
+            s+=LABEL_ROBOT_START_WITHOUT_WD;
+            break;
+        case MESSAGE_ROBOT_START_WITH_WD:
+            s+=LABEL_ROBOT_START_WITH_WD;
+            break;
+        case MESSAGE_ROBOT_RELOAD_WD:
+            s+=LABEL_ROBOT_RELOAD_WD;
+            break;
+        case MESSAGE_ROBOT_BATTERY_GET:
+            s+=LABEL_ROBOT_GET_BATTERY;
+            break;
+        case MESSAGE_ROBOT_STATE_GET:
+            s+=LABEL_ROBOT_GET_STATE;
+            break;
+        case MESSAGE_ROBOT_GO_FORWARD:
+            s+=LABEL_ROBOT_MOVE;
+            s+=LABEL_ROBOT_SEPARATOR_CHAR;
+            s.append(to_string(500000));
+            break;
+        case MESSAGE_ROBOT_GO_BACKWARD:
+            s+=LABEL_ROBOT_MOVE;
+            s+=LABEL_ROBOT_SEPARATOR_CHAR;
+            s.append(to_string(-500000));
+            break;
+        case MESSAGE_ROBOT_GO_LEFT:
+            s+=LABEL_ROBOT_TURN;
+            s+=LABEL_ROBOT_SEPARATOR_CHAR;
+            s.append(to_string(90));
+            break;
+        case MESSAGE_ROBOT_GO_RIGHT:
+            s+=LABEL_ROBOT_TURN;
+            s+=LABEL_ROBOT_SEPARATOR_CHAR;
+            s.append(to_string(-90));
+            break;
+        case MESSAGE_ROBOT_MOVE:
+            s+=LABEL_ROBOT_MOVE;
+            s+=LABEL_ROBOT_SEPARATOR_CHAR;
+            s.append(to_string(((MessageInt*)msg)->GetValue()));
+            break;
+        case MESSAGE_ROBOT_TURN:
+            s+=LABEL_ROBOT_TURN;
+            s+=LABEL_ROBOT_SEPARATOR_CHAR;
+            s.append(to_string(((MessageInt*)msg)->GetValue()));
             break;
         default:
-            printf("Invalid message to send");
-            val_i = 0;
-            b = (unsigned char *) &val_i;
+            cerr<<"["<<__PRETTY_FUNCTION__<<"] Invalid message for robot ("<<msg->ToString()<<")"<<endl<<flush;
+            throw std::runtime_error {"Invalid message"};
     }
 
-    buffer[2] = b[0];
-    buffer[3] = b[1];
-    buffer[4] = b[2];
-    buffer[5] = b[3];
+    return s;
 }
 
+/**
+ * Add a checksum and carriage return to a command string
+ * @param[in,out] s String containing command for robot, without ending char (carriage return) 
+ */
+void ComRobot::AddChecksum(string &s) {
+    unsigned char checksum=0;
+    
+    for (string::iterator it=s.begin(); it!=s.end(); ++it) {
+        checksum ^= (unsigned char)*it;
+    }
+    
+    s+=(char)checksum; // Add calculated checksum
+    s+=(char)LABEL_ROBOT_ENDING_CHAR;
+}
+
+/**
+ * Verify if checksum of an incoming answer from robot is valid, 
+ * then remove checksum from incoming answer (if checksum is ok)
+ * @param[in,out] s String containing incoming answer from robot
+ * @return true is checksum is valid, false otherwise.
+ */
+bool ComRobot::VerifyChecksum(string &s) {
+    unsigned char checksum=0;
+    
+    for (string::iterator it=s.begin(); it!=s.end(); ++it) {
+        checksum ^= (unsigned char)*it;
+    }
+    
+    if (checksum==0) { // checksum is ok, remove last char of string (checksum)
+        s.pop_back(); // remove last char
+        return true;
+    }
+    else return false;
+}
