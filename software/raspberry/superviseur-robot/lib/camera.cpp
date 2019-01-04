@@ -20,8 +20,24 @@
 
 using namespace cv;
 
-void Camera::setSize(int size) {
+Camera::Camera(int size) {
+    this->SetSize(size);
+    this->cap.set(CV_CAP_PROP_FORMAT, CV_8UC3);
+    this->cap.set(CV_CAP_PROP_FRAME_WIDTH,width);
+    this->cap.set(CV_CAP_PROP_FRAME_HEIGHT,height);
+}
+
+bool Camera::Open() {
+    this->cap.open(0);
+}
+
+void Camera::Close() {
+    this->cap.release();
+}
+
+void Camera::SetSize(int size) {
     this->size = size;
+    
     switch (size){
         case xs:
             this->width = 480;
@@ -46,40 +62,24 @@ void Camera::setSize(int size) {
     }
 }
 
-
-int Camera::open_camera() {
-    this->cap.open(0);
-}
-
-Camera::Camera(int size) {
-    this->setSize(size);
-    this->cap.set(CV_CAP_PROP_FORMAT, CV_8UC3);
-    this->cap.set(CV_CAP_PROP_FRAME_WIDTH,width);
-    this->cap.set(CV_CAP_PROP_FRAME_HEIGHT,height);
-}
-
-int Camera::close_camera() {
-    cap.release();
-    return 0;
-}
-
-Img Camera::grab_image() {
+Img Camera::Grab() {
     ImageMat frame;
+    
     cap >> frame;
     Img capture = Img(frame);
+    
     return capture;
 }
 
-
-bool Camera::isOpen() {
+bool Camera::IsOpen() {
     return cap.isOpened();
 }
 
-int Camera::getWidth() const {
+int Camera::GetWidth() const {
     return width;
 }
 
-int Camera::getHeight() const {
+int Camera::GetHeight() const {
     return height;
 }
 

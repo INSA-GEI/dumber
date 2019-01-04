@@ -28,6 +28,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "base64/base64.h"
+
 /*
  * @brief Constants used for sending commands to monitor
  */
@@ -41,7 +43,7 @@ const string LABEL_MONITOR_CAMERA_OPEN = "COPN";
 const string LABEL_MONITOR_CAMERA_CLOSE = "CCLS";
 const string LABEL_MONITOR_CAMERA_IMAGE = "CIMG";
 const string LABEL_MONITOR_CAMERA_ARENA_ASK = "CASA";
-const string LABEL_MONITOR_CAMERA_ARENA_INFIRME = "CAIN";
+const string LABEL_MONITOR_CAMERA_ARENA_INFIRM = "CAIN";
 const string LABEL_MONITOR_CAMERA_ARENA_CONFIRM = "CACO";
 const string LABEL_MONITOR_CAMERA_POSITION_COMPUTE = "CPCO";
 const string LABEL_MONITOR_CAMERA_POSITION_STOP = "CPST";
@@ -83,6 +85,12 @@ int ComMonitor::Open(int port) {
         throw std::runtime_error{"Can not create socket"};
     }
 
+    int enable = 1;
+    if (setsockopt(socketFD, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
+        cerr<<"setsockopt(SO_REUSEADDR) failed"<<endl<<flush;
+    }
+    
+    bzero((char *) &server, sizeof(server));
     server.sin_addr.s_addr = INADDR_ANY;
     server.sin_family = AF_INET;
     server.sin_port = htons(port);
@@ -130,9 +138,9 @@ int ComMonitor::AcceptClient() {
  * @attention Message given in parameter will be destroyed (delete) after being sent. No need for user to delete message after that.
  * @warning Write is not thread safe : check that multiple tasks can't access this method simultaneously  
  */
-void ComMonitor::Write(Message &msg) {
+void ComMonitor::Write(Message *msg) {
     string str;
-
+    
     // Call user method before Write
     Write_Pre();
 
@@ -142,8 +150,10 @@ void ComMonitor::Write(Message &msg) {
     //cout << "Message sent to monitor: " << str->c_str() << endl;
     write(clientID, str.c_str(), str.length());
 
-    delete(&msg);
-
+    if (!msg->CompareID(MESSAGE_CAM_IMAGE)) {
+        delete(msg);
+    }
+   
     // Call user method after write
     Write_Post();
 }
@@ -191,13 +201,17 @@ Message *ComMonitor::Read() {
  * @param msg Message to be converted
  * @return A string, image of the message
  */
-string ComMonitor::MessageToString(Message &msg) {
+string ComMonitor::MessageToString(Message *msg) {
     int id;
     string str;
-    Message *localMsg = &msg;
+    //Message *localMsg = msg;
     Position pos;
 
-    id = msg.GetID();
+    Img *image;
+    Jpg jpeg ;
+    string s;
+                    
+    id = msg->GetID();
 
     switch (id) {
         case MESSAGE_ANSWER_ACK :
@@ -219,17 +233,23 @@ string ComMonitor::MessageToString(Message &msg) {
             str.append(LABEL_MONITOR_ANSWER_COM_ERROR);
             break;
         case MESSAGE_CAM_POSITION:
-            pos = ((MessagePosition*) & msg)->GetPosition();
+            pos = ((MessagePosition*) msg)->GetPosition();
 
             str.append(LABEL_MONITOR_CAMERA_POSITION + LABEL_SEPARATOR_CHAR + to_string(pos.robotId) + ";" +
                     to_string(pos.angle) + ";" + to_string(pos.center.x) + ";" + to_string(pos.center.y) + ";" +
                     to_string(pos.direction.x) + ";" + to_string(pos.direction.y));
             break;
         case MESSAGE_CAM_IMAGE:
-            str.append(LABEL_MONITOR_CAMERA_IMAGE + LABEL_SEPARATOR_CHAR + ((MessageImg*) & msg)->GetImage()->ToBase64());
+            image=((MessageImg*) msg)->GetImage();
+            jpeg = image->ToJpg();
+            
+            cout << "Jpeg size: " << to_string(jpeg.size())<<endl<<flush;
+            
+            s = base64_encode(jpeg.data(), jpeg.size());
+            str.append(LABEL_MONITOR_CAMERA_IMAGE + LABEL_SEPARATOR_CHAR + s);
             break;
         case MESSAGE_ROBOT_BATTERY_LEVEL:
-            str.append(LABEL_MONITOR_ROBOT_BATTERY_LEVEL + LABEL_SEPARATOR_CHAR + to_string(((MessageBattery*) & msg)->GetLevel()));
+            str.append(LABEL_MONITOR_ROBOT_BATTERY_LEVEL + LABEL_SEPARATOR_CHAR + to_string(((MessageBattery*) msg)->GetLevel()));
             break;
         case MESSAGE_ROBOT_STATE_BUSY:
             str.append(LABEL_MONITOR_ROBOT_CURRENT_STATE + LABEL_SEPARATOR_CHAR + "1");
@@ -238,13 +258,13 @@ string ComMonitor::MessageToString(Message &msg) {
             str.append(LABEL_MONITOR_ROBOT_CURRENT_STATE + LABEL_SEPARATOR_CHAR + "0");
             break;
         case MESSAGE_LOG:
-            str.append(LABEL_MONITOR_MESSAGE + LABEL_SEPARATOR_CHAR + ((MessageString*) & msg)->GetString());
+            str.append(LABEL_MONITOR_MESSAGE + LABEL_SEPARATOR_CHAR + ((MessageString*) msg)->GetString());
             break;
         case MESSAGE_EMPTY:
             str.append(""); //empty string
             break;
         default:
-            cerr<<"["<<__PRETTY_FUNCTION__<<"] (from ComMonitor::Write): Invalid message to send ("<<msg.ToString()<<")"<<endl<<flush;
+            cerr<<"["<<__PRETTY_FUNCTION__<<"] (from ComMonitor::Write): Invalid message to send ("<<msg->ToString()<<")"<<endl<<flush;
             throw std::runtime_error {"Invalid message to send"};
     }
 
@@ -291,7 +311,7 @@ Message *ComMonitor::StringToMessage(string &s) {
         msg = new Message(MESSAGE_CAM_ASK_ARENA);
     } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_ARENA_CONFIRM) != string::npos) {
         msg = new Message(MESSAGE_CAM_ARENA_CONFIRM);
-    } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_ARENA_INFIRME) != string::npos) {
+    } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_ARENA_INFIRM) != string::npos) {
         msg = new Message(MESSAGE_CAM_ARENA_INFIRM);
     } else if (tokenCmd.find(LABEL_MONITOR_CAMERA_CLOSE) != string::npos) {
         msg = new Message(MESSAGE_CAM_CLOSE);

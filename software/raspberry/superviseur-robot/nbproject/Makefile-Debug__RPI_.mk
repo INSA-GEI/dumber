@@ -43,6 +43,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/lib/server.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/tasks.o \
+	${OBJECTDIR}/_ext/a7f31ab4/base64.o \
 	${OBJECTDIR}/_ext/6cc0dc4a/camera.o \
 	${OBJECTDIR}/_ext/6cc0dc4a/commonitor.o \
 	${OBJECTDIR}/_ext/6cc0dc4a/comrobot.o \
@@ -113,6 +114,11 @@ ${OBJECTDIR}/tasks.o: tasks.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_WITH_TRACE_ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tasks.o tasks.cpp
+
+${OBJECTDIR}/_ext/a7f31ab4/base64.o: /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/base64/base64.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/a7f31ab4
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/a7f31ab4/base64.o /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/base64/base64.cpp
 
 ${OBJECTDIR}/_ext/6cc0dc4a/camera.o: /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/camera.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/6cc0dc4a

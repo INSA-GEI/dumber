@@ -37,6 +37,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/lib/messages.o \
 	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/_ext/a7f31ab4/base64.o \
 	${OBJECTDIR}/_ext/6cc0dc4a/camera.o \
 	${OBJECTDIR}/_ext/6cc0dc4a/commonitor.o \
 	${OBJECTDIR}/_ext/6cc0dc4a/comrobot.o \
@@ -77,6 +78,11 @@ ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -D__WITH_PTHREAD__ -I./ -I./lib `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+
+${OBJECTDIR}/_ext/a7f31ab4/base64.o: /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/base64/base64.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/a7f31ab4
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -D__WITH_PTHREAD__ -I./ -I./lib `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/a7f31ab4/base64.o /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/base64/base64.cpp
 
 ${OBJECTDIR}/_ext/6cc0dc4a/camera.o: /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/camera.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/6cc0dc4a

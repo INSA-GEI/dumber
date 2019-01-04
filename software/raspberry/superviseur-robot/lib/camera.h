@@ -27,20 +27,18 @@ enum captureSize {xs, sm, md, lg};
 
 class Camera {
 public:
-
     Camera(int size);
 
-    int open_camera();
+    bool Open();
+    void Close();
+    
+    int GetWidth() const;
+    int GetHeight() const;
 
-    int getWidth() const;
+    bool IsOpen();
+    void SetSize(int size);
 
-    int getHeight() const;
-
-    bool isOpen();
-    void setSize(int size);
-
-    int close_camera();
-    Img grab_image();
+    Img Grab();
     
 private:
     cv::VideoCapture cap;

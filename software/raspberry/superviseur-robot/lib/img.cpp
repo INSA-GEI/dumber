@@ -17,8 +17,8 @@
 
 #include "img.h"
 
-bool Arene::empty() {
-    if ((this->arene.height==0) || (this->arene.width==0)) return true;
+bool Arena::IsEmpty() {
+    if ((this->arena.height==0) || (this->arena.width==0)) return true;
     else return false;
 }
 
@@ -29,23 +29,19 @@ Img::Img(ImageMat imgMatrice) {
 string Img::ToString() {
     return "Image size: "+to_string(this->img.cols)+"x"+to_string(this->img.rows)+" (dim="+to_string(this->img.dims)+")";
 }
-    
-string Img::ToBase64() {
-    return "";
-}
 
 Img* Img::Copy() {
     return new Img(this->img);
 }
     
-float Img::calculAngle(Position robot) {
+float Img::CalculAngle(Position robot) {
     float a = robot.direction.x - robot.center.x;
     float b = robot.direction.y - robot.center.y ;
     float angle = atan2(b,a);
     return angle * 180.f/M_PI;
 }
 
-float Img::calculAngle2(cv::Point2f pt1, cv::Point2f pt2) {
+float Img::CalculAngle2(cv::Point2f pt1, cv::Point2f pt2) {
     float a = pt1.x - pt2.x;
     float b = pt1.y - pt2.y ;
     float angle = atan2(b,a);
@@ -61,7 +57,7 @@ cv::Point2f Img::find_aruco_direction(std::vector<cv::Point2f> aruco) {
     return ((aruco[0]+aruco[1])/2);;
 }
 
-std::list<Position> Img::search_aruco(Arene monArene) {
+std::list<Position> Img::search_aruco(Arena monArene) {
     ImageMat imgTraitment;
     std::list<Position> positionList;
     cv::Point2f areneCoor;
@@ -93,12 +89,12 @@ std::list<Position> Img::search_aruco(Arene monArene) {
 }
 #endif // __WITH_ARUCO__
 
-float Img::euclideanDist(cv::Point2f p, cv::Point2f q) {
+float Img::EuclideanDistance(cv::Point2f p, cv::Point2f q) {
     cv::Point diff = p - q;
     return cv::sqrt(diff.x*diff.x + diff.y*diff.y);
 }
 
-Jpg Img::toJpg() {
+Jpg Img::ToJpg() {
     Jpg imgJpg;
     cv::imencode(".jpg",this->img,imgJpg);
     return imgJpg;
@@ -112,7 +108,7 @@ Jpg Img::toJpg() {
 //    return imgBase64;
 //}
 
-std::list<Position> Img::search_robot(Arene monArene) {
+std::list<Position> Img::SearchRobot(Arena monArene) {
 
     std::list<Position> robotsFind;
     std::vector<std::vector<cv::Point2f> > contours;
@@ -121,10 +117,10 @@ std::list<Position> Img::search_robot(Arene monArene) {
 
     ImageMat imgTraitment;
 
-    if(monArene.empty())
+    if(monArene.IsEmpty())
         imgTraitment=this->img.clone();
     else
-        imgTraitment = cropArena(monArene);
+        imgTraitment = CropArena(monArene);
 
     cvtColor(imgTraitment,imgTraitment,CV_RGB2GRAY);
     threshold(imgTraitment,imgTraitment,128,255,CV_THRESH_BINARY);
@@ -145,14 +141,14 @@ std::list<Position> Img::search_robot(Arene monArene) {
             c = approx[2];
 
 
-            if(!monArene.empty()) // ajout de l'offset de l'arène
+            if(!monArene.IsEmpty()) // ajout de l'offset de l'arène
             {
-                a.x += monArene.arene.x;
-                a.y += monArene.arene.y;
-                b.x += monArene.arene.x;
-                b.y += monArene.arene.y;
-                c.x += monArene.arene.x;
-                c.y += monArene.arene.y;
+                a.x += monArene.arena.x;
+                a.y += monArene.arena.y;
+                b.x += monArene.arena.x;
+                b.y += monArene.arena.y;
+                c.x += monArene.arena.x;
+                c.y += monArene.arena.y;
             }
 
             center.x = (a.x + b.x + c.x)/3;
@@ -160,13 +156,13 @@ std::list<Position> Img::search_robot(Arene monArene) {
             Position newPos;
             newPos.center=center;
 
-            if(euclideanDist(center,b) > euclideanDist(center,a) && euclideanDist(center,b) > euclideanDist(center,c) )
+            if(EuclideanDistance(center,b) > EuclideanDistance(center,a) && EuclideanDistance(center,b) > EuclideanDistance(center,c) )
             {
 
                 newPos.direction=b;
                 //line(img,center,b,Scalar(0,125,0),2,8,0);
             }
-            else if(euclideanDist(center,a) > euclideanDist(center,c))
+            else if(EuclideanDistance(center,a) > EuclideanDistance(center,c))
             {
                 newPos.direction=a;
                 //line(img,center,a,Scalar(0,125,0),2,8,0);
@@ -177,14 +173,14 @@ std::list<Position> Img::search_robot(Arene monArene) {
                 newPos.direction=c;
                 //line(img,center,c,Scalar(0,125,0),2,8,0);
             }
-            newPos.angle=calculAngle(newPos);
+            newPos.angle=CalculAngle(newPos);
             robotsFind.push_back(newPos);
         }
     }
     return robotsFind;
 }
 
-Arene Img::search_arena() {
+Arena Img::SearchArena() {
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Point> approx;
     std::vector<cv::Vec4i> hierarchy;
@@ -200,31 +196,31 @@ Arene Img::search_arena() {
         approxPolyDP(ImageMat(contours[i]), approx, cv::arcLength(ImageMat(contours[i]), true)*0.1, true);
         if(approx.size()==4 && fabs(cv::contourArea(contours[i])) > 100000)
         {
-            Arene rectangle;
-            rectangle.arene = cv::boundingRect(ImageMat(contours[i]));
+            Arena rectangle;
+            rectangle.arena = cv::boundingRect(ImageMat(contours[i]));
             return rectangle;
         }
     }
-    return Arene();
+    return Arena();
 }
 
-int Img::draw_robot(Position robot) {
+int Img::DrawRobot(Position robot) {
     cv::arrowedLine(this->img, (cv::Point2f)robot.center, (cv::Point2f)robot.direction, cv::Scalar(0,0,255),3,8,0);
     return 0;
 }
 
-int Img::draw_all_robots(std::list<Position> robots) {
+int Img::DrawAllRobots(std::list<Position> robots) {
     for(Position robot  : robots){
         cv::arrowedLine(this->img, (cv::Point2f)robot.center, (cv::Point2f)robot.direction, cv::Scalar(0,0,255),3,8,0);
     }
     return robots.size();
 }
 
-int Img::draw_arena(Arene areneToDraw) {
-    cv::rectangle(this->img,areneToDraw.arene.tl(),areneToDraw.arene.br(),cv::Scalar(0,0,125),2,8,0);
+int Img::DrawArena(Arena areneToDraw) {
+    cv::rectangle(this->img,areneToDraw.arena.tl(),areneToDraw.arena.br(),cv::Scalar(0,0,125),2,8,0);
     return 0;
 }
 
-ImageMat Img::cropArena(Arene arene) {
-    return this->img(arene.arene);
+ImageMat Img::CropArena(Arena arene) {
+    return this->img(arene.arena);
 }

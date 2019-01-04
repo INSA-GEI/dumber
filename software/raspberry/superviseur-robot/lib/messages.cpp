@@ -291,7 +291,7 @@ MessageImg::MessageImg() {
  * @param image Image
  * @throw std::runtime_error if message ID is incompatible with image
  */
-MessageImg::MessageImg(MessageID id, Img* image) {
+MessageImg::MessageImg(MessageID id, Img *image) {
     MessageImg::SetID(id);
     MessageImg::SetImage(image);
 }
@@ -322,7 +322,8 @@ void MessageImg::SetID(MessageID id) {
  * @param image Reference to image object
  */
 void MessageImg::SetImage(Img* image) {
-    this->image = image->Copy();
+    //this->image = image->Copy();
+    this->image = image;
 }
 
 /**
@@ -341,7 +342,6 @@ string MessageImg::ToString() {
  * @return A message, copy of current
  */
 Message* MessageImg::Copy() {
-    
     return new MessageImg(this->messageID, this->image->Copy());
 }
 

@@ -47,12 +47,12 @@ typedef struct {
     int robotId;
 } Position;
 
-class Arene {
+class Arena {
 public:
-    Arene() {}
+    Arena() {}
     
-    cv::Rect arene;
-    bool empty();
+    cv::Rect arena;
+    bool IsEmpty();
 };
 
 class Img {
@@ -62,18 +62,17 @@ public:
     string ToString();
     Img* Copy();
     
-    Jpg toJpg();
-    string ToBase64();
-    Arene search_arena();
+    Jpg ToJpg();
+    Arena SearchArena();
 
-    int draw_robot(Position robot);
-    int draw_all_robots(std::list<Position> robots);
-    int draw_arena(Arene areneToDraw);
-    std::list<Position> search_robot(Arene monArene);
+    int DrawRobot(Position robot);
+    int DrawAllRobots(std::list<Position> robots);
+    int DrawArena(Arena areneToDraw);
+    std::list<Position> SearchRobot(Arena myArena);
     
     
 #ifdef __WITH_ARUCO__    
-    list<Position> search_aruco(Arene monArene = NULL);
+    list<Position> search_aruco(Arena monArene = NULL);
 #endif // __WITH_ARUCO__
 private:
     ImageMat img;
@@ -84,10 +83,10 @@ private:
     cv::Point2f find_aruco_direction(std::vector<cv::Point2f> aruco);
 #endif // __WITH_ARUCO__
     
-    float calculAngle(Position robots);
-    float calculAngle2(cv::Point2f pt1, cv::Point2f pt2);
-    float euclideanDist(cv::Point2f p, cv::Point2f q);
-    ImageMat cropArena(Arene arene);
+    float CalculAngle(Position robots);
+    float CalculAngle2(cv::Point2f pt1, cv::Point2f pt2);
+    float EuclideanDistance(cv::Point2f p, cv::Point2f q);
+    ImageMat CropArena(Arena arene);
 };
 
 #endif //__IMG_H__

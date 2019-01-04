@@ -90,6 +90,9 @@ private:
     ComMonitor monitor;
     ComRobot robot;
     
+    bool sendImage=false;
+    bool sendPosition=false;
+    
     thread *threadServer;
     thread *threadSendToMon;
     thread *threadTimer;

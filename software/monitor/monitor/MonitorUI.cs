@@ -23,6 +23,7 @@
 using System;
 using Gtk;
 using Gdk;
+using Cairo;
 
 using monitor;
 
@@ -40,6 +41,11 @@ public partial class MainWindow : Gtk.Window
     /// Pixbuffer used for displaying image
     /// </summary>
     private Pixbuf drawingareaCameraPixbuf;
+
+    /// <summary>
+    /// Position used for displaying position
+    /// </summary>
+    private DestijlCommandManager.Position position=new DestijlCommandManager.Position();
 
     /// <summary>
     /// List of availble state for the application
@@ -200,8 +206,8 @@ public partial class MainWindow : Gtk.Window
         a.RetVal = true;
     }
 
-    private byte[] imageComplete;
-    private byte[] imageInProgress;
+    //private byte[] imageComplete;
+    //private byte[] imageInProgress;
 
     /// <summary>
     /// Callback called when new message is received from server
@@ -209,17 +215,20 @@ public partial class MainWindow : Gtk.Window
     /// <param name="header">Header of message</param>
     /// <param name="data">Data of message</param>
     /// <param name="buffer">Raw buffer corresponding of received message</param>
-    public void OnCommandReceivedEvent(string header, string data, byte[] buffer)
+    public void OnCommandReceivedEvent(string header, string data)
     {
-        if (buffer==null)
+        if (header == null)
         {
             // we have lost server
             ChangeState(SystemState.NotConnected);
 
-            MessagePopup(MessageType.Error,
+            Gtk.Application.Invoke(delegate
+            {
+                MessagePopup(MessageType.Error,
                      ButtonsType.Ok, "Server lost",
                          "Server is down: disconnecting");
-            cmdManager.Close();
+                cmdManager.Close();
+            });
         }
 
         // if we have received a valid message
@@ -228,75 +237,104 @@ public partial class MainWindow : Gtk.Window
 #if DEBUG
             // print message content
             if (header.Length > 4)
-                Console.WriteLine("Bad header(" + buffer.Length + ")");
-            else
-                Console.WriteLine("Received header (" + header.Length + "): " + header);
+                Console.WriteLine("Bad header(" + header.Length + ")");
+            //else
+            //    Console.WriteLine("Received header (" + header.Length + "): " + header);
             //if (header.ToUpper() != DestijlCommandList.HeaderStmImage)
             //{
             //    if (data != null) Console.WriteLine("Received data (" + data.Length + "): " + data);
             //}
 #endif
             // Image management
-            if (header == DestijlCommandList.HeaderStmImage)
-            {
-                imageComplete = imageInProgress;
-                imageInProgress = buffer;
-            }
-            else
-            {
-                if (imageInProgress == null) imageInProgress = buffer;
-                else
-                {
-                    Array.Resize<byte>(ref imageInProgress, imageInProgress.Length + buffer.Length);
-                    System.Buffer.BlockCopy(buffer, 0, imageInProgress, imageInProgress.Length - buffer.Length, buffer.Length);
-                }
-            }
+            //if (header == DestijlCommandList.CAMERA_IMAGE)
+            //{
+            //    imageComplete = imageInProgress;
+            //    //TODO: Decoder le base64 pour recuperer le JPG
+            //    imageInProgress = buffer;
+            //}
+            //else
+            //{
+            //    if (imageInProgress == null) imageInProgress = buffer;
+            //    else
+            //    {
+            //        Array.Resize<byte>(ref imageInProgress, imageInProgress.Length + buffer.Length);
+            //        System.Buffer.BlockCopy(buffer, 0, imageInProgress, imageInProgress.Length - buffer.Length, buffer.Length);
+            //    }
+            //}
 
             // depending on message received (based on header)
             // launch correponding action
-            if (header.ToUpper() == DestijlCommandList.HeaderStmBat)
+            header = header.ToUpper();
+
+            if (header == DestijlCommandList.ROBOT_BATTERY_LEVEL)
             {
+                string batLevel = "";
+
                 switch (data[0])
                 {
                     case '2':
-                        labelBatteryLevel.Text = "High";
+                        batLevel = "High";
                         break;
                     case '1':
-                        labelBatteryLevel.Text = "Low";
+                        batLevel = "Low";
                         break;
                     case '0':
-                        labelBatteryLevel.Text = "Empty";
+                        batLevel = "Empty";
                         break;
                     default:
-                        labelBatteryLevel.Text = "Invalid value";
+                        batLevel = "Invalid value";
                         break;
                 }
+
+                Gtk.Application.Invoke(delegate
+                {
+                    labelBatteryLevel.Text = batLevel;
+                });
             }
-            else if (header.ToUpper() == DestijlCommandList.HeaderStmImage)
+            else if (header == DestijlCommandList.CAMERA_IMAGE)
             {
                 // if message is an image, convert it to a pixbuf
                 // that can be displayed
-                if (imageComplete != null)
-                {
-                    byte[] image = new byte[imageComplete.Length - 4];
-                    System.Buffer.BlockCopy(imageComplete, 4, image, 0, image.Length);
+                //if (imageComplete != null)
+                //{
+                //TODO: Decoder le base64 et convertir en JPG
+                byte[] image = Convert.FromBase64String(data);
+                //byte[] image = new byte[imageComplete.Length - 4];
+                //System.Buffer.BlockCopy(imageComplete, 4, image, 0, image.Length);
 
-                    imageReceivedCounter++;
-                    try
+                imageReceivedCounter++;
+
+                try
+                {
+                    drawingareaCameraPixbuf = new Pixbuf(image);
+
+                    Gtk.Application.Invoke(delegate
                     {
-                        drawingareaCameraPixbuf = new Pixbuf(image);
                         drawingAreaCamera.QueueDraw();
-                    }
-                    catch (GLib.GException)
-                    {
-                        badImageReceivedCounter++;
-#if DEBUG
-                        Console.WriteLine("Bad Image: " + badImageReceivedCounter +
-                                          " / " + imageReceivedCounter +
-                                          " (" + badImageReceivedCounter * 100 / imageReceivedCounter + "%)");
-#endif
-                    }
+                    });
                 }
+                catch (GLib.GException)
+                {
+                    badImageReceivedCounter++;
+#if DEBUG
+                    Console.WriteLine("Bad Image: " + badImageReceivedCounter +
+                                      " / " + imageReceivedCounter +
+                                      " (" + badImageReceivedCounter * 100 / imageReceivedCounter + "%)");
+#endif
+                }
+                //}
+            }
+            else if (header == DestijlCommandList.CAMERA_POSITION)
+            {
+                //Console.WriteLine("Pos data: " + data);
+
+                position = DestijlCommandManager.DecodePosition(data);
+                //Console.WriteLine("decoded position: " + position.ToString());
+
+                Gtk.Application.Invoke(delegate
+                {
+                    drawingAreaCamera.QueueDraw();
+                });
             }
         }
     }
@@ -417,10 +455,10 @@ public partial class MainWindow : Gtk.Window
         DestijlCommandManager.CommandStatus status;
 
         //if robot is not activated
-        if (buttonRobotActivation.Label == "Activate") 
+        if (buttonRobotActivation.Label == "Activate")
         {
             // if a startup with watchdog is requested
-            if (radioButtonWithWatchdog.Active) 
+            if (radioButtonWithWatchdog.Active)
             {
                 status = cmdManager.RobotStartWithWatchdog();
             }
@@ -557,9 +595,7 @@ public partial class MainWindow : Gtk.Window
         {
             if (cmdManager.CameraClose() != DestijlCommandManager.CommandStatus.Success)
             {
-                MessagePopup(MessageType.Error,
-                             ButtonsType.Ok, "Error",
-                             "Error when closing camera: bad answer for supervisor or timeout");
+                Console.WriteLine("Error when closing camera: bad answer for supervisor or timeout");
             }
         }
         else // camera is not active, switch it on
@@ -569,10 +605,8 @@ public partial class MainWindow : Gtk.Window
 
             if (cmdManager.CameraOpen() != DestijlCommandManager.CommandStatus.Success)
             {
-                MessagePopup(MessageType.Error,
-                             ButtonsType.Ok, "Error",
-                             "Error when opening camera: bad answer for supervisor or timeout");
-                checkButtonCameraOn.Active = false;
+                Console.WriteLine("Error when opening camera: bad answer for supervisor or timeout");
+                //checkButtonCameraOn.Active = false;
             }
         }
     }
@@ -589,20 +623,16 @@ public partial class MainWindow : Gtk.Window
         {
             if (cmdManager.CameraStopComputePosition() != DestijlCommandManager.CommandStatus.Success)
             {
-                MessagePopup(MessageType.Error,
-                             ButtonsType.Ok, "Error",
-                             "Error when stopping position reception: bad answer for supervisor or timeout");
+                Console.WriteLine("Error when stopping position reception: bad answer for supervisor or timeout");
             }
         }
         else // start reception of robot position
         {
             if (cmdManager.CameraComputePosition() != DestijlCommandManager.CommandStatus.Success)
             {
-                MessagePopup(MessageType.Error,
-                             ButtonsType.Ok, "Error",
-                             "Error when starting getting robot position: bad answer for supervisor or timeout");
+                Console.WriteLine("Error when starting getting robot position: bad answer for supervisor or timeout");
 
-                checkButtonRobotPosition.Active = false;
+                //checkButtonRobotPosition.Active = false;
             }
         }
     }
@@ -657,6 +687,47 @@ public partial class MainWindow : Gtk.Window
                                   (areaHeight - displayPixbuf.Height) / 2,
                                   displayPixbuf.Width, displayPixbuf.Height,
                                   RgbDither.Normal, 0, 0);
+
+        if (checkButtonRobotPosition.Active) {
+            Cairo.Context cr = Gdk.CairoHelper.Create(area.GdkWindow);
+            Cairo.Color textFontColor = new Cairo.Color(0.8, 0, 0);
+
+            cr.SelectFontFace("Cantarell", FontSlant.Normal, FontWeight.Bold);
+            cr.SetSourceColor(textFontColor);
+            cr.SetFontSize(16);
+
+            double space = 0.0;
+            string text = "Direction (" + position.direction.x.ToString("0.##") + " ; " + position.direction.y.ToString("0.##") +")";
+            TextExtents te = cr.TextExtents(text);
+            cr.MoveTo(areaWidth - te.Width-5,
+                      areaHeight - te.Height -5);
+            space = te.Height;
+            cr.ShowText(text);
+
+            text = "Centre (" + position.centre.x.ToString("0.##") + " ; " + position.centre.y.ToString("0.##") + ")";
+            te = cr.TextExtents(text);
+            cr.MoveTo(areaWidth - te.Width - 5,
+                      areaHeight - te.Height - 5 - space-5);
+            space = space+ te.Height+5;
+            cr.ShowText(text);
+
+            text = "Angle: " + position.angle.ToString("0.##");
+            te = cr.TextExtents(text);
+            cr.MoveTo(areaWidth - te.Width - 5,
+                      areaHeight - te.Height - 5 - space - 5);
+            space = space+ te.Height+5;
+            cr.ShowText(text);
+
+            text = "ID: " + position.robotID;
+            te = cr.TextExtents(text);
+            cr.MoveTo(areaWidth - te.Width - 5,
+                      areaHeight - te.Height - 5 - space-5);
+
+            cr.ShowText(text);
+
+            ((IDisposable)cr.GetTarget()).Dispose();
+            ((IDisposable)cr).Dispose();
+        }
     }
 
     /// <summary>

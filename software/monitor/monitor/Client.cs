@@ -23,6 +23,8 @@ using System;
 using System.Net.Sockets;
 using System.Text;
 
+using System.Threading;
+
 namespace monitor
 {
     /// <summary>
@@ -66,20 +68,25 @@ namespace monitor
         /// </summary>
         private static byte[] receiveBuffer;
 
-        private static int initialReceiveBufferIndex = 0;
+        //private static int initialReceiveBufferIndex = 0;
 
         /// <summary>
         /// String containing received message from tcp server
         /// </summary>
         private static StringBuilder message = new StringBuilder();
-        private static int newLength = 1;
-        private static int packetCounter = 0;
+        //private static int newLength = 1;
+        //private static int packetCounter = 0;
 
         /// <summary>
         /// Callback to send received message to upper level
         /// </summary>
-        public delegate void ReadEvent(string msg, byte[] buffer);
+        public delegate void ReadEvent(string msg);
         public static ReadEvent readEvent = null;
+
+        /// <summary>
+        /// Thread used in reception
+        /// </summary>
+        private static Thread readThread;
 
         /// <summary>
         /// Open connection to server "host", on default port number.
@@ -114,7 +121,12 @@ namespace monitor
 
                 // received data are stored in buffer
                 // Next reading will be done in ReadCallback method
-                stream.BeginRead(buffer, 0, newLength, new AsyncCallback(ReadCallback), message);
+                stream.BeginRead(buffer, 0, 1, new AsyncCallback(ReadCallback), message);
+
+                // Start reading thread
+                //message.Clear();
+                //readThread = new Thread(new ThreadStart(ReadCallback));
+                //readThread.Start();
             }
             catch (ArgumentNullException e)
             {
@@ -147,16 +159,139 @@ namespace monitor
         /// <summary>
         /// Callback call by stream.BeginRead after reception of newLength data
         /// </summary>
+        //private static void ReadCallback()
+        //{
+        //    char character;
+        //    int data;
+        //    byte[] buffer=new byte[4096];
+        //    int lengthRead;
+
+        //    while (client.Connected)
+        //    {
+        //        try
+        //        {
+        //            //data = stream.ReadByte();
+        //            lengthRead = stream.Read(buffer, 0, buffer.Length);
+        //        }
+        //        catch (ObjectDisposedException)
+        //        {
+        //            Console.WriteLine("Connection to server dropped (object disposed)!");
+        //            return;
+        //        }
+        //        catch (System.IO.IOException)
+        //        {
+        //            Console.WriteLine("Connection to server dropped (other error)");
+        //            return;
+        //        }
+
+        //        if (lengthRead > 0) // a data was read
+        //        {
+        //            //character = (char)data;
+        //            var str = System.Text.Encoding.Default.GetString(buffer);
+        //            int indexOf = str.IndexOf('\n');
+
+        //            //if (character != '\n')
+        //            if (indexOf == -1) // \n doesn't exists
+        //            {
+        //                message.Append(str);
+
+        //                //if (receiveBuffer == null) receiveBuffer = new byte[1];
+        //                //else Array.Resize<byte>(ref receiveBuffer, receiveBuffer.Length + 1); // resize currrent buffer
+
+        //                //receiveBuffer[receiveBuffer.Length - 1] = (byte)data;
+        //            }
+        //            else // end of string found
+        //            {
+        //                message.Append((str.Substring(0,indexOf)));
+        //                readEvent?.Invoke(message.ToString(), receiveBuffer);
+
+        //                message.Clear();
+        //                receiveBuffer = null;
+        //            }
+        //        }
+        //    }
+        //}
+
+        /// <summary>
+        /// Callback call by stream.BeginRead after reception of newLength data
+        /// </summary>
         /// <param name="ar">Not sure of what is it, but needed for terminate reading</param>
+        //private static void ReadCallback(IAsyncResult ar)
+        //{
+        //    if (client.Connected)
+        //    {
+        //        int bytesRead;
+
+        //        try
+        //        {
+        //            // Termintae read operation, and get number of byte stored in buffer
+        //            bytesRead = stream.EndRead(ar);
+        //        }
+        //        catch (ObjectDisposedException e)
+        //        {
+        //            Console.WriteLine("Connection to server dropped: " + e.ToString());
+        //            return;
+        //        }
+
+        //        newLength = 1;
+
+        //        // if number of byte read is not 0, concatenate string and buffer
+        //        if (bytesRead > 0)
+        //        {
+        //            packetCounter++;
+
+        //            if (packetCounter >= 3)
+        //            {
+        //                //Console.WriteLine("Supplementary packet " + packetCounter);
+        //            }
+
+        //            // Append new data to current string (expecting data are ascii)
+        //            message.Append(Encoding.ASCII.GetString(buffer, 0, bytesRead));
+
+        //            // Similarly, append received bytes to current buffer 
+        //            if (receiveBuffer == null) receiveBuffer = new byte[bytesRead];
+        //            else Array.Resize<byte>(ref receiveBuffer, initialReceiveBufferIndex + bytesRead); // resize currrent buffer
+
+        //            System.Buffer.BlockCopy(buffer, 0, receiveBuffer, initialReceiveBufferIndex, bytesRead); // and add received data
+        //            initialReceiveBufferIndex = receiveBuffer.Length; // move last index of current buffer
+        //        }
+
+        //        // if it remains received data, prepare for a new reading (get another buffer to append to current one)
+        //        if (client.Available > 0)
+        //        {
+        //            newLength = client.Available;
+        //            if (newLength > BufferMaxSize) newLength = BufferMaxSize;
+        //            else newLength = client.Available;
+        //        }
+        //        else
+        //        {
+        //            // no more data to read, buffer and string can be send to upper level
+        //            readEvent?.Invoke(message.ToString(), receiveBuffer);
+
+        //            message.Clear();
+        //            receiveBuffer = null;
+        //            initialReceiveBufferIndex = 0;
+        //            packetCounter = 0;
+        //        }
+
+        //        // Prepare for reading new data
+        //        if (newLength> BufferMaxSize) newLength = BufferMaxSize;
+        //        if (newLength <= 0) newLength = 1;
+        //        stream.BeginRead(buffer, 0, newLength, new AsyncCallback(ReadCallback), message);
+        //    }
+        //}
+
         private static void ReadCallback(IAsyncResult ar)
         {
+            int newLength = 1;
+
             if (client.Connected)
             {
                 int bytesRead;
 
                 try
                 {
-                    // Termintae read operation, and get number of byte stored in buffer
+                    // Terminate read operation, and get number of byte stored in buffer
                     bytesRead = stream.EndRead(ar);
                 }
                 catch (ObjectDisposedException e)
@@ -165,27 +300,13 @@ namespace monitor
                     return;
                 }
 
-                newLength = 1;
+                //newLength = 1;
 
                 // if number of byte read is not 0, concatenate string and buffer
                 if (bytesRead > 0)
                 {
-                    packetCounter++;
-
-                    if (packetCounter >= 3)
-                    {
-                        //Console.WriteLine("Supplementary packet " + packetCounter);
-                    }
-
                     // Append new data to current string (expecting data are ascii)
                     message.Append(Encoding.ASCII.GetString(buffer, 0, bytesRead));
-
-                    // Similarly, append received bytes to current buffer 
-                    if (receiveBuffer == null) receiveBuffer = new byte[bytesRead];
-                    else Array.Resize<byte>(ref receiveBuffer, initialReceiveBufferIndex + bytesRead); // resize currrent buffer
-
-                    System.Buffer.BlockCopy(buffer, 0, receiveBuffer, initialReceiveBufferIndex, bytesRead); // and add received data
-                    initialReceiveBufferIndex = receiveBuffer.Length; // move last index of current buffer
                 }
 
                 // if it remains received data, prepare for a new reading (get another buffer to append to current one)
@@ -198,12 +319,9 @@ namespace monitor
                 else
                 {
                     // no more data to read, buffer and string can be send to upper level
-                    readEvent?.Invoke(message.ToString(), receiveBuffer);
+                    readEvent?.Invoke(message.ToString());
 
                     message.Clear();
-                    receiveBuffer = null;
-                    initialReceiveBufferIndex = 0;
-                    packetCounter = 0;
                 }
 
                 // Prepare for reading new data

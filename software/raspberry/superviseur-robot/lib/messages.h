@@ -39,14 +39,14 @@ typedef enum {
     MESSAGE_ANSWER_ROBOT_UNKNOWN_COMMAND,
     MESSAGE_ANSWER_ROBOT_ERROR,
     MESSAGE_ANSWER_COM_ERROR,
-           
+      
+    // Messages specific to server
+    MESSAGE_MONITOR_LOST,
+    
     // messages for serial communication with robot
     MESSAGE_ROBOT_COM_OPEN,
     MESSAGE_ROBOT_COM_CLOSE,
          
-    // Messages specific to server
-    MESSAGE_MONITOR_LOST,
-    
     // Messages for camera   
     MESSAGE_CAM_OPEN,
     MESSAGE_CAM_CLOSE,
@@ -373,7 +373,7 @@ public:
      * @param image Pointer to image
      * @throw std::runtime_error if message ID is incompatible with image message
      */
-    MessageImg(MessageID id, Img* image);
+    MessageImg(MessageID id, Img *image);
 
     /**
      * Destroy Image message

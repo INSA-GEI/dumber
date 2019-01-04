@@ -23,7 +23,7 @@
 
 using namespace std;
      
-#define SERVER_PORT 1234
+#define SERVER_PORT 5544
 
 /**
  * Class used for generating a server and communicating through it with monitor
@@ -71,7 +71,7 @@ public:
      * @attention Message given in parameter will be destroyed (delete) after being sent. No need for user to delete message after that.
      * @warning Write is not thread safe : check that multiple tasks can't access this method simultaneously  
      */
-    void Write(Message &msg);
+    void Write(Message *msg);
     
     /**
      * Function called at beginning of Write method
@@ -121,7 +121,7 @@ protected:
      * @param msg Message to be converted
      * @return A string, image of the message
      */
-    string MessageToString(Message &msg);
+    string MessageToString(Message *msg);
     
     /**
      * Method used internally to convert a string received over TCP to a message 

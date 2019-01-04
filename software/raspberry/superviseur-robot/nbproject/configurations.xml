@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/base64/base64.h</itemPath>
       <itemPath>./lib/camera.h</itemPath>
       <itemPath>/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/commonitor.h</itemPath>
       <itemPath>/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/comrobot.h</itemPath>
@@ -26,6 +27,7 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/base64/base64.cpp</itemPath>
       <itemPath>/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/camera.cpp</itemPath>
       <itemPath>/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/commonitor.cpp</itemPath>
       <itemPath>/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/comrobot.cpp</itemPath>
@@ -127,6 +129,16 @@
       </item>
       <item path="./tasks.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/base64/base64.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/base64/base64.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/camera.cpp"
             ex="false"
             tool="1"
@@ -219,6 +231,16 @@
       <item path="./tasks.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="./tasks.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/base64/base64.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/base64/base64.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/camera.cpp"
             ex="false"
@@ -330,6 +352,16 @@
       </item>
       <item path="./tasks.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/base64/base64.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/base64/base64.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/camera.cpp"
             ex="false"
             tool="1"
@@ -433,6 +465,16 @@
       <item path="./main.cpp" ex="false" tool="1" flavor2="9">
       </item>
       <item path="./tasks.cpp" ex="true" tool="1" flavor2="9">
+      </item>
+      <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/base64/base64.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/base64/base64.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/camera.cpp"
             ex="false"
