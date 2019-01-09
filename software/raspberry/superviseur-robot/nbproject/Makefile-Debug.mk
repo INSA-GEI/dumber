@@ -35,6 +35,11 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/lib/base64/base64.o \
+	${OBJECTDIR}/lib/camera.o \
+	${OBJECTDIR}/lib/commonitor.o \
+	${OBJECTDIR}/lib/comrobot.o \
+	${OBJECTDIR}/lib/img.o \
 	${OBJECTDIR}/lib/message.o \
 	${OBJECTDIR}/lib/messages.o \
 	${OBJECTDIR}/lib/monitor.o \
@@ -42,11 +47,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/lib/server.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/tasks.o \
-	${OBJECTDIR}/_ext/a7f31ab4/base64.o \
-	${OBJECTDIR}/_ext/6cc0dc4a/camera.o \
-	${OBJECTDIR}/_ext/6cc0dc4a/commonitor.o \
-	${OBJECTDIR}/_ext/6cc0dc4a/comrobot.o \
-	${OBJECTDIR}/_ext/6cc0dc4a/img.o \
 	${OBJECTDIR}/tasks_pthread.o
 
 
@@ -73,6 +73,31 @@ LDLIBSOPTIONS=`pkg-config --libs opencv`
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/superviseur-robot: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/superviseur-robot ${OBJECTFILES} ${LDLIBSOPTIONS} -Wl,--no-as-needed -lalchemy -lcopperplate /usr/xenomai/lib/xenomai/bootstrap.o -Wl,--wrap=main -Wl,--dynamic-list=/usr/xenomai/lib/dynlist.ld -L/usr/xenomai/lib -lmercury -lpthread -lrt
+
+${OBJECTDIR}/lib/base64/base64.o: lib/base64/base64.cpp
+	${MKDIR} -p ${OBJECTDIR}/lib/base64
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/lib/base64/base64.o lib/base64/base64.cpp
+
+${OBJECTDIR}/lib/camera.o: lib/camera.cpp
+	${MKDIR} -p ${OBJECTDIR}/lib
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/lib/camera.o lib/camera.cpp
+
+${OBJECTDIR}/lib/commonitor.o: lib/commonitor.cpp
+	${MKDIR} -p ${OBJECTDIR}/lib
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/lib/commonitor.o lib/commonitor.cpp
+
+${OBJECTDIR}/lib/comrobot.o: lib/comrobot.cpp
+	${MKDIR} -p ${OBJECTDIR}/lib
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/lib/comrobot.o lib/comrobot.cpp
+
+${OBJECTDIR}/lib/img.o: lib/img.cpp
+	${MKDIR} -p ${OBJECTDIR}/lib
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/lib/img.o lib/img.cpp
 
 ${OBJECTDIR}/lib/message.o: lib/message.cpp
 	${MKDIR} -p ${OBJECTDIR}/lib
@@ -108,31 +133,6 @@ ${OBJECTDIR}/tasks.o: tasks.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tasks.o tasks.cpp
-
-${OBJECTDIR}/_ext/a7f31ab4/base64.o: /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/base64/base64.cpp
-	${MKDIR} -p ${OBJECTDIR}/_ext/a7f31ab4
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/a7f31ab4/base64.o /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/base64/base64.cpp
-
-${OBJECTDIR}/_ext/6cc0dc4a/camera.o: /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/camera.cpp
-	${MKDIR} -p ${OBJECTDIR}/_ext/6cc0dc4a
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/6cc0dc4a/camera.o /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/camera.cpp
-
-${OBJECTDIR}/_ext/6cc0dc4a/commonitor.o: /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/commonitor.cpp
-	${MKDIR} -p ${OBJECTDIR}/_ext/6cc0dc4a
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/6cc0dc4a/commonitor.o /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/commonitor.cpp
-
-${OBJECTDIR}/_ext/6cc0dc4a/comrobot.o: /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/comrobot.cpp
-	${MKDIR} -p ${OBJECTDIR}/_ext/6cc0dc4a
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/6cc0dc4a/comrobot.o /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/comrobot.cpp
-
-${OBJECTDIR}/_ext/6cc0dc4a/img.o: /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/img.cpp
-	${MKDIR} -p ${OBJECTDIR}/_ext/6cc0dc4a
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/6cc0dc4a/img.o /home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/img.cpp
 
 ${OBJECTDIR}/tasks_pthread.o: tasks_pthread.cpp
 	${MKDIR} -p ${OBJECTDIR}

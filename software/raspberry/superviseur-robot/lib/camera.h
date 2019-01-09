@@ -21,13 +21,16 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#ifndef __FOR_PC__
+#include "raspicam/raspicam_cv.h"
+#endif /* __FOR_PC__ */
 #include "img.h"
 
 enum captureSize {xs, sm, md, lg};
 
 class Camera {
 public:
-    Camera(int size);
+    Camera(int size, int fps);
 
     bool Open();
     void Close();
@@ -41,7 +44,12 @@ public:
     Img Grab();
     
 private:
+#ifdef __FOR_PC__
     cv::VideoCapture cap;
+#else
+    raspicam::RaspiCam_Cv cap;
+#endif /*  __FOR_PC__ */   
+   
     int size = sm;
     int width;
     int height;

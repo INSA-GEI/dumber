@@ -243,7 +243,7 @@ string ComMonitor::MessageToString(Message *msg) {
             image=((MessageImg*) msg)->GetImage();
             jpeg = image->ToJpg();
             
-            cout << "Jpeg size: " << to_string(jpeg.size())<<endl<<flush;
+            //cout << "Jpeg size: " << to_string(jpeg.size())<<endl<<flush;
             
             s = base64_encode(jpeg.data(), jpeg.size());
             str.append(LABEL_MONITOR_CAMERA_IMAGE + LABEL_SEPARATOR_CHAR + s);

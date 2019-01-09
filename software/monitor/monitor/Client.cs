@@ -35,7 +35,7 @@ namespace monitor
         /// <summary>
         /// Default server name
         /// </summary>
-        public const string defaultIP = "localhost";
+        public const string defaultIP = "10.105.1.13";
 
         /// <summary>
         /// Default server port number
@@ -55,7 +55,7 @@ namespace monitor
         /// <summary>
         /// Size of internal buffer used when reading data from server
         /// </summary>
-        private const int BufferMaxSize = 512;
+        private const int BufferMaxSize = 8*1024;
 
         /// <summary>
         /// Internal buffer used when reading data from server
@@ -66,7 +66,7 @@ namespace monitor
         /// buffer containing received message from TCP server
         /// Used to concatenate internal buffers into one
         /// </summary>
-        private static byte[] receiveBuffer;
+        //private static byte[] receiveBuffer;
 
         //private static int initialReceiveBufferIndex = 0;
 
@@ -82,11 +82,6 @@ namespace monitor
         /// </summary>
         public delegate void ReadEvent(string msg);
         public static ReadEvent readEvent = null;
-
-        /// <summary>
-        /// Thread used in reception
-        /// </summary>
-        private static Thread readThread;
 
         /// <summary>
         /// Open connection to server "host", on default port number.
@@ -159,131 +154,11 @@ namespace monitor
         /// <summary>
         /// Callback call by stream.BeginRead after reception of newLength data
         /// </summary>
-        //private static void ReadCallback()
-        //{
-        //    char character;
-        //    int data;
-        //    byte[] buffer=new byte[4096];
-        //    int lengthRead;
-
-        //    while (client.Connected)
-        //    {
-        //        try
-        //        {
-        //            //data = stream.ReadByte();
-        //            lengthRead = stream.Read(buffer, 0, buffer.Length);
-        //        }
-        //        catch (ObjectDisposedException)
-        //        {
-        //            Console.WriteLine("Connection to server dropped (object disposed)!");
-        //            return;
-        //        }
-        //        catch (System.IO.IOException)
-        //        {
-        //            Console.WriteLine("Connection to server dropped (other error)");
-        //            return;
-        //        }
-
-        //        if (lengthRead > 0) // a data was read
-        //        {
-        //            //character = (char)data;
-        //            var str = System.Text.Encoding.Default.GetString(buffer);
-        //            int indexOf = str.IndexOf('\n');
-
-        //            //if (character != '\n')
-        //            if (indexOf == -1) // \n doesn't exists
-        //            {
-        //                message.Append(str);
-
-        //                //if (receiveBuffer == null) receiveBuffer = new byte[1];
-        //                //else Array.Resize<byte>(ref receiveBuffer, receiveBuffer.Length + 1); // resize currrent buffer
-
-        //                //receiveBuffer[receiveBuffer.Length - 1] = (byte)data;
-        //            }
-        //            else // end of string found
-        //            {
-        //                message.Append((str.Substring(0,indexOf)));
-        //                readEvent?.Invoke(message.ToString(), receiveBuffer);
-
-        //                message.Clear();
-        //                receiveBuffer = null;
-        //            }
-        //        }
-        //    }
-        //}
-
-        /// <summary>
-        /// Callback call by stream.BeginRead after reception of newLength data
-        /// </summary>
         /// <param name="ar">Not sure of what is it, but needed for terminate reading</param>
-        //private static void ReadCallback(IAsyncResult ar)
-        //{
-        //    if (client.Connected)
-        //    {
-        //        int bytesRead;
-
-        //        try
-        //        {
-        //            // Termintae read operation, and get number of byte stored in buffer
-        //            bytesRead = stream.EndRead(ar);
-        //        }
-        //        catch (ObjectDisposedException e)
-        //        {
-        //            Console.WriteLine("Connection to server dropped: " + e.ToString());
-        //            return;
-        //        }
-
-        //        newLength = 1;
-
-        //        // if number of byte read is not 0, concatenate string and buffer
-        //        if (bytesRead > 0)
-        //        {
-        //            packetCounter++;
-
-        //            if (packetCounter >= 3)
-        //            {
-        //                //Console.WriteLine("Supplementary packet " + packetCounter);
-        //            }
-
-        //            // Append new data to current string (expecting data are ascii)
-        //            message.Append(Encoding.ASCII.GetString(buffer, 0, bytesRead));
-
-        //            // Similarly, append received bytes to current buffer 
-        //            if (receiveBuffer == null) receiveBuffer = new byte[bytesRead];
-        //            else Array.Resize<byte>(ref receiveBuffer, initialReceiveBufferIndex + bytesRead); // resize currrent buffer
-
-        //            System.Buffer.BlockCopy(buffer, 0, receiveBuffer, initialReceiveBufferIndex, bytesRead); // and add received data
-        //            initialReceiveBufferIndex = receiveBuffer.Length; // move last index of current buffer
-        //        }
-
-        //        // if it remains received data, prepare for a new reading (get another buffer to append to current one)
-        //        if (client.Available > 0)
-        //        {
-        //            newLength = client.Available;
-        //            if (newLength > BufferMaxSize) newLength = BufferMaxSize;
-        //            else newLength = client.Available;
-        //        }
-        //        else
-        //        {
-        //            // no more data to read, buffer and string can be send to upper level
-        //            readEvent?.Invoke(message.ToString(), receiveBuffer);
-
-        //            message.Clear();
-        //            receiveBuffer = null;
-        //            initialReceiveBufferIndex = 0;
-        //            packetCounter = 0;
-        //        }
-
-        //        // Prepare for reading new data
-        //        if (newLength> BufferMaxSize) newLength = BufferMaxSize;
-        //        if (newLength <= 0) newLength = 1;
-        //        stream.BeginRead(buffer, 0, newLength, new AsyncCallback(ReadCallback), message);
-        //    }
-        //}
-
         private static void ReadCallback(IAsyncResult ar)
         {
             int newLength = 1;
+            int index = -1;
 
             if (client.Connected)
             {
@@ -299,36 +174,96 @@ namespace monitor
                     Console.WriteLine("Connection to server dropped: " + e.ToString());
                     return;
                 }
+                catch (System.IO.IOException e)
+                {
+                    Console.WriteLine("Connection to server dropped: " + e.ToString());
+                    return;
+                }
 
-                //newLength = 1;
+                newLength = 1;
+                index = -1;
 
                 // if number of byte read is not 0, concatenate string and buffer
                 if (bytesRead > 0)
                 {
+                    //Console.WriteLine("Receive " + bytesRead + " data");
+
                     // Append new data to current string (expecting data are ascii)
                     message.Append(Encoding.ASCII.GetString(buffer, 0, bytesRead));
+                    index = SearchCarriageReturn(buffer, bytesRead);
                 }
 
                 // if it remains received data, prepare for a new reading (get another buffer to append to current one)
-                if (client.Available > 0)
+                if (index == -1)
                 {
-                    newLength = client.Available;
-                    if (newLength > BufferMaxSize) newLength = BufferMaxSize;
-                    else newLength = client.Available;
+                    if (client.Available > 0)
+                    {
+                        newLength = client.Available;
+                        if (newLength > BufferMaxSize) newLength = BufferMaxSize;
+                        else newLength = client.Available;
+                    }
                 }
                 else
                 {
+                    string s = message.ToString();
+
+                    //Console.WriteLine("Message received (" + s.Length + ")");
                     // no more data to read, buffer and string can be send to upper level
-                    readEvent?.Invoke(message.ToString());
+                    readEvent?.Invoke(s);
 
                     message.Clear();
+
+                    if (index != bytesRead - 1)
+                    {
+                        //Console.WriteLine("Index not at end (" + index + "/" + bytesRead + ")");
+                        //Console.WriteLine("1=" + (char)buffer[index + 1] + " 2=" + (char)buffer[index + 2]);
+
+                        byte[] trailing=new byte[BufferMaxSize];
+
+                        Array.Copy(buffer, index + 1, trailing, 0, bytesRead - index - 1);
+                        message.Append(Encoding.ASCII.GetString(trailing, 0, bytesRead - index - 1));
+                    }
                 }
 
                 // Prepare for reading new data
                 if (newLength> BufferMaxSize) newLength = BufferMaxSize;
                 if (newLength <= 0) newLength = 1;
-                stream.BeginRead(buffer, 0, newLength, new AsyncCallback(ReadCallback), message);
+
+                try
+                {
+                    stream.BeginRead(buffer, 0, newLength, new AsyncCallback(ReadCallback), message);
+                }
+                catch (ObjectDisposedException e)
+                {
+                    Console.WriteLine("Connection to server dropped: " + e.ToString());
+                    return;
+                }
+                catch (System.IO.IOException e)
+                {
+                    Console.WriteLine("Connection to server dropped: " + e.ToString());
+                    return;
+                }
             }
+        }
+
+        /// <summary>
+        /// Searchs the carriage return.
+        /// </summary>
+        /// <returns>Index of carriage return, if present, -1 otherwise.</returns>
+        /// <param name="buf">Buffer of byte</param>
+        /// <param name="length">Length of buffer</param>
+        private static int SearchCarriageReturn(byte[] buf, int length)
+        {
+            int index = -1;
+            int i = 0;
+
+            for (i = 0; i < length; i++)
+            {
+                if (buf[i] == (byte)'\n') break;
+            }
+
+            if (i!= length) index = i;
+            return index;
         }
 
         /// <summary>

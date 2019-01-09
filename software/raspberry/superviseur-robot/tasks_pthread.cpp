@@ -48,11 +48,11 @@
  */
 
 void Tasks::Init() {
-    int status; 
-    
+    int status;
+
     /* Open com port with STM32 */
     cout << "Open serial com (";
-    status = robot.Open("/dev/ttyUSB0");
+    status = robot.Open();
     cout << status;
     cout << ")" << endl;
 
@@ -60,7 +60,7 @@ void Tasks::Init() {
         // Open server
 
         status = monitor.Open(SERVER_PORT);
-        cout << "Open server on port " << SERVER_PORT << " (" << status << ")" << endl;
+        cout << "Open server on port " << (SERVER_PORT) << " (" << status << ")" << endl;
 
         if (status < 0) throw std::runtime_error {
             "Unable to start server on port " + std::to_string(SERVER_PORT)
@@ -72,40 +72,60 @@ void Tasks::Init() {
 }
 
 void Tasks::Run() {
-    
-    threadTimer=new thread((void (*)(void*)) &Tasks::TimerTask,this);
-    threadServer=new thread((void (*)(void*)) &Tasks::ServerTask,this);
-    //    threadSendToMon=new thread((void (*)(void*)) &Tasks::SendToMonTask,this);
-    
+    threadTimer = new thread((void (*)(void*)) & Tasks::TimerTask, this);
+    threadServer = new thread((void (*)(void*)) & Tasks::ServerTask, this);
 
-//    msgSend = ComRobot::Ping();
-//    cout << "Send => " << msgSend->ToString() << endl << flush;
-//    msgRcv = robot.SendCommand(msgSend, MESSAGE_ANSWER_ACK, 3);
-//    cout << "Rcv <= " << msgRcv->ToString() << endl << flush;
-//
-//    delete(msgRcv);
-//
-//    msgSend = ComRobot::StartWithoutWD();
-//    cout << "Send => " << msgSend->ToString() << endl << flush;
-//    msgRcv = robot.SendCommand(msgSend, MESSAGE_ANSWER_ACK, 3);
-//    cout << "Rcv <= " << msgRcv->ToString() << endl << flush;
-//
-//    delete(msgRcv);
-//
-//    msgSend = ComRobot::Move(1000);
-//    cout << "Send => " << msgSend->ToString() << endl << flush;
-//    msgRcv = robot.SendCommand(msgSend, MESSAGE_ANSWER_ACK, 3);
-//    cout << "Rcv <= " << msgRcv->ToString() << endl << flush;
-//
-//    delete(msgRcv);
-//
-//    msgSend = ComRobot::GetBattery();
-//    cout << "Send => " << msgSend->ToString() << endl << flush;
-//    msgRcv = robot.SendCommand(msgSend, MESSAGE_ROBOT_BATTERY_LEVEL, 3);
-//    cout << "Rcv <= " << msgRcv->ToString() << endl << flush;
-//
-//    delete(msgRcv);
-    cout<<"Tasks launched"<<endl<<flush; 
+    //    threadSendToMon=new thread((void (*)(void*)) &Tasks::SendToMonTask,this);
+
+    //
+    //    Camera camera=Camera(sm);
+    //    cout << "Try opening camera"<<endl<<flush;
+    //    if (camera.Open()) cout<<"Camera opened successfully"<<endl<<flush;
+    //    else cout<<"Failed to open camera"<<endl<<flush;
+    //    
+    //    counter = 0;
+    //    while (1) {
+    //        Img image=camera.Grab();
+    //        
+    //        counter++;
+    //        
+    //        if (flag == true) {
+    //            cout<< "Image info: "<<image.ToString()<<endl<<flush;
+    //            cout << "FPS = "<<to_string(counter)<<endl<<flush;
+    //            flag=false;
+    //            counter=0;
+    //        }
+    //    }
+
+
+    //    msgSend = ComRobot::Ping();
+    //    cout << "Send => " << msgSend->ToString() << endl << flush;
+    //    msgRcv = robot.SendCommand(msgSend, MESSAGE_ANSWER_ACK, 3);
+    //    cout << "Rcv <= " << msgRcv->ToString() << endl << flush;
+    //
+    //    delete(msgRcv);
+    //
+    //    msgSend = ComRobot::StartWithoutWD();
+    //    cout << "Send => " << msgSend->ToString() << endl << flush;
+    //    msgRcv = robot.SendCommand(msgSend, MESSAGE_ANSWER_ACK, 3);
+    //    cout << "Rcv <= " << msgRcv->ToString() << endl << flush;
+    //
+    //    delete(msgRcv);
+    //
+    //    msgSend = ComRobot::Move(1000);
+    //    cout << "Send => " << msgSend->ToString() << endl << flush;
+    //    msgRcv = robot.SendCommand(msgSend, MESSAGE_ANSWER_ACK, 3);
+    //    cout << "Rcv <= " << msgRcv->ToString() << endl << flush;
+    //
+    //    delete(msgRcv);
+    //
+    //    msgSend = ComRobot::GetBattery();
+    //    cout << "Send => " << msgSend->ToString() << endl << flush;
+    //    msgRcv = robot.SendCommand(msgSend, MESSAGE_ROBOT_BATTERY_LEVEL, 3);
+    //    cout << "Rcv <= " << msgRcv->ToString() << endl << flush;
+    //
+    //    delete(msgRcv);
+    cout << "Tasks launched" << endl << flush;
 }
 
 void Tasks::Stop() {
@@ -116,14 +136,14 @@ void Tasks::Stop() {
 void Tasks::ServerTask(void *arg) {
     Message *msgRcv;
     Message *msgSend;
-    bool isActive=true;
-    
-    cout << "Start " << __PRETTY_FUNCTION__ <<endl<<flush;
-    
+    bool isActive = true;
+
+    cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
+
     while (isActive) {
-        msgRcv=NULL;
-        msgSend=NULL;
-        
+        msgRcv = NULL;
+        msgSend = NULL;
+
         msgRcv = monitor.Read();
         cout << "Rcv <= " << msgRcv->ToString() << endl << flush;
 
@@ -132,31 +152,35 @@ void Tasks::ServerTask(void *arg) {
 
         if (msgRcv->CompareID(MESSAGE_ROBOT_START_WITH_WD)) msgSend = new Message(MESSAGE_ANSWER_ACK);
         if (msgRcv->CompareID(MESSAGE_ROBOT_START_WITHOUT_WD)) msgSend = new Message(MESSAGE_ANSWER_ACK);
-        
+
         if (msgRcv->CompareID(MESSAGE_ROBOT_COM_CLOSE)) isActive = false;
 
         if (msgRcv->CompareID(MESSAGE_CAM_OPEN)) {
-            sendImage=true;
+            sendImage = true;
             msgSend = new Message(MESSAGE_ANSWER_ACK);
         }
-        
+
         if (msgRcv->CompareID(MESSAGE_CAM_CLOSE)) {
-            sendImage=false;
+            sendImage = false;
             msgSend = new Message(MESSAGE_ANSWER_ACK);
         }
-        
+
         if (msgRcv->CompareID(MESSAGE_CAM_POSITION_COMPUTE_START)) {
-            sendPosition=true;
+            sendPosition = true;
             msgSend = new Message(MESSAGE_ANSWER_ACK);
         }
-        
+
         if (msgRcv->CompareID(MESSAGE_CAM_POSITION_COMPUTE_STOP)) {
-            sendPosition=false;
+            sendPosition = false;
             msgSend = new Message(MESSAGE_ANSWER_ACK);
         }
-        
-        if (msgRcv->CompareID(MESSAGE_ROBOT_BATTERY_GET)) msgSend = new MessageBattery(MESSAGE_ROBOT_BATTERY_LEVEL,BATTERY_FULL);
-        
+
+        if (msgRcv->CompareID(MESSAGE_ROBOT_BATTERY_GET)) msgSend = new MessageBattery(MESSAGE_ROBOT_BATTERY_LEVEL, BATTERY_FULL);
+
+        if (msgRcv->CompareID(MESSAGE_CAM_ASK_ARENA)) showArena = true;
+        if (msgRcv->CompareID(MESSAGE_CAM_ARENA_CONFIRM)) showArena = false;
+        if (msgRcv->CompareID(MESSAGE_CAM_ARENA_INFIRM)) showArena = false;
+
         if (msgSend != NULL) monitor.Write(msgSend);
         delete(msgRcv);
     }
@@ -166,61 +190,107 @@ void Tasks::TimerTask(void* arg) {
     struct timespec tim, tim2;
     Message *msgSend;
     int counter;
+    int cntFrame = 0;
+    Position pos;
+    Arena arena;
     
     tim.tv_sec = 0;
     tim.tv_nsec = 50000000; // 50ms (20fps)
-    
-    cout << "Start " << __PRETTY_FUNCTION__ <<endl<<flush;
-    
-    Camera camera=Camera(sm);
-    cout << "Try opening camera"<<endl<<flush;
-    if (camera.Open()) cout<<"Camera opened successfully"<<endl<<flush;
-    else cout<<"Failed to open camera"<<endl<<flush;
+
+    cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
+
+    Camera camera = Camera(sm, 10);
+    cout << "Try opening camera" << endl << flush;
+    if (camera.Open()) cout << "Camera opened successfully" << endl << flush;
+    else {
+        cout << "Failed to open camera" << endl << flush;
+        
+        exit(0);
+    }
+
+    pos.angle = 0.0;
+    pos.robotId = -1;
+    pos.center = cv::Point2f(0, 0);
+    pos.direction = cv::Point2f(0, 0);
     
     while (1) {
         //std::this_thread::sleep_for(std::chrono::seconds )
         //sleep(1);
-        if (nanosleep(&tim, &tim2) < 0) {
-            printf("Nano sleep system call failed \n");
-            return;
-        }
-        
+        //        if (nanosleep(&tim, &tim2) < 0) {
+        //            printf("Nano sleep system call failed \n");
+        //            return;
+        //        }
+
+        //        counter++;
+        //        if (counter>=10) {
+        //            flag=true;
+        //            counter=0;
+        //        }
         //mutexTimer.unlock();
-        if (sendImage==true) {
+        Img image = camera.Grab(); // 15fps
+
+        if (sendPosition == true) {
             counter++;
-            
-            if (counter>=1) {
-                counter=0;
-                Img image=camera.Grab();
+
+            if (counter >= 1) { // div =15
+                counter = 0;
                 
-                cout << image.ToString()<<endl<<flush;
-                MessageImg *msg=new MessageImg(MESSAGE_CAM_IMAGE, &image);
-                
-                monitor.Write(msg);
-                cout << "Image sent"<<endl<<flush;
+                //if (!arena.IsEmpty()) {
+                image.dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME(3));
+                list<Position> poses = image.SearchAruco(arena);
+         
+                //std::list<Position> poses = image.SearchRobot(arena);
+                cout << "Nbr of pos detected: " << to_string(poses.size()) << endl << flush;
+
+                if (poses.size() > 0) {
+                    Position firstPos = poses.front();
+
+                    pos.angle = firstPos.angle;
+                    pos.robotId = firstPos.robotId;
+                    pos.center = firstPos.center;
+                    pos.direction = firstPos.direction;
+                } else {
+                    // Nothing found
+                    pos.angle = 0.0;
+                    pos.robotId = -1;
+                    pos.center = cv::Point2f(0,0);
+                    pos.direction = cv::Point2f(0,0);
+                }
+
+                MessagePosition *msgp = new MessagePosition(MESSAGE_CAM_POSITION, pos);
+                monitor.Write(msgp);
+                cout << "Position sent" << endl << flush;
             }
         }
         
-        if (sendPosition==true) {
-            Position pos;
-            pos.angle=0.0;
-            pos.robotId=1;
-            pos.center=cv::Point2f(0.5,0.5);
-            pos.direction=cv::Point2f(1.0,2.5);
+        if (sendImage == true) {
+            if (showArena) {
+                arena = image.SearchArena();
+
+                if (!arena.IsEmpty()) image.DrawArena(arena);
+                else cout << "Arena not found" << endl << flush;
+            }
+
+            if (sendPosition == true) {
+                image.DrawRobot(pos);
+            }
+             
+            if (!arena.IsEmpty()) image.DrawArena(arena);
             
-            MessagePosition *msgp=new MessagePosition(MESSAGE_CAM_POSITION, pos);
-            monitor.Write(msgp);
-            cout << "Position sent"<<endl<<flush;
+            MessageImg *msg = new MessageImg(MESSAGE_CAM_IMAGE, &image);
+
+            monitor.Write(msg);
+            cntFrame++;
+            cout << "cnt: " << to_string(cntFrame) << endl << flush;
         }
     }
 }
 
 void Tasks::SendToMonTask(void* arg) {
-    
-    cout << "Start " << __PRETTY_FUNCTION__ <<endl<<flush;
-    
+    cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
+
     while (1) {
-        
+
     }
 }
 

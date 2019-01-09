@@ -38,6 +38,14 @@ CND_ARTIFACT_PATH_Debug__Pthread_=dist/Debug__Pthread_/GNU-Linux/superviseur-rob
 CND_PACKAGE_DIR_Debug__Pthread_=dist/Debug__Pthread_/GNU-Linux/package
 CND_PACKAGE_NAME_Debug__Pthread_=superviseur-robot.tar
 CND_PACKAGE_PATH_Debug__Pthread_=dist/Debug__Pthread_/GNU-Linux/package/superviseur-robot.tar
+# Debug__Pthread__RPI configuration
+CND_PLATFORM_Debug__Pthread__RPI=GNU-Linux
+CND_ARTIFACT_DIR_Debug__Pthread__RPI=dist/Debug__Pthread__RPI/GNU-Linux
+CND_ARTIFACT_NAME_Debug__Pthread__RPI=superviseur-robot
+CND_ARTIFACT_PATH_Debug__Pthread__RPI=dist/Debug__Pthread__RPI/GNU-Linux/superviseur-robot
+CND_PACKAGE_DIR_Debug__Pthread__RPI=dist/Debug__Pthread__RPI/GNU-Linux/package
+CND_PACKAGE_NAME_Debug__Pthread__RPI=superviseur-robot.tar
+CND_PACKAGE_PATH_Debug__Pthread__RPI=dist/Debug__Pthread__RPI/GNU-Linux/package/superviseur-robot.tar
 #
 # include compiler specific variables
 #

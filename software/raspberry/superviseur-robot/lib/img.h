@@ -29,7 +29,9 @@
 #ifdef __WITH_ARUCO__
 #include <opencv2/aruco/dictionary.hpp>
 #include <opencv2/aruco/charuco.hpp>
+//#include <opencv2/aruco.hpp>
 #include <opencv2/core/mat.hpp>
+
 #endif // __WITH_ARUCO__
 
 #define ARENA_NOT_DETECTED -1
@@ -57,6 +59,8 @@ public:
 
 class Img {
 public:
+    ImageMat img;
+    
     Img(ImageMat imgMatrice);
     
     string ToString();
@@ -67,26 +71,23 @@ public:
 
     int DrawRobot(Position robot);
     int DrawAllRobots(std::list<Position> robots);
-    int DrawArena(Arena areneToDraw);
-    std::list<Position> SearchRobot(Arena myArena);
-    
-    
+    int DrawArena(Arena arenaToDraw);
+    std::list<Position> SearchRobot(Arena arena);
+        
 #ifdef __WITH_ARUCO__    
-    list<Position> search_aruco(Arena monArene = NULL);
+    list<Position> SearchAruco(Arena arena);
+    cv::Ptr<cv::aruco::Dictionary> dictionary;
 #endif // __WITH_ARUCO__
 private:
-    ImageMat img;
-    
 #ifdef __WITH_ARUCO__
-    Ptr<std::Dictionary> dictionary;
-    cv::Point2f find_aruco_center(std::vector<cv::Point2f> aruco);
-    cv::Point2f find_aruco_direction(std::vector<cv::Point2f> aruco);
+    cv::Point2f FindArucoCenter(std::vector<cv::Point2f> aruco);
+    cv::Point2f FindArucoDirection(std::vector<cv::Point2f> aruco);
 #endif // __WITH_ARUCO__
     
     float CalculAngle(Position robots);
     float CalculAngle2(cv::Point2f pt1, cv::Point2f pt2);
     float EuclideanDistance(cv::Point2f p, cv::Point2f q);
-    ImageMat CropArena(Arena arene);
+    ImageMat CropArena(Arena arena);
 };
 
 #endif //__IMG_H__

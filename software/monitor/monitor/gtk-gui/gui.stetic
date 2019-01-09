@@ -74,68 +74,95 @@
                 <property name="MemberName" />
                 <property name="Spacing">6</property>
                 <child>
-                  <widget class="Gtk.Alignment" id="alignment1">
+                  <widget class="Gtk.HBox" id="hbox2">
                     <property name="MemberName" />
-                    <property name="Xscale">0</property>
-                    <property name="Xalign">0</property>
-                    <property name="BorderWidth">6</property>
+                    <property name="Spacing">6</property>
                     <child>
-                      <widget class="Gtk.HBox" id="hbox2">
+                      <widget class="Gtk.Alignment" id="alignment1">
                         <property name="MemberName" />
-                        <property name="Spacing">6</property>
+                        <property name="Xscale">0</property>
+                        <property name="Xalign">0</property>
+                        <property name="BorderWidth">6</property>
                         <child>
-                          <widget class="Gtk.CheckButton" id="checkButtonCameraOn">
+                          <widget class="Gtk.HBox" id="hbox5">
                             <property name="MemberName" />
-                            <property name="CanFocus">True</property>
-                            <property name="Label" translatable="yes">Camera On</property>
-                            <property name="DrawIndicator">True</property>
-                            <property name="HasLabel">True</property>
-                            <property name="UseUnderline">True</property>
-                            <signal name="Clicked" handler="OnCheckButtonCameraOnClicked" />
+                            <property name="Spacing">6</property>
+                            <child>
+                              <widget class="Gtk.CheckButton" id="checkButtonCameraOn">
+                                <property name="MemberName" />
+                                <property name="CanFocus">True</property>
+                                <property name="Label" translatable="yes">Camera On</property>
+                                <property name="DrawIndicator">True</property>
+                                <property name="HasLabel">True</property>
+                                <property name="UseUnderline">True</property>
+                                <signal name="Clicked" handler="OnCheckButtonCameraOnClicked" />
+                              </widget>
+                              <packing>
+                                <property name="Position">0</property>
+                                <property name="AutoSize">True</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="Gtk.CheckButton" id="checkButtonRobotPosition">
+                                <property name="MemberName" />
+                                <property name="CanFocus">True</property>
+                                <property name="Label" translatable="yes">Show Position</property>
+                                <property name="DrawIndicator">True</property>
+                                <property name="HasLabel">True</property>
+                                <property name="UseUnderline">True</property>
+                                <signal name="Clicked" handler="OnCheckButtonRobotPositionClicked" />
+                              </widget>
+                              <packing>
+                                <property name="Position">1</property>
+                                <property name="AutoSize">True</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="Gtk.CheckButton" id="checkButtonFPS">
+                                <property name="MemberName" />
+                                <property name="CanFocus">True</property>
+                                <property name="Label" translatable="yes">Show FPS</property>
+                                <property name="DrawIndicator">True</property>
+                                <property name="HasLabel">True</property>
+                                <property name="UseUnderline">True</property>
+                                <signal name="Toggled" handler="OnCheckButtonFPSToggled" />
+                              </widget>
+                              <packing>
+                                <property name="Position">2</property>
+                                <property name="AutoSize">True</property>
+                              </packing>
+                            </child>
                           </widget>
-                          <packing>
-                            <property name="Position">0</property>
-                            <property name="AutoSize">True</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="Gtk.CheckButton" id="checkButtonRobotPosition">
-                            <property name="MemberName" />
-                            <property name="CanFocus">True</property>
-                            <property name="Label" translatable="yes">Robot Position</property>
-                            <property name="DrawIndicator">True</property>
-                            <property name="HasLabel">True</property>
-                            <property name="UseUnderline">True</property>
-                            <signal name="Clicked" handler="OnCheckButtonRobotPositionClicked" />
-                          </widget>
-                          <packing>
-                            <property name="Position">1</property>
-                            <property name="AutoSize">True</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="Gtk.Button" id="buttonAskArena">
-                            <property name="MemberName" />
-                            <property name="CanFocus">True</property>
-                            <property name="Type">TextOnly</property>
-                            <property name="Label" translatable="yes">Ask Arena...</property>
-                            <property name="UseUnderline">True</property>
-                            <signal name="Clicked" handler="OnButtonAskArenaClicked" />
-                          </widget>
-                          <packing>
-                            <property name="PackType">End</property>
-                            <property name="Position">2</property>
-                            <property name="AutoSize">True</property>
-                            <property name="Expand">False</property>
-                            <property name="Fill">False</property>
-                          </packing>
                         </child>
                       </widget>
+                      <packing>
+                        <property name="Position">0</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder />
+                    </child>
+                    <child>
+                      <widget class="Gtk.Button" id="buttonAskArena">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Type">TextOnly</property>
+                        <property name="Label" translatable="yes">Ask Arena...</property>
+                        <property name="UseUnderline">True</property>
+                        <signal name="Clicked" handler="OnButtonAskArenaClicked" />
+                      </widget>
+                      <packing>
+                        <property name="Position">2</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
                     </child>
                   </widget>
                   <packing>
                     <property name="Position">0</property>
-                    <property name="AutoSize">False</property>
+                    <property name="AutoSize">True</property>
                     <property name="Expand">False</property>
                     <property name="Fill">False</property>
                   </packing>
@@ -758,6 +785,7 @@
                                         <property name="MemberName" />
                                         <property name="CanFocus">True</property>
                                         <property name="Label" translatable="yes">Get battery level</property>
+                                        <property name="Active">True</property>
                                         <property name="DrawIndicator">True</property>
                                         <property name="HasLabel">True</property>
                                         <property name="UseUnderline">True</property>

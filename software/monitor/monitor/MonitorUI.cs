@@ -26,6 +26,7 @@ using Gdk;
 using Cairo;
 
 using monitor;
+using System.Timers;
 
 /// <summary>
 /// Main part of the program, behavior of main window
@@ -69,6 +70,13 @@ public partial class MainWindow : Gtk.Window
 
     private int imageReceivedCounter = 0;
     private int badImageReceivedCounter = 0;
+    private int imageFPS = 0;
+    private int imageFPScounter = 0;
+
+    /// <summary>
+    /// Timer for FPS request
+    /// </summary>
+    private System.Timers.Timer fpsTimer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -82,6 +90,10 @@ public partial class MainWindow : Gtk.Window
         // create new timer for battery request, every 10s
         batteryTimer = new System.Timers.Timer(10000.0);
         batteryTimer.Elapsed += OnBatteryTimerElapsed;
+
+        // create new timer for FPS , every 1s
+        fpsTimer = new System.Timers.Timer(1000.0);
+        fpsTimer.Elapsed += OnFpsTimerElapsed;
 
         // Customize controls
         AdjustControls();
@@ -126,6 +138,8 @@ public partial class MainWindow : Gtk.Window
 
                 checkButtonCameraOn.Active = false;
                 checkButtonRobotPosition.Active = false;
+                checkButtonFPS.Active = false;
+
                 if (cmdManager != null) cmdManager.Close();
 
                 batteryTimer.Stop();
@@ -165,6 +179,7 @@ public partial class MainWindow : Gtk.Window
 
                 checkButtonCameraOn.Active = false;
                 checkButtonRobotPosition.Active = false;
+                checkButtonFPS.Active = false;
 
                 systemState = SystemState.NotConnected;
 
@@ -183,11 +198,9 @@ public partial class MainWindow : Gtk.Window
     /// <param name="message">Message</param>
     private void MessagePopup(MessageType type, ButtonsType buttons, string title, string message)
     {
-        MessageDialog md = new MessageDialog(this, DialogFlags.DestroyWithParent, type, buttons, message)
-        {
-            Title = title
-        };
+        MessageDialog md = new MessageDialog(this, DialogFlags.DestroyWithParent, type, buttons, message);
 
+        md.Title = title;
         md.Run();
         md.Destroy();
     }
@@ -206,15 +219,11 @@ public partial class MainWindow : Gtk.Window
         a.RetVal = true;
     }
 
-    //private byte[] imageComplete;
-    //private byte[] imageInProgress;
-
     /// <summary>
     /// Callback called when new message is received from server
     /// </summary>
     /// <param name="header">Header of message</param>
     /// <param name="data">Data of message</param>
-    /// <param name="buffer">Raw buffer corresponding of received message</param>
     public void OnCommandReceivedEvent(string header, string data)
     {
         if (header == null)
@@ -237,33 +246,11 @@ public partial class MainWindow : Gtk.Window
 #if DEBUG
             // print message content
             if (header.Length > 4)
+            {
                 Console.WriteLine("Bad header(" + header.Length + ")");
-            //else
-            //    Console.WriteLine("Received header (" + header.Length + "): " + header);
-            //if (header.ToUpper() != DestijlCommandList.HeaderStmImage)
-            //{
-            //    if (data != null) Console.WriteLine("Received data (" + data.Length + "): " + data);
-            //}
+            }
 #endif
-            // Image management
-            //if (header == DestijlCommandList.CAMERA_IMAGE)
-            //{
-            //    imageComplete = imageInProgress;
-            //    //TODO: Decoder le base64 pour recuperer le JPG
-            //    imageInProgress = buffer;
-            //}
-            //else
-            //{
-            //    if (imageInProgress == null) imageInProgress = buffer;
-            //    else
-            //    {
-            //        Array.Resize<byte>(ref imageInProgress, imageInProgress.Length + buffer.Length);
-            //        System.Buffer.BlockCopy(buffer, 0, imageInProgress, imageInProgress.Length - buffer.Length, buffer.Length);
-            //    }
-            //}
-
-            // depending on message received (based on header)
-            // launch correponding action
+            // Depending on message received (based on header), launch correponding action
             header = header.ToUpper();
 
             if (header == DestijlCommandList.ROBOT_BATTERY_LEVEL)
@@ -293,20 +280,23 @@ public partial class MainWindow : Gtk.Window
             }
             else if (header == DestijlCommandList.CAMERA_IMAGE)
             {
-                // if message is an image, convert it to a pixbuf
-                // that can be displayed
-                //if (imageComplete != null)
-                //{
-                //TODO: Decoder le base64 et convertir en JPG
-                byte[] image = Convert.FromBase64String(data);
-                //byte[] image = new byte[imageComplete.Length - 4];
-                //System.Buffer.BlockCopy(imageComplete, 4, image, 0, image.Length);
-
                 imageReceivedCounter++;
+
+                byte[] image = new byte[2];
+                try
+                {
+                    image = Convert.FromBase64String(data);
+                }
+                catch (FormatException)
+                {
+                    badImageReceivedCounter++;
+                    Console.WriteLine("Unable to convert from base64 ");
+                }
 
                 try
                 {
                     drawingareaCameraPixbuf = new Pixbuf(image);
+                    imageFPScounter++;
 
                     Gtk.Application.Invoke(delegate
                     {
@@ -326,10 +316,7 @@ public partial class MainWindow : Gtk.Window
             }
             else if (header == DestijlCommandList.CAMERA_POSITION)
             {
-                //Console.WriteLine("Pos data: " + data);
-
                 position = DestijlCommandManager.DecodePosition(data);
-                //Console.WriteLine("decoded position: " + position.ToString());
 
                 Gtk.Application.Invoke(delegate
                 {
@@ -728,6 +715,23 @@ public partial class MainWindow : Gtk.Window
             ((IDisposable)cr.GetTarget()).Dispose();
             ((IDisposable)cr).Dispose();
         }
+
+        if (checkButtonFPS.Active) {
+            Cairo.Context cr = Gdk.CairoHelper.Create(area.GdkWindow);
+            Cairo.Color textFontColor = new Cairo.Color(0.8, 0, 0);
+
+            cr.SelectFontFace("Cantarell", FontSlant.Normal, FontWeight.Bold);
+            cr.SetSourceColor(textFontColor);
+            cr.SetFontSize(16);
+
+            string text = "FPS= " + imageFPS.ToString() ;
+            TextExtents te = cr.TextExtents(text);
+            cr.MoveTo( 10,10 + te.Height);
+            cr.ShowText(text);
+
+            ((IDisposable)cr.GetTarget()).Dispose();
+            ((IDisposable)cr).Dispose();
+        }
     }
 
     /// <summary>
@@ -738,9 +742,8 @@ public partial class MainWindow : Gtk.Window
         DestijlCommandManager.CommandStatus status;
         MessageDialog md = new MessageDialog(this, DialogFlags.DestroyWithParent,
                                              MessageType.Question, ButtonsType.YesNo, "Arena is correct ?");
-        {
-            Title = "Check arena";
-        };
+
+        md.Title = "Check arena";
 
         ResponseType result = (ResponseType)md.Run();
         md.Destroy();
@@ -780,5 +783,34 @@ public partial class MainWindow : Gtk.Window
 
         // show popup and wait for user to say if arena is ok or not 
         DetectArena();
+    }
+
+    protected void OnCheckButtonFPSToggled(object sender, EventArgs e)
+    {
+        if (checkButtonFPS.Active) { // User ask for FPS
+            imageFPS = 0;
+            imageFPScounter = 0;
+
+            fpsTimer.Start();
+        }
+        else { // stop computing FPS
+            fpsTimer.Stop();
+
+            Gtk.Application.Invoke(delegate
+            {
+                drawingAreaCamera.QueueDraw();
+            });
+        }
+    }
+
+    private void OnFpsTimerElapsed(object sender, ElapsedEventArgs e)
+    {
+        imageFPS = imageFPScounter;
+        imageFPScounter = 0;
+
+        Gtk.Application.Invoke(delegate
+        {
+            drawingAreaCamera.QueueDraw();
+        });
     }
 }

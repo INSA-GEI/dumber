@@ -7,3 +7,4 @@
 # Release configuration
 # Debug__RPI_ configuration
 # Debug__Pthread_ configuration
+# Debug__Pthread__RPI configuration

@@ -17,18 +17,42 @@
 
 #include "camera.h"
 #include "img.h"
+#include <unistd.h>
 
 using namespace cv;
 
-Camera::Camera(int size) {
+Camera::Camera(int size, int fps) {
     this->SetSize(size);
+#ifndef __FOR_PC__
     this->cap.set(CV_CAP_PROP_FORMAT, CV_8UC3);
     this->cap.set(CV_CAP_PROP_FRAME_WIDTH,width);
     this->cap.set(CV_CAP_PROP_FRAME_HEIGHT,height);
+    this->cap.set(CV_CAP_PROP_FPS, fps);
+#endif /* __FOR_PC__ */
 }
 
 bool Camera::Open() {
-    this->cap.open(0);
+    bool status = false;
+    
+#ifdef __FOR_PC__
+    if (this->cap.open(0)) {
+        //this->cap.set(CV_CAP_PROP_FORMAT, CV_8UC3);
+        this->cap.set(CV_CAP_PROP_FRAME_WIDTH,width);
+        this->cap.set(CV_CAP_PROP_FRAME_HEIGHT,height);
+        
+        status =true;
+     }
+#else
+    if (this->cap.open()) {
+        cout<<"Camera warmup 2sec"<<endl<<flush;
+        sleep(2);
+        cout<<"Start capture"<<endl<<flush;
+    
+        status =true;
+    }
+#endif /* __FOR_PC__ */
+    
+    return status;
 }
 
 void Camera::Close() {
@@ -58,15 +82,22 @@ void Camera::SetSize(int size) {
         default:
             this->width = 480;
             this->height = 360;
-
     }
 }
 
 Img Camera::Grab() {
     ImageMat frame;
     
+#ifdef __FOR_PC__
     cap >> frame;
     Img capture = Img(frame);
+#else
+    cap.grab();
+    cap.retrieve (frame);
+    cvtColor(frame,frame,CV_BGR2RGB);
+    
+    Img capture = Img(frame);
+#endif /* __FOR_PC__ */
     
     return capture;
 }

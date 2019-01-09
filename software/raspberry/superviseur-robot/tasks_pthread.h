@@ -93,6 +93,11 @@ private:
     bool sendImage=false;
     bool sendPosition=false;
     
+    int counter;
+    bool flag;
+    
+    bool showArena=false;
+    
     thread *threadServer;
     thread *threadSendToMon;
     thread *threadTimer;
