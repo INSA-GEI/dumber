@@ -441,6 +441,7 @@
           <commandLine>-D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -Wno-pmf-conversions -std=gnu++11</commandLine>
           <preprocessorList>
             <Elem>_WITH_TRACE_</Elem>
+            <Elem>__WITH_ARUCO__</Elem>
             <Elem>__WITH_PTHREAD__</Elem>
           </preprocessorList>
         </ccTool>
