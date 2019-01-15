@@ -9,3 +9,6 @@ Makefile
 *.cmake
 CMakeCache.txt
 
+docs/
+doc/
+

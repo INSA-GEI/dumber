@@ -383,7 +383,7 @@ public:
     /**
      * Set message ID
      * @param id Message ID
-     * @throw std::runtime_error if message ID is incompatible withimage message
+     * @throw std::runtime_error if message ID is incompatible with image message
      */
     void SetID(MessageID id);
 
@@ -436,12 +436,12 @@ protected:
 class MessagePosition : public Message {
 public:
     /**
-     * Create a new, empty image message
+     * Create a new, empty position message
      */
     MessagePosition();
 
     /**
-     * Create a new image message, with given ID and boolean value
+     * Create a new position message, with given ID and position
      * @param id Message ID
      * @param pos Position
      * @throw std::runtime_error if message ID is incompatible with image message
@@ -451,21 +451,21 @@ public:
     /**
      * Set message ID
      * @param id Message ID
-     * @throw std::runtime_error if message ID is incompatible withimage message
+     * @throw std::runtime_error if message ID is incompatible with position message
      */
     void SetID(MessageID id);
 
     /**
-     * Get message image
-     * @return Pointer to image
+     * Get position
+     * @return Position
      */
     Position GetPosition() {
         return pos;
     }
 
     /**
-     * Set message image
-     * @param image Pointer to image object
+     * Set position
+     * @param pos Reference to position
      */
     void SetPosition(Position& pos);
 
@@ -483,7 +483,7 @@ public:
 
 protected:
     /**
-     * Message position
+     * Position
      */
    Position pos;
 
@@ -498,42 +498,42 @@ protected:
 /**
  * Message class for holding battery level, based on Message class
  * 
- * @brief Position message class
+ * @brief Battery message class
  * 
  */
 class MessageBattery : public Message {
 public:
     /**
-     * Create a new, empty image message
+     * Create a new, empty battery message
      */
     MessageBattery();
 
     /**
-     * Create a new image message, with given ID and boolean value
+     * Create a new battery message, with given ID and battery level
      * @param id Message ID
-     * @param image Pointer to image
-     * @throw std::runtime_error if message ID is incompatible with image message
+     * @param level Battery level
+     * @throw std::runtime_error if message ID is incompatible with battery message
      */
     MessageBattery(MessageID id, BatteryLevel level);
 
     /**
      * Set message ID
      * @param id Message ID
-     * @throw std::runtime_error if message ID is incompatible withimage message
+     * @throw std::runtime_error if message ID is incompatible with battery message
      */
     void SetID(MessageID id);
 
     /**
      * Get message image
-     * @return Pointer to image
+     * @return Battery level
      */
     BatteryLevel GetLevel() {
         return level;
     }
 
     /**
-     * Set message image
-     * @param image Pointer to image object
+     * Set battery level
+     * @param level Battery level
      */
     void SetLevel(BatteryLevel level);
 
@@ -551,7 +551,7 @@ public:
 
 protected:
     /**
-     * Message position
+     * Battery level
      */
    BatteryLevel level;
 

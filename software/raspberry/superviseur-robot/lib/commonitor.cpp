@@ -339,6 +339,8 @@ Message *ComMonitor::StringToMessage(string &s) {
         msg = new Message(MESSAGE_ROBOT_GO_LEFT);
     } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_GO_RIGHT) != string::npos) {
         msg = new Message(MESSAGE_ROBOT_GO_RIGHT);
+    } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_STOP) != string::npos) {
+        msg = new Message(MESSAGE_ROBOT_STOP);
     } else if (tokenCmd.find(LABEL_MONITOR_ROBOT_POWEROFF) != string::npos) {
         msg = new Message(MESSAGE_ROBOT_POWEROFF);
     } else {

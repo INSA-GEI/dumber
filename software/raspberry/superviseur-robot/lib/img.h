@@ -29,64 +29,181 @@
 #ifdef __WITH_ARUCO__
 #include <opencv2/aruco/dictionary.hpp>
 #include <opencv2/aruco/charuco.hpp>
-//#include <opencv2/aruco.hpp>
 #include <opencv2/core/mat.hpp>
-
 #endif // __WITH_ARUCO__
 
 #define ARENA_NOT_DETECTED -1
 
 using namespace std;
 
+/**
+ * Redefinition of cv::Mat type
+ */
 typedef cv::Mat ImageMat;
 
+/**
+ * Declaration of Jpg type
+ */
 typedef vector<unsigned char> Jpg;
 
+/**
+ * Position type used for store robot coordinates
+ * 
+ * @brief Position type used for store robot coordinates
+ */
 typedef struct {
-    cv::Point2f center;
+    cv::Point2f center; 
     cv::Point2f direction;
     float angle;
     int robotId;
 } Position;
 
+/**
+ * Class arena, used for holding outline of arena on image and cropping image to only usefull area
+ * 
+ * @brief Class arena, used for holding outline of arena on image and cropping image to only usefull area
+ */
 class Arena {
 public:
+    /**
+     * Constructor of Arena object
+     */
     Arena() {}
     
+    /**
+     * Coordinate of arena, empty if no arena found
+     */
     cv::Rect arena;
+    
+    /**
+     * Tell if arena is empty (not found) or not
+     * @return true if no arena found, false otherwise
+     */
     bool IsEmpty();
 };
 
+/**
+ * Class for image storage and treatment
+ * 
+ * @brief Class for image storage and treatment
+ */
 class Img {
 public:
+    /**
+     * Image data
+     */
     ImageMat img;
     
+    /**
+     * Create new Img object based on image data
+     * 
+     * @param imgMatrice Image data to be stored (raw data)
+     */
     Img(ImageMat imgMatrice);
     
+    /**
+     * Convert object to a string representation
+     * 
+     * @return String containing information on contained image (size and number of channel) 
+     */
     string ToString();
+    
+    /**
+     * Create a copy of current object
+     * 
+     * @return New Img object, copy of current 
+     */
     Img* Copy();
     
+    /**
+     * Compress current image to JPEG
+     * @return Image compressed as JPEG
+     */
     Jpg ToJpg();
+    
+    /**
+     * Search arena outline in current image
+     * @return Arena object with coordinate of outline, empty if no arena found
+     */
     Arena SearchArena();
-
-    int DrawRobot(Position robot);
+    
+    /**
+     * Draw an oriented arrow at robot position
+     * @param robot Position of robot
+     */
+    void DrawRobot(Position robot);
+    
+    /**
+     * Draw an oriented arrow for each position provided
+     * @param robots List of robot positions
+     * @return Number of position drawn
+     */
     int DrawAllRobots(std::list<Position> robots);
-    int DrawArena(Arena arenaToDraw);
+    
+    /**
+     * Draw arena outline
+     * @param arenaToDraw Arena position
+     */
+    void DrawArena(Arena arenaToDraw);
+    
+    /**
+     * Search available robots in an image
+     * @param arena Arena position for cropping image
+     * @return list of position, empty if no robot found
+     */
     std::list<Position> SearchRobot(Arena arena);
         
 #ifdef __WITH_ARUCO__    
-    list<Position> SearchAruco(Arena arena);
+    /**
+     * Dictionary to be used for aruco recognition
+     */
     cv::Ptr<cv::aruco::Dictionary> dictionary;
 #endif // __WITH_ARUCO__
 private:
 #ifdef __WITH_ARUCO__
+    /**
+     * Find center point of given aruco
+     * @param aruco Aruco coordinates
+     * @return Center point coordinate
+     */
     cv::Point2f FindArucoCenter(std::vector<cv::Point2f> aruco);
+    
+    /**
+     * Find direction of given aruco
+     * @param aruco Aruco coordinates
+     * @return Orientation of aruco
+     */
     cv::Point2f FindArucoDirection(std::vector<cv::Point2f> aruco);
 #endif // __WITH_ARUCO__
     
+    /**
+     * Function for computing angle 
+     * @param robots Position of robot
+     * @return Angle
+     */
     float CalculAngle(Position robots);
+    
+    /**
+     * Function for computing angle 
+     * @param pt1 ???
+     * @param pt2 ???
+     * @return Angle
+     */
     float CalculAngle2(cv::Point2f pt1, cv::Point2f pt2);
+    
+    /**
+     * Used for computing distance
+     * @param p ???
+     * @param q ???
+     * @return Distance
+     */
     float EuclideanDistance(cv::Point2f p, cv::Point2f q);
+    
+    /**
+     * Crop image around detected arena
+     * @param arena Coordinate of arena
+     * @return Reduced image, focused on arena
+     */
     ImageMat CropArena(Arena arena);
 };
 

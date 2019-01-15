@@ -19,6 +19,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// 15/01/2019 dimercur
+// Demande #41: Modifier les messages envoyés par les flèches de direction
+
 using System;
 using System.Globalization;
 
@@ -65,48 +68,7 @@ namespace monitor
         public const string ROBOT_CURRENT_STATE = "RCST";
 
         public const char SEPARATOR_CHAR = ':';
-
-        //public const string HeaderMtsComDmb = "COM";
-        //public const string HeaderMtsDmbOrder = "DMB";
-        //public const string HeaderMtsCamera = "CAM";
-        //public const string HeaderMtsMessage = "MSG";
-
-        //public const string DataComOpen = "o";
-        //public const string DataComClose = "C";
-
-        //public const string DataCamOpen = "A";
-        //public const string DataCamClose = "I";
-        //public const string DataCamAskArena = "y";
-        //public const string DataCamArenaConfirm = "x";
-        //public const string DataCamInfirm = "z";
-        //public const string DataCamComputePosition = "p";
-        //public const string DataCamStopComputePosition = "s";
-
-        //public const string HeaderStmAck = "ACK";
-        //public const string HeaderStmNoAck = "NAK";
-        //public const string HeaderStmLostDmb = "LCD";
-        //public const string HeaderStmImage = "IMG";
-        //public const string HeaderStmPos = "POS";
-        //public const string HeaderStmMes = "MSG";
-        //public const string HeaderStmBat = "BAT";
     }
-
-    /// <summary>
-    /// Commands used for robot messages
-    /// </summary>
-    //public static class RobotCommandList
-    //{
-    //    public const string RobotPing = "p";
-    //    public const string RobotReset = "r";
-    //    public const string RobotStartWithoutWatchdog = "u";
-    //    public const string RobotStartWithWatchdog = "W";
-    //    public const string RobotGetBattery = "v";
-    //    public const string RobotGetBusyState = "b";
-    //    public const string RobotMove = "M";
-    //    public const string RobotTurn = "T";
-    //    public const string RobotGetVersion = "V";
-    //    public const string RobotPowerOff = "z";
-    //}
 
     /// <summary>
     /// Specialization class for command manager, which implemnent destijl protocol between monitor and server
@@ -409,17 +371,84 @@ namespace monitor
         }
 
         /// <summary>
-        /// Move robot forward or backward, for a distance expressed in millimeter
+        /// Move robot forward for an unlimited distance
         /// </summary>
         /// <returns>Command status (see DecodeStatus)</returns>
-        /// <param name="distance">Distance of mouvment, in millimeter</param>
-        public CommandStatus RobotMove(int distance)
+        public CommandStatus RobotGoForward()
         {
             CommandManager.CommandManagerStatus localStatus;
             string answer;
 
             localStatus = commandManager.SendCommand(
-                CreateCommand(DestijlCommandList.ROBOT_MOVE, Convert.ToString(distance)),
+                CreateCommand(DestijlCommandList.ROBOT_GO_FORWARD),
+                out answer,
+                0);
+
+            return DecodeStatus(localStatus, answer);
+        }
+
+        /// <summary>
+        /// Move robot backward for an unlimited distance
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
+        public CommandStatus RobotGoBackward()
+        {
+            CommandManager.CommandManagerStatus localStatus;
+            string answer;
+
+            localStatus = commandManager.SendCommand(
+                CreateCommand(DestijlCommandList.ROBOT_GO_BACKWARD),
+                out answer,
+                0);
+
+            return DecodeStatus(localStatus, answer);
+        }
+
+        /// <summary>
+        /// Turn robot to the left for an unlimited number of turn
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
+        public CommandStatus RobotGoLeft()
+        {
+            CommandManager.CommandManagerStatus localStatus;
+            string answer;
+
+            localStatus = commandManager.SendCommand(
+                CreateCommand(DestijlCommandList.ROBOT_GO_LEFT),
+                out answer,
+                0);
+
+            return DecodeStatus(localStatus, answer);
+        }
+
+        /// <summary>
+        /// Turn robot to the right for an unlimited number of turn
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
+        public CommandStatus RobotGoRight()
+        {
+            CommandManager.CommandManagerStatus localStatus;
+            string answer;
+
+            localStatus = commandManager.SendCommand(
+                CreateCommand(DestijlCommandList.ROBOT_GO_RIGHT),
+                out answer,
+                0);
+
+            return DecodeStatus(localStatus, answer);
+        }
+
+        /// <summary>
+        /// Stop robot mouvement
+        /// </summary>
+        /// <returns>Command status (see DecodeStatus)</returns>
+        public CommandStatus RobotStop()
+        {
+            CommandManager.CommandManagerStatus localStatus;
+            string answer;
+
+            localStatus = commandManager.SendCommand(
+                CreateCommand(DestijlCommandList.ROBOT_STOP),
                 out answer,
                 0);
 
@@ -608,10 +637,6 @@ namespace monitor
             pos.direction.y = 0.0;
 
             string[] parts = data.Split(';');
-
-            //for (int i = 0; i < parts.Length; i++) {
-            //    Console.WriteLine(parts[i]);
-            //}
 
             NumberFormatInfo provider = new NumberFormatInfo();
             provider.NumberDecimalSeparator = ".";

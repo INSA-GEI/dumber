@@ -63,19 +63,9 @@ namespace monitor
         private static byte[] buffer = new byte[BufferMaxSize];
 
         /// <summary>
-        /// buffer containing received message from TCP server
-        /// Used to concatenate internal buffers into one
-        /// </summary>
-        //private static byte[] receiveBuffer;
-
-        //private static int initialReceiveBufferIndex = 0;
-
-        /// <summary>
         /// String containing received message from tcp server
         /// </summary>
         private static StringBuilder message = new StringBuilder();
-        //private static int newLength = 1;
-        //private static int packetCounter = 0;
 
         /// <summary>
         /// Callback to send received message to upper level
@@ -117,11 +107,6 @@ namespace monitor
                 // received data are stored in buffer
                 // Next reading will be done in ReadCallback method
                 stream.BeginRead(buffer, 0, 1, new AsyncCallback(ReadCallback), message);
-
-                // Start reading thread
-                //message.Clear();
-                //readThread = new Thread(new ThreadStart(ReadCallback));
-                //readThread.Start();
             }
             catch (ArgumentNullException e)
             {
@@ -207,7 +192,6 @@ namespace monitor
                 {
                     string s = message.ToString();
 
-                    //Console.WriteLine("Message received (" + s.Length + ")");
                     // no more data to read, buffer and string can be send to upper level
                     readEvent?.Invoke(s);
 
@@ -215,9 +199,6 @@ namespace monitor
 
                     if (index != bytesRead - 1)
                     {
-                        //Console.WriteLine("Index not at end (" + index + "/" + bytesRead + ")");
-                        //Console.WriteLine("1=" + (char)buffer[index + 1] + " 2=" + (char)buffer[index + 2]);
-
                         byte[] trailing=new byte[BufferMaxSize];
 
                         Array.Copy(buffer, index + 1, trailing, 0, bytesRead - index - 1);

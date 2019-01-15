@@ -17,23 +17,47 @@
 
 #include "img.h"
 
+/**
+ * Tell if arena is empty (not found) or not
+ * @return true if no arena found, false otherwise
+ */
 bool Arena::IsEmpty() {
     if ((this->arena.height == 0) || (this->arena.width == 0)) return true;
     else return false;
 }
 
+/**
+ * Create new Img object based on image data
+ * 
+ * @param imgMatrice Image data to be stored (raw data)
+ */
 Img::Img(ImageMat imgMatrice) {
     this->img = imgMatrice.clone();
 }
 
+/**
+ * Convert object to a string representation
+ * 
+ * @return String containing information on contained image (size and number of channel) 
+ */
 string Img::ToString() {
     return "Image size: " + to_string(this->img.cols) + "x" + to_string(this->img.rows) + " (dim=" + to_string(this->img.dims) + ")";
 }
 
+/**
+ * Create a copy of current object
+ * 
+ * @return New Img object, copy of current 
+ */
 Img* Img::Copy() {
     return new Img(this->img);
 }
 
+/**
+ * Function for computing angle 
+ * @param robots Position of robot
+ * @return Angle
+ */
 float Img::CalculAngle(Position robot) {
     float a = robot.direction.x - robot.center.x;
     float b = robot.direction.y - robot.center.y;
@@ -41,6 +65,12 @@ float Img::CalculAngle(Position robot) {
     return angle * 180.f / M_PI;
 }
 
+/**
+ * Function for computing angle 
+ * @param pt1 ???
+ * @param pt2 ???
+ * @return Angle
+ */
 float Img::CalculAngle2(cv::Point2f pt1, cv::Point2f pt2) {
     float a = pt1.x - pt2.x;
     float b = pt1.y - pt2.y;
@@ -50,21 +80,59 @@ float Img::CalculAngle2(cv::Point2f pt1, cv::Point2f pt2) {
 
 #ifdef __WITH_ARUCO__ 
 
+/**
+ * Find center point of given aruco
+ * @param aruco Aruco coordinates
+ * @return Center point coordinate
+ */
 cv::Point2f Img::FindArucoCenter(std::vector<cv::Point2f> aruco) {
     return ((aruco[0] + aruco[2]) / 2);
 }
 
+/**
+ * Find direction of given aruco
+ * @param aruco Aruco coordinates
+ * @return Orientation of aruco
+ */
 cv::Point2f Img::FindArucoDirection(std::vector<cv::Point2f> aruco) {
     return ((aruco[0] + aruco[1]) / 2);
 }
+#endif // __WITH_ARUCO__
 
-std::list<Position> Img::SearchAruco(Arena arena) {
+/**
+ * Used for computing distance
+ * @param p ???
+ * @param q ???
+ * @return Distance
+ */
+float Img::EuclideanDistance(cv::Point2f p, cv::Point2f q) {
+    cv::Point diff = p - q;
+    return cv::sqrt(diff.x * diff.x + diff.y * diff.y);
+}
+
+/**
+ * Compress current image to JPEG
+ * @return Image compressed as JPEG
+ */
+Jpg Img::ToJpg() {
+    Jpg imgJpg;
+    cv::imencode(".jpg", this->img, imgJpg);
+    return imgJpg;
+}
+
+/**
+ * Search available robots in an image
+ * @param arena Arena position for cropping image
+ * @return list of position, empty if no robot found
+ */
+std::list<Position> Img::SearchRobot(Arena arena) {
+#ifdef __WITH_ARUCO__
     ImageMat imgTraitment;
     std::list<Position> positionList;
     cv::Point2f areneCoor;
     std::vector<int> ids;
     std::vector<std::vector<cv::Point2f> > corners;
-    
+
     if (arena.IsEmpty())
         imgTraitment = this->img.clone();
     else {
@@ -72,7 +140,7 @@ std::list<Position> Img::SearchAruco(Arena arena) {
         areneCoor.x = arena.arena.x;
         areneCoor.y = arena.arena.y;
     }
-    
+
     cv::aruco::detectMarkers(imgTraitment, dictionary, corners, ids);
     if (ids.size() > 0) {
         for (int i = 0; i < ids.size(); i++) {
@@ -89,22 +157,7 @@ std::list<Position> Img::SearchAruco(Arena arena) {
         }
     }
     return positionList;
-}
-#endif // __WITH_ARUCO__
-
-float Img::EuclideanDistance(cv::Point2f p, cv::Point2f q) {
-    cv::Point diff = p - q;
-    return cv::sqrt(diff.x * diff.x + diff.y * diff.y);
-}
-
-Jpg Img::ToJpg() {
-    Jpg imgJpg;
-    cv::imencode(".jpg", this->img, imgJpg);
-    return imgJpg;
-}
-
-std::list<Position> Img::SearchRobot(Arena arena) {
-
+#else
     std::list<Position> robotsFind;
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Point> approx;
@@ -168,8 +221,14 @@ std::list<Position> Img::SearchRobot(Arena arena) {
     }
 
     return robotsFind;
+
+#endif // __WITH_ARUCO__
 }
 
+/**
+ * Search arena outline in current image
+ * @return Arena object with coordinate of outline, empty if no arena found
+ */
 Arena Img::SearchArena() {
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Point> approx;
@@ -189,26 +248,44 @@ Arena Img::SearchArena() {
             return rectangle;
         }
     }
+
     return Arena();
 }
 
-int Img::DrawRobot(Position robot) {
+/**
+ * Draw an oriented arrow at robot position
+ * @param robot Position of robot
+ */
+void Img::DrawRobot(Position robot) {
     cv::arrowedLine(this->img, (cv::Point2f)robot.center, (cv::Point2f)robot.direction, cv::Scalar(0, 0, 255), 3, 8, 0);
-    return 0;
 }
 
+/**
+ * Draw an oriented arrow for each position provided
+ * @param robots List of robot positions
+ * @return Number of position drawn
+ */
 int Img::DrawAllRobots(std::list<Position> robots) {
     for (Position robot : robots) {
         cv::arrowedLine(this->img, (cv::Point2f)robot.center, (cv::Point2f)robot.direction, cv::Scalar(0, 0, 255), 3, 8, 0);
     }
+
     return robots.size();
 }
 
-int Img::DrawArena(Arena arenaToDraw) {
+/**
+ * Draw arena outline
+ * @param arenaToDraw Arena position
+ */
+void Img::DrawArena(Arena arenaToDraw) {
     cv::rectangle(this->img, arenaToDraw.arena.tl(), arenaToDraw.arena.br(), cv::Scalar(0, 0, 125), 2, 8, 0);
-    return 0;
 }
 
+/**
+ * Crop image around detected arena
+ * @param arena Coordinate of arena
+ * @return Reduced image, focused on arena
+ */
 ImageMat Img::CropArena(Arena arena) {
     return this->img(arena.arena);
 }

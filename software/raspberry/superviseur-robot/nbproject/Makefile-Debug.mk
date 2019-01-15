@@ -40,11 +40,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/lib/commonitor.o \
 	${OBJECTDIR}/lib/comrobot.o \
 	${OBJECTDIR}/lib/img.o \
-	${OBJECTDIR}/lib/message.o \
 	${OBJECTDIR}/lib/messages.o \
-	${OBJECTDIR}/lib/monitor.o \
-	${OBJECTDIR}/lib/robot.o \
-	${OBJECTDIR}/lib/server.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/tasks.o \
 	${OBJECTDIR}/tasks_pthread.o
@@ -99,30 +95,10 @@ ${OBJECTDIR}/lib/img.o: lib/img.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/lib/img.o lib/img.cpp
 
-${OBJECTDIR}/lib/message.o: lib/message.cpp
-	${MKDIR} -p ${OBJECTDIR}/lib
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/lib/message.o lib/message.cpp
-
 ${OBJECTDIR}/lib/messages.o: lib/messages.cpp
 	${MKDIR} -p ${OBJECTDIR}/lib
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/lib/messages.o lib/messages.cpp
-
-${OBJECTDIR}/lib/monitor.o: lib/monitor.cpp
-	${MKDIR} -p ${OBJECTDIR}/lib
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/lib/monitor.o lib/monitor.cpp
-
-${OBJECTDIR}/lib/robot.o: lib/robot.cpp
-	${MKDIR} -p ${OBJECTDIR}/lib
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/lib/robot.o lib/robot.cpp
-
-${OBJECTDIR}/lib/server.o: lib/server.cpp
-	${MKDIR} -p ${OBJECTDIR}/lib
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/lib/server.o lib/server.cpp
 
 ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}

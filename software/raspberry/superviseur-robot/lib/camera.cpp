@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (C) 2018 dimercur
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,48 +21,64 @@
 
 using namespace cv;
 
+/**
+ * Create an object for accessing camera
+ * @param size Size of picture to grab (@see captureSize)
+ * @param fps speed of sampling
+ */
 Camera::Camera(int size, int fps) {
     this->SetSize(size);
 #ifndef __FOR_PC__
     this->cap.set(CV_CAP_PROP_FORMAT, CV_8UC3);
-    this->cap.set(CV_CAP_PROP_FRAME_WIDTH,width);
-    this->cap.set(CV_CAP_PROP_FRAME_HEIGHT,height);
+    this->cap.set(CV_CAP_PROP_FRAME_WIDTH, width);
+    this->cap.set(CV_CAP_PROP_FRAME_HEIGHT, height);
     this->cap.set(CV_CAP_PROP_FPS, fps);
 #endif /* __FOR_PC__ */
 }
 
+/**
+ * Open camera
+ * @return True if camera is open, false otherwise
+ */
 bool Camera::Open() {
     bool status = false;
-    
+
 #ifdef __FOR_PC__
     if (this->cap.open(0)) {
         //this->cap.set(CV_CAP_PROP_FORMAT, CV_8UC3);
-        this->cap.set(CV_CAP_PROP_FRAME_WIDTH,width);
-        this->cap.set(CV_CAP_PROP_FRAME_HEIGHT,height);
-        
-        status =true;
-     }
+        this->cap.set(CV_CAP_PROP_FRAME_WIDTH, width);
+        this->cap.set(CV_CAP_PROP_FRAME_HEIGHT, height);
+
+        status = true;
+    }
 #else
     if (this->cap.open()) {
-        cout<<"Camera warmup 2sec"<<endl<<flush;
+        cout << "Camera warmup 2sec" << endl << flush;
         sleep(2);
-        cout<<"Start capture"<<endl<<flush;
-    
-        status =true;
+        cout << "Start capture" << endl << flush;
+
+        status = true;
     }
 #endif /* __FOR_PC__ */
-    
+
     return status;
 }
 
+/**
+ * Close and release camera
+ */
 void Camera::Close() {
     this->cap.release();
 }
 
+/**
+ * Define size for sampled picture
+ * @param size Size of picture (@see captureSize)
+ */
 void Camera::SetSize(int size) {
     this->size = size;
-    
-    switch (size){
+
+    switch (size) {
         case xs:
             this->width = 480;
             this->height = 360;
@@ -85,33 +101,47 @@ void Camera::SetSize(int size) {
     }
 }
 
+/**
+ * Grab next image from camera
+ * @return Image taken from camera
+ */
 Img Camera::Grab() {
     ImageMat frame;
-    
+
 #ifdef __FOR_PC__
     cap >> frame;
     Img capture = Img(frame);
 #else
     cap.grab();
-    cap.retrieve (frame);
-    cvtColor(frame,frame,CV_BGR2RGB);
-    
+    cap.retrieve(frame);
+    cvtColor(frame, frame, CV_BGR2RGB);
+
     Img capture = Img(frame);
 #endif /* __FOR_PC__ */
-    
+
     return capture;
 }
 
+/**
+ * Get opening status for camera
+ * @return true if camera is open, false otherwise
+ */
 bool Camera::IsOpen() {
     return cap.isOpened();
 }
 
+/**
+ * Get width of sampled image
+ * @return Width of sampled picture
+ */
 int Camera::GetWidth() const {
     return width;
 }
 
+/**
+ * Get height of sampled image
+ * @return height of sampled picture
+ */
 int Camera::GetHeight() const {
     return height;
 }
-
-

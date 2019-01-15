@@ -1,8 +1,0 @@
-build/
-dist/
-.dep.inc
-
-*.o
-*.dep
-*.i
-

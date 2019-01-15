@@ -199,7 +199,7 @@ void Tasks::TimerTask(void* arg) {
 
     cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
 
-    Camera camera = Camera(sm, 10);
+    Camera camera = Camera(sm, 20);
     cout << "Try opening camera" << endl << flush;
     if (camera.Open()) cout << "Camera opened successfully" << endl << flush;
     else {
@@ -237,9 +237,8 @@ void Tasks::TimerTask(void* arg) {
                 
                 //if (!arena.IsEmpty()) {
                 image.dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME(3));
-                list<Position> poses = image.SearchAruco(arena);
-         
-                //std::list<Position> poses = image.SearchRobot(arena);
+                         
+                std::list<Position> poses = image.SearchRobot(arena);
                 cout << "Nbr of pos detected: " << to_string(poses.size()) << endl << flush;
 
                 if (poses.size() > 0) {

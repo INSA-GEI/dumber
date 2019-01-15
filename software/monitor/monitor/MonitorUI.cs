@@ -19,6 +19,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// 15/01/2019 dimercur
+// Demande #41: Modifier les messages envoyés par les flèches de direction
+
+// 15/10/2019 dimercur
+// Demande #43: Migrer le code lié à la gestion des images dans sa propre classe widget
 
 using System;
 using Gtk;
@@ -37,11 +42,6 @@ public partial class MainWindow : Gtk.Window
     /// Destijl command manager reference
     /// </summary>
     private DestijlCommandManager cmdManager;
-
-    /// <summary>
-    /// Pixbuffer used for displaying image
-    /// </summary>
-    private Pixbuf drawingareaCameraPixbuf;
 
     /// <summary>
     /// Position used for displaying position
@@ -64,19 +64,20 @@ public partial class MainWindow : Gtk.Window
     private SystemState systemState = SystemState.NotConnected;
 
     /// <summary>
+    /// Object used for displaying image on a valid DrawingArea widget
+    /// </summary>
+    private ImageWidget imageWidget;
+
+    /// <summary>
     /// Timer for battery request
     /// </summary>
     private System.Timers.Timer batteryTimer;
 
+    /// <summary>
+    /// Counter for image reception and detecting bad picture ratio
+    /// </summary>
     private int imageReceivedCounter = 0;
     private int badImageReceivedCounter = 0;
-    private int imageFPS = 0;
-    private int imageFPScounter = 0;
-
-    /// <summary>
-    /// Timer for FPS request
-    /// </summary>
-    private System.Timers.Timer fpsTimer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -87,13 +88,12 @@ public partial class MainWindow : Gtk.Window
 
         cmdManager = new DestijlCommandManager(OnCommandReceivedEvent);
 
+        // Init of image widget
+        imageWidget = new ImageWidget(drawingAreaCamera);
+
         // create new timer for battery request, every 10s
         batteryTimer = new System.Timers.Timer(10000.0);
         batteryTimer.Elapsed += OnBatteryTimerElapsed;
-
-        // create new timer for FPS , every 1s
-        fpsTimer = new System.Timers.Timer(1000.0);
-        fpsTimer.Elapsed += OnFpsTimerElapsed;
 
         // Customize controls
         AdjustControls();
@@ -108,7 +108,7 @@ public partial class MainWindow : Gtk.Window
         ChangeState(SystemState.NotConnected);
 
         // Load "no picture" image from disque
-        drawingareaCameraPixbuf = Pixbuf.LoadFromResource("monitor.ressources.missing_picture.png");
+        imageWidget.ShowImage("monitor.ressources.missing_picture.png");
 
         // setup server controls
         entryServerName.Text = Client.defaultIP;
@@ -139,6 +139,9 @@ public partial class MainWindow : Gtk.Window
                 checkButtonCameraOn.Active = false;
                 checkButtonRobotPosition.Active = false;
                 checkButtonFPS.Active = false;
+
+                imageWidget.ShowFPS = false;
+                imageWidget.showPosition = false;
 
                 if (cmdManager != null) cmdManager.Close();
 
@@ -180,6 +183,9 @@ public partial class MainWindow : Gtk.Window
                 checkButtonCameraOn.Active = false;
                 checkButtonRobotPosition.Active = false;
                 checkButtonFPS.Active = false;
+
+                imageWidget.ShowFPS = false;
+                imageWidget.showPosition = false;
 
                 systemState = SystemState.NotConnected;
 
@@ -295,13 +301,7 @@ public partial class MainWindow : Gtk.Window
 
                 try
                 {
-                    drawingareaCameraPixbuf = new Pixbuf(image);
-                    imageFPScounter++;
-
-                    Gtk.Application.Invoke(delegate
-                    {
-                        drawingAreaCamera.QueueDraw();
-                    });
+                    imageWidget.ShowImage(image);
                 }
                 catch (GLib.GException)
                 {
@@ -316,12 +316,7 @@ public partial class MainWindow : Gtk.Window
             }
             else if (header == DestijlCommandList.CAMERA_POSITION)
             {
-                position = DestijlCommandManager.DecodePosition(data);
-
-                Gtk.Application.Invoke(delegate
-                {
-                    drawingAreaCamera.QueueDraw();
-                });
+                imageWidget.Position = DestijlCommandManager.DecodePosition(data);
             }
         }
     }
@@ -336,6 +331,7 @@ public partial class MainWindow : Gtk.Window
         Console.WriteLine("Bye bye 2");
         if (cmdManager != null) cmdManager.Close();
         this.Destroy();
+
         Application.Quit();
     }
 
@@ -506,19 +502,23 @@ public partial class MainWindow : Gtk.Window
         // depending on button clicked, launch appropriate action
         if (sender == buttonRight)
         {
-            cmdManager.RobotTurn(90);
+            cmdManager.RobotGoRight();
         }
         else if (sender == buttonLeft)
         {
-            cmdManager.RobotTurn(-90);
+            cmdManager.RobotGoLeft();
         }
         else if (sender == buttonForward)
         {
-            cmdManager.RobotMove(100);
+            cmdManager.RobotGoForward();
         }
         else if (sender == buttonDown)
         {
-            cmdManager.RobotMove(-100);
+            cmdManager.RobotGoBackward();
+        }
+        else if (sender == buttonStop)
+        {
+            cmdManager.RobotStop();
         }
         else
         {
@@ -622,116 +622,8 @@ public partial class MainWindow : Gtk.Window
                 //checkButtonRobotPosition.Active = false;
             }
         }
-    }
 
-    /// <summary>
-    /// Callback called when drawingarea need refresh
-    /// </summary>
-    /// <param name="o">Sender object</param>
-    /// <param name="args">Expose arguments</param>
-    protected void OnDrawingAreaCameraExposeEvent(object o, ExposeEventArgs args)
-    {
-        //Console.WriteLine("Event expose. Args = " + args.ToString());
-
-        DrawingArea area = (DrawingArea)o;
-        Gdk.Pixbuf displayPixbuf;
-        int areaWidth, areaHeight;
-
-        // Get graphic context for background
-        Gdk.GC gc = area.Style.BackgroundGC(Gtk.StateType.Normal);
-
-        // get size of drawingarea widget
-        area.GdkWindow.GetSize(out areaWidth, out areaHeight);
-        int width = drawingareaCameraPixbuf.Width;
-        int height = drawingareaCameraPixbuf.Height;
-        float ratio = (float)width / (float)height;
-
-        // if widget is smaller than image, reduce it
-        if (areaWidth <= width)
-        {
-            width = areaWidth;
-            height = (int)(width / ratio);
-        }
-
-        // if image is smaller than widget, enlarge it
-        if (width > areaWidth)
-        {
-            width = areaWidth;
-        }
-
-        if (height > areaHeight)
-        {
-            height = areaHeight;
-        }
-
-        //scale original picture and copy result in local pixbuf
-        displayPixbuf = drawingareaCameraPixbuf.ScaleSimple(width, height, InterpType.Bilinear);
-
-        // draw local pixbuff centered on drawingarea
-        area.GdkWindow.DrawPixbuf(gc, displayPixbuf,
-                                  0, 0,
-                                  (areaWidth - displayPixbuf.Width) / 2,
-                                  (areaHeight - displayPixbuf.Height) / 2,
-                                  displayPixbuf.Width, displayPixbuf.Height,
-                                  RgbDither.Normal, 0, 0);
-
-        if (checkButtonRobotPosition.Active) {
-            Cairo.Context cr = Gdk.CairoHelper.Create(area.GdkWindow);
-            Cairo.Color textFontColor = new Cairo.Color(0.8, 0, 0);
-
-            cr.SelectFontFace("Cantarell", FontSlant.Normal, FontWeight.Bold);
-            cr.SetSourceColor(textFontColor);
-            cr.SetFontSize(16);
-
-            double space = 0.0;
-            string text = "Direction (" + position.direction.x.ToString("0.##") + " ; " + position.direction.y.ToString("0.##") +")";
-            TextExtents te = cr.TextExtents(text);
-            cr.MoveTo(areaWidth - te.Width-5,
-                      areaHeight - te.Height -5);
-            space = te.Height;
-            cr.ShowText(text);
-
-            text = "Centre (" + position.centre.x.ToString("0.##") + " ; " + position.centre.y.ToString("0.##") + ")";
-            te = cr.TextExtents(text);
-            cr.MoveTo(areaWidth - te.Width - 5,
-                      areaHeight - te.Height - 5 - space-5);
-            space = space+ te.Height+5;
-            cr.ShowText(text);
-
-            text = "Angle: " + position.angle.ToString("0.##");
-            te = cr.TextExtents(text);
-            cr.MoveTo(areaWidth - te.Width - 5,
-                      areaHeight - te.Height - 5 - space - 5);
-            space = space+ te.Height+5;
-            cr.ShowText(text);
-
-            text = "ID: " + position.robotID;
-            te = cr.TextExtents(text);
-            cr.MoveTo(areaWidth - te.Width - 5,
-                      areaHeight - te.Height - 5 - space-5);
-
-            cr.ShowText(text);
-
-            ((IDisposable)cr.GetTarget()).Dispose();
-            ((IDisposable)cr).Dispose();
-        }
-
-        if (checkButtonFPS.Active) {
-            Cairo.Context cr = Gdk.CairoHelper.Create(area.GdkWindow);
-            Cairo.Color textFontColor = new Cairo.Color(0.8, 0, 0);
-
-            cr.SelectFontFace("Cantarell", FontSlant.Normal, FontWeight.Bold);
-            cr.SetSourceColor(textFontColor);
-            cr.SetFontSize(16);
-
-            string text = "FPS= " + imageFPS.ToString() ;
-            TextExtents te = cr.TextExtents(text);
-            cr.MoveTo( 10,10 + te.Height);
-            cr.ShowText(text);
-
-            ((IDisposable)cr.GetTarget()).Dispose();
-            ((IDisposable)cr).Dispose();
-        }
+        imageWidget.showPosition = checkButtonRobotPosition.Active;
     }
 
     /// <summary>
@@ -766,7 +658,7 @@ public partial class MainWindow : Gtk.Window
     }
 
     /// <summary>
-    /// Callback called when "detect Arena " button is clicked
+    /// Callback called when "Detect Arena" button is clicked
     /// </summary>
     /// <param name="sender">Sender object</param>
     /// <param name="e">Event</param>
@@ -785,32 +677,13 @@ public partial class MainWindow : Gtk.Window
         DetectArena();
     }
 
+    /// <summary>
+    /// Callback function for FPS checkbutton
+    /// </summary>
+    /// <param name="sender">Sender object</param>
+    /// <param name="e">unused paramter</param>
     protected void OnCheckButtonFPSToggled(object sender, EventArgs e)
     {
-        if (checkButtonFPS.Active) { // User ask for FPS
-            imageFPS = 0;
-            imageFPScounter = 0;
-
-            fpsTimer.Start();
-        }
-        else { // stop computing FPS
-            fpsTimer.Stop();
-
-            Gtk.Application.Invoke(delegate
-            {
-                drawingAreaCamera.QueueDraw();
-            });
-        }
-    }
-
-    private void OnFpsTimerElapsed(object sender, ElapsedEventArgs e)
-    {
-        imageFPS = imageFPScounter;
-        imageFPScounter = 0;
-
-        Gtk.Application.Invoke(delegate
-        {
-            drawingAreaCamera.QueueDraw();
-        });
+        imageWidget.ShowFPS = checkButtonFPS.Active;
     }
 }

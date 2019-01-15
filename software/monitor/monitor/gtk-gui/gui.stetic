@@ -170,7 +170,6 @@
                 <child>
                   <widget class="Gtk.DrawingArea" id="drawingAreaCamera">
                     <property name="MemberName" />
-                    <signal name="ExposeEvent" handler="OnDrawingAreaCameraExposeEvent" />
                   </widget>
                   <packing>
                     <property name="Position">1</property>
@@ -611,11 +610,9 @@
                                               <placeholder />
                                             </child>
                                             <child>
-                                              <placeholder />
-                                            </child>
-                                            <child>
                                               <widget class="Gtk.Button" id="buttonDown">
                                                 <property name="MemberName" />
+                                                <property name="Tooltip" translatable="yes">Move robot backward</property>
                                                 <property name="CanFocus">True</property>
                                                 <property name="Type">TextAndIcon</property>
                                                 <property name="Icon">resource:monitor.ressources.pan-down-symbolic.symbolic.png</property>
@@ -642,6 +639,7 @@
                                             <child>
                                               <widget class="Gtk.Button" id="buttonForward">
                                                 <property name="MemberName" />
+                                                <property name="Tooltip" translatable="yes">Move robot forward</property>
                                                 <property name="CanFocus">True</property>
                                                 <property name="Type">TextAndIcon</property>
                                                 <property name="Icon">resource:monitor.ressources.pan-up-symbolic.symbolic.png</property>
@@ -666,6 +664,7 @@
                                             <child>
                                               <widget class="Gtk.Button" id="buttonLeft">
                                                 <property name="MemberName" />
+                                                <property name="Tooltip" translatable="yes">Turn robot to the left</property>
                                                 <property name="CanFocus">True</property>
                                                 <property name="Type">TextAndIcon</property>
                                                 <property name="Icon">resource:monitor.ressources.pan-start-symbolic.symbolic.png</property>
@@ -690,6 +689,7 @@
                                             <child>
                                               <widget class="Gtk.Button" id="buttonRight">
                                                 <property name="MemberName" />
+                                                <property name="Tooltip" translatable="yes">Turn robot to the right</property>
                                                 <property name="CanFocus">True</property>
                                                 <property name="Type">TextAndIcon</property>
                                                 <property name="Icon">resource:monitor.ressources.pan-end-symbolic.symbolic.png</property>
@@ -702,6 +702,33 @@
                                                 <property name="BottomAttach">2</property>
                                                 <property name="LeftAttach">2</property>
                                                 <property name="RightAttach">3</property>
+                                                <property name="AutoSize">True</property>
+                                                <property name="XOptions">Fill</property>
+                                                <property name="YOptions">Fill</property>
+                                                <property name="XExpand">False</property>
+                                                <property name="XFill">True</property>
+                                                <property name="XShrink">False</property>
+                                                <property name="YExpand">False</property>
+                                                <property name="YFill">True</property>
+                                                <property name="YShrink">False</property>
+                                              </packing>
+                                            </child>
+                                            <child>
+                                              <widget class="Gtk.Button" id="buttonStop">
+                                                <property name="MemberName" />
+                                                <property name="Tooltip" translatable="yes">Stop robot movements</property>
+                                                <property name="CanFocus">True</property>
+                                                <property name="Type">TextAndIcon</property>
+                                                <property name="Icon">resource:monitor.ressources.hand-filled-32.png</property>
+                                                <property name="Label" translatable="yes" />
+                                                <property name="UseUnderline">True</property>
+                                                <signal name="Clicked" handler="OnButtonMouvClicked" />
+                                              </widget>
+                                              <packing>
+                                                <property name="TopAttach">1</property>
+                                                <property name="BottomAttach">2</property>
+                                                <property name="LeftAttach">1</property>
+                                                <property name="RightAttach">2</property>
                                                 <property name="AutoSize">True</property>
                                                 <property name="XOptions">Fill</property>
                                                 <property name="YOptions">Fill</property>

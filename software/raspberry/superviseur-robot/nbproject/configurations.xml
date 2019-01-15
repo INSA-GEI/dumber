@@ -8,14 +8,8 @@
       <itemPath>./lib/camera.h</itemPath>
       <itemPath>./lib/commonitor.h</itemPath>
       <itemPath>./lib/comrobot.h</itemPath>
-      <itemPath>./lib/definitions.h</itemPath>
-      <itemPath>./lib/image.h</itemPath>
       <itemPath>./lib/img.h</itemPath>
-      <itemPath>./lib/message.h</itemPath>
       <itemPath>./lib/messages.h</itemPath>
-      <itemPath>./lib/monitor.h</itemPath>
-      <itemPath>./lib/robot.h</itemPath>
-      <itemPath>./lib/server.h</itemPath>
       <itemPath>./tasks.h</itemPath>
       <itemPath>tasks_pthread.h</itemPath>
     </logicalFolder>
@@ -31,14 +25,9 @@
       <itemPath>./lib/camera.cpp</itemPath>
       <itemPath>./lib/commonitor.cpp</itemPath>
       <itemPath>./lib/comrobot.cpp</itemPath>
-      <itemPath>./lib/image.cpp</itemPath>
       <itemPath>./lib/img.cpp</itemPath>
       <itemPath>./main.cpp</itemPath>
-      <itemPath>./lib/message.cpp</itemPath>
       <itemPath>./lib/messages.cpp</itemPath>
-      <itemPath>./lib/monitor.cpp</itemPath>
-      <itemPath>./lib/robot.cpp</itemPath>
-      <itemPath>./lib/server.cpp</itemPath>
       <itemPath>./tasks.cpp</itemPath>
       <itemPath>tasks_pthread.cpp</itemPath>
     </logicalFolder>
@@ -111,33 +100,13 @@
       </item>
       <item path="./lib/comrobot.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/definitions.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/image.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="./lib/img.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="./lib/img.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/message.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="./lib/message.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="./lib/messages.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="./lib/messages.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/monitor.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="./lib/monitor.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/robot.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="./lib/robot.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/server.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="./lib/server.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="./main.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -188,35 +157,13 @@
       </item>
       <item path="./lib/comrobot.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/definitions.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/image.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="./lib/image.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="./lib/img.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="./lib/img.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/message.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="./lib/message.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="./lib/messages.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="./lib/messages.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/monitor.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="./lib/monitor.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/robot.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="./lib/robot.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/server.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="./lib/server.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="./main.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -284,35 +231,13 @@
       </item>
       <item path="./lib/comrobot.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/definitions.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/image.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="./lib/image.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="./lib/img.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="./lib/img.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/message.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="./lib/message.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="./lib/messages.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="./lib/messages.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/monitor.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="./lib/monitor.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/robot.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="./lib/robot.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/server.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="./lib/server.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="./main.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -377,35 +302,13 @@
       </item>
       <item path="./lib/comrobot.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/definitions.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/image.cpp" ex="true" tool="1" flavor2="9">
-      </item>
-      <item path="./lib/image.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="./lib/img.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="./lib/img.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/message.cpp" ex="true" tool="1" flavor2="9">
-      </item>
-      <item path="./lib/message.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="./lib/messages.cpp" ex="false" tool="1" flavor2="9">
       </item>
       <item path="./lib/messages.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/monitor.cpp" ex="true" tool="1" flavor2="9">
-      </item>
-      <item path="./lib/monitor.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/robot.cpp" ex="true" tool="1" flavor2="9">
-      </item>
-      <item path="./lib/robot.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/server.cpp" ex="true" tool="1" flavor2="9">
-      </item>
-      <item path="./lib/server.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="./main.cpp" ex="false" tool="1" flavor2="9">
       </item>
@@ -472,35 +375,13 @@
       </item>
       <item path="./lib/comrobot.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/definitions.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/image.cpp" ex="true" tool="1" flavor2="9">
-      </item>
-      <item path="./lib/image.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="./lib/img.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="./lib/img.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="./lib/message.cpp" ex="true" tool="1" flavor2="9">
-      </item>
-      <item path="./lib/message.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="./lib/messages.cpp" ex="false" tool="1" flavor2="9">
       </item>
       <item path="./lib/messages.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/monitor.cpp" ex="true" tool="1" flavor2="9">
-      </item>
-      <item path="./lib/monitor.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/robot.cpp" ex="true" tool="1" flavor2="9">
-      </item>
-      <item path="./lib/robot.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="./lib/server.cpp" ex="true" tool="1" flavor2="9">
-      </item>
-      <item path="./lib/server.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="./main.cpp" ex="false" tool="1" flavor2="9">
       </item>
