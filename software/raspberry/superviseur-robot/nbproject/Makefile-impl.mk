@@ -27,11 +27,11 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 PROJECTNAME=superviseur-robot
 
 # Active Configuration
-DEFAULTCONF=Debug
+DEFAULTCONF=Debug__PC_
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=Debug Release Debug__RPI_ Debug__Pthread_ Debug__Pthread__RPI 
+ALLCONFS=Debug__PC_ Debug__RPI_ 
 
 
 # build

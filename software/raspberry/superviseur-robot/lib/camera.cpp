@@ -114,7 +114,10 @@ Img Camera::Grab() {
 #else
     cap.grab();
     cap.retrieve(frame);
+
+#ifdef __INVERSE_COLOR__
     cvtColor(frame, frame, CV_BGR2RGB);
+#endif // __INVERSE_COLOR__
 
     Img capture = Img(frame);
 #endif /* __FOR_PC__ */

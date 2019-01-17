@@ -18,10 +18,8 @@
 #ifndef __TASKS_H__
 #define __TASKS_H__
 
-#ifndef __WITH_PTHREAD__
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
+#include <iostream>
 
 #include <sys/mman.h>
 #include <alchemy/task.h>
@@ -30,15 +28,11 @@
 #include <alchemy/sem.h>
 #include <alchemy/queue.h>
 
-//#include "monitor.h"
-//#include "robot.h"
-//#include "image.h"
-//#include "message.h"
-//#include "server.h"
-
 #include "messages.h"
 #include "commonitor.h"
 #include "comrobot.h"
+#include "camera.h"
+#include "img.h"
 
 using namespace std;
 
@@ -62,20 +56,25 @@ public:
     
     /**
      */
-    void Join() {
-        rt_sem_broadcast(&sem_barrier);
-        pause();
-    }
+    void Join();
     
     /**
      */
     bool AcceptClient() {
-        return false;
+        return monitor.AcceptClient();
     }
     
 private:
     ComMonitor monitor;
     ComRobot robot;
+    
+    bool sendImage=false;
+    bool sendPosition=false;
+    
+    int counter;
+    bool flag;
+    
+    bool showArena=false;
     
     RT_TASK th_server;
     RT_TASK th_sendToMon;
@@ -83,6 +82,7 @@ private:
     RT_TASK th_openComRobot;
     RT_TASK th_startRobot;
     RT_TASK th_move;
+    RT_TASK th_camera;
 
     RT_MUTEX mutex_robotStarted;
     RT_MUTEX mutex_move;
@@ -100,37 +100,66 @@ private:
 
     int MSG_QUEUE_SIZE;
 
+    char mode_start;
+    
     /**
-     * \brief       Thread handling server communication.
+     * Write a message in a given queue
+     * @param queue Queue identifier
+     * @param msg Message to be stored
      */
-    void f_server(void *arg);
+    void WriteInQueue(RT_QUEUE *queue, Message *msg);
 
     /**
-     * \brief       Thread handling communication to monitor.
+     * Read a message from a given queue, block if empty
+     * @param queue Queue identifier
+     * @return Message read
      */
-    void f_sendToMon(void *arg);
+    Message *ReadInQueue(RT_QUEUE *queue);
+    
+    /**
+     * @brief Thread handling server communication.
+     */
+    void ReceiveFromMonTask(void *arg);
 
     /**
-     * \brief       Thread handling communication from monitor.
+     * @brief Thread handling periodic image capture.
      */
-    void f_receiveFromMon(void *arg);
-
+    void CameraTask(void *arg);
+    
     /**
-     * \brief       Thread handling opening of robot communication.
+     * @brief Thread sending data to monitor.
      */
-    void f_openComRobot(void * arg);
-
-    /**
-     * \brief       Thread handling robot mouvements.
-     */
-    void f_move(void *arg);
-
-    /**
-     * \brief       Thread handling robot activation.
-     */
-    void f_startRobot(void *arg);
+    void SendToMonTask(void *arg);
+//    /**
+//     * \brief       Thread handling server communication.
+//     */
+//    void f_server(void *arg);
+//
+//    /**
+//     * \brief       Thread handling communication to monitor.
+//     */
+//    void f_sendToMon(void *arg);
+//
+//    /**
+//     * \brief       Thread handling communication from monitor.
+//     */
+//    void f_receiveFromMon(void *arg);
+//
+//    /**
+//     * \brief       Thread handling opening of robot communication.
+//     */
+//    void f_openComRobot(void * arg);
+//
+//    /**
+//     * \brief       Thread handling robot mouvements.
+//     */
+//    void f_move(void *arg);
+//
+//    /**
+//     * \brief       Thread handling robot activation.
+//     */
+//    void f_startRobot(void *arg);
 };
 
-#endif // __WITH_PTHREAD__
 #endif // __TASKS_H__ 
 

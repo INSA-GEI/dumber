@@ -258,7 +258,14 @@ namespace monitor
             {
                 byte[] writeBuffer = Encoding.UTF8.GetBytes(mes);
 
-                stream.Write(writeBuffer, 0, mes.Length);
+                try
+                {
+                    stream.Write(writeBuffer, 0, mes.Length);
+                }
+                catch (System.IO.IOException) {
+                    Console.WriteLine("Server closed");
+                    client.Close();
+                }
             }
         }
     }

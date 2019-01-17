@@ -70,22 +70,20 @@ int ComRobot::Open() {
  */
 int ComRobot::Open(string usart) {
     struct termios options;
-    
+
     fd = open(usart.c_str(), O_RDWR | O_NOCTTY /*| O_NDELAY*/); //Open in blocking read/write mode
     if (fd == -1) {
-        cerr<<"["<<__PRETTY_FUNCTION__<<"] Unable to open UART ("<<usart<<"). Ensure it is not in use by another application"<<endl<<flush;
+        cerr << "[" << __PRETTY_FUNCTION__ << "] Unable to open UART (" << usart << "). Ensure it is not in use by another application" << endl << flush;
         throw std::runtime_error{"Unable to open UART"};
         exit(EXIT_FAILURE);
-    }
-    else
-    {
+    } else {
         fcntl(fd, F_SETFL, 0);
         tcgetattr(fd, &options);
         options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-        cfsetospeed (&options, B9600);
-        cfsetispeed (&options, B9600);
-        options.c_cc[VMIN]=0;
-        options.c_cc[VTIME]=1; /* Timeout of 100 ms per character*/
+        cfsetospeed(&options, B9600);
+        cfsetispeed(&options, B9600);
+        options.c_cc[VMIN] = 0;
+        options.c_cc[VTIME] = 1; /* Timeout of 100 ms per character */
         tcsetattr(fd, TCSANOW, &options);
     }
 
@@ -99,6 +97,7 @@ int ComRobot::Open(string usart) {
 int ComRobot::Close() {
     return close(fd);
 }
+
 /**
  * Send a message to robot
  * @param msg Message to send to robot
@@ -115,7 +114,7 @@ Message *ComRobot::Write(Message* msg) {
 
         Write_Pre();
 
-        s=MessageToString(msg);
+        s = MessageToString(msg);
         AddChecksum(s);
 
         //cout << "[" <<__PRETTY_FUNCTION__<<"] Send command: "<<s<<endl<<flush;
@@ -128,8 +127,8 @@ Message *ComRobot::Write(Message* msg) {
 
             try {
                 s = Read();
-                cout << "Answer = "<<s<<endl<<flush;
-                
+                //cout << "Answer = "<<s<<endl<<flush;
+
                 if (VerifyChecksum(s)) {
                     msgAnswer = StringToMessage(s);
                 } else msgAnswer = new Message(MESSAGE_ANSWER_ROBOT_UNKNOWN_COMMAND);
@@ -169,14 +168,14 @@ string ComRobot::Read() {
 
     do {
         rxLength = read(this->fd, (void*) &receivedChar, 1); //Filestream, buffer to store in, number of bytes to read (max)
-        if (rxLength ==0) { // timeout
+        if (rxLength == 0) { // timeout
             // try again
             rxLength = read(this->fd, (void*) &receivedChar, 1); //Filestream, buffer to store in, number of bytes to read (max)
-            if (rxLength ==0) { // re-timeout: it sucks !
-                throw std::runtime_error {"ComRobot::Read: Timeout when reading from com port"};
+            if (rxLength == 0) { // re-timeout: it sucks !
+                throw std::runtime_error{"ComRobot::Read: Timeout when reading from com port"};
             }
-        } else if (rxLength <0) { // big pb !
-            throw std::runtime_error {"ComRobot::Read: Unknown problem when reading from com port"};
+        } else if (rxLength < 0) { // big pb !
+            throw std::runtime_error{"ComRobot::Read: Unknown problem when reading from com port"};
         } else { // everything ok
             if ((receivedChar != '\r') && (receivedChar != '\n')) s += receivedChar;
         }
@@ -190,7 +189,7 @@ Message *ComRobot::SendCommand(Message* msg, MessageID answerID, int maxRetries)
     Message *msgSend;
     Message *msgRcv;
     Message *msgTmp;
-    
+
     do {
         msgSend = msg->Copy();
         cout << "S => " << msgSend->ToString() << endl << flush;
@@ -200,13 +199,13 @@ Message *ComRobot::SendCommand(Message* msg, MessageID answerID, int maxRetries)
         if (msgTmp->CompareID(answerID)) counter = 0;
         else counter--;
 
-        if (counter == 0) msgRcv=msgTmp->Copy();
-        
+        if (counter == 0) msgRcv = msgTmp->Copy();
+
         delete(msgTmp);
     } while (counter);
-    
+
     delete (msg);
-    
+
     return msgRcv;
 }
 
@@ -220,26 +219,26 @@ Message* ComRobot::StringToMessage(string s) {
 
     switch (s[0]) {
         case LABEL_ROBOT_OK:
-            msg=new Message(MESSAGE_ANSWER_ACK);
+            msg = new Message(MESSAGE_ANSWER_ACK);
             break;
         case LABEL_ROBOT_ERROR:
-            msg=new Message(MESSAGE_ANSWER_ROBOT_ERROR);
+            msg = new Message(MESSAGE_ANSWER_ROBOT_ERROR);
             break;
         case LABEL_ROBOT_UNKNOWN_COMMAND:
-            msg=new Message(MESSAGE_ANSWER_ROBOT_UNKNOWN_COMMAND);
+            msg = new Message(MESSAGE_ANSWER_ROBOT_UNKNOWN_COMMAND);
             break;
         case '0':
-            msg=new MessageBattery(MESSAGE_ROBOT_BATTERY_LEVEL, BATTERY_EMPTY);
+            msg = new MessageBattery(MESSAGE_ROBOT_BATTERY_LEVEL, BATTERY_EMPTY);
             break;
-            case '1':
-            msg=new MessageBattery(MESSAGE_ROBOT_BATTERY_LEVEL, BATTERY_LOW);
+        case '1':
+            msg = new MessageBattery(MESSAGE_ROBOT_BATTERY_LEVEL, BATTERY_LOW);
             break;
-            case '2':
-            msg=new MessageBattery(MESSAGE_ROBOT_BATTERY_LEVEL, BATTERY_FULL);
+        case '2':
+            msg = new MessageBattery(MESSAGE_ROBOT_BATTERY_LEVEL, BATTERY_FULL);
             break;
         default:
-            msg=new Message(MESSAGE_ANSWER_ROBOT_ERROR);
-            cerr<<"["<<__PRETTY_FUNCTION__<<"] Unknown message received from robot (" << s <<")"<<endl<<flush;
+            msg = new Message(MESSAGE_ANSWER_ROBOT_ERROR);
+            cerr << "[" << __PRETTY_FUNCTION__ << "] Unknown message received from robot (" << s << ")" << endl << flush;
     }
 
     return msg;
@@ -252,69 +251,74 @@ Message* ComRobot::StringToMessage(string s) {
  */
 string ComRobot::MessageToString(Message *msg) {
     string s;
-    
+
     float val_f;
     int val_i;
     unsigned char *b;
 
     switch (msg->GetID()) {
         case MESSAGE_ROBOT_PING:
-            s+=LABEL_ROBOT_PING;
+            s += LABEL_ROBOT_PING;
             break;
         case MESSAGE_ROBOT_RESET:
-            s+=LABEL_ROBOT_RESET;
+            s += LABEL_ROBOT_RESET;
             break;
         case MESSAGE_ROBOT_POWEROFF:
-            s+=LABEL_ROBOT_POWEROFF;
+            s += LABEL_ROBOT_POWEROFF;
             break;
         case MESSAGE_ROBOT_START_WITHOUT_WD:
-            s+=LABEL_ROBOT_START_WITHOUT_WD;
+            s += LABEL_ROBOT_START_WITHOUT_WD;
             break;
         case MESSAGE_ROBOT_START_WITH_WD:
-            s+=LABEL_ROBOT_START_WITH_WD;
+            s += LABEL_ROBOT_START_WITH_WD;
             break;
         case MESSAGE_ROBOT_RELOAD_WD:
-            s+=LABEL_ROBOT_RELOAD_WD;
+            s += LABEL_ROBOT_RELOAD_WD;
             break;
         case MESSAGE_ROBOT_BATTERY_GET:
-            s+=LABEL_ROBOT_GET_BATTERY;
+            s += LABEL_ROBOT_GET_BATTERY;
             break;
         case MESSAGE_ROBOT_STATE_GET:
-            s+=LABEL_ROBOT_GET_STATE;
+            s += LABEL_ROBOT_GET_STATE;
             break;
         case MESSAGE_ROBOT_GO_FORWARD:
-            s+=LABEL_ROBOT_MOVE;
-            s+=LABEL_ROBOT_SEPARATOR_CHAR;
+            s += LABEL_ROBOT_MOVE;
+            s += LABEL_ROBOT_SEPARATOR_CHAR;
             s.append(to_string(500000));
             break;
         case MESSAGE_ROBOT_GO_BACKWARD:
-            s+=LABEL_ROBOT_MOVE;
-            s+=LABEL_ROBOT_SEPARATOR_CHAR;
+            s += LABEL_ROBOT_MOVE;
+            s += LABEL_ROBOT_SEPARATOR_CHAR;
             s.append(to_string(-500000));
             break;
         case MESSAGE_ROBOT_GO_LEFT:
-            s+=LABEL_ROBOT_TURN;
-            s+=LABEL_ROBOT_SEPARATOR_CHAR;
-            s.append(to_string(90));
+            s += LABEL_ROBOT_TURN;
+            s += LABEL_ROBOT_SEPARATOR_CHAR;
+            s.append(to_string(-500000));
             break;
         case MESSAGE_ROBOT_GO_RIGHT:
-            s+=LABEL_ROBOT_TURN;
-            s+=LABEL_ROBOT_SEPARATOR_CHAR;
-            s.append(to_string(-90));
+            s += LABEL_ROBOT_TURN;
+            s += LABEL_ROBOT_SEPARATOR_CHAR;
+            s.append(to_string(500000));
+            break;
+        case MESSAGE_ROBOT_STOP:
+            s += LABEL_ROBOT_MOVE;
+            s += LABEL_ROBOT_SEPARATOR_CHAR;
+            s.append(to_string(0));
             break;
         case MESSAGE_ROBOT_MOVE:
-            s+=LABEL_ROBOT_MOVE;
-            s+=LABEL_ROBOT_SEPARATOR_CHAR;
-            s.append(to_string(((MessageInt*)msg)->GetValue()));
+            s += LABEL_ROBOT_MOVE;
+            s += LABEL_ROBOT_SEPARATOR_CHAR;
+            s.append(to_string(((MessageInt*) msg)->GetValue()));
             break;
         case MESSAGE_ROBOT_TURN:
-            s+=LABEL_ROBOT_TURN;
-            s+=LABEL_ROBOT_SEPARATOR_CHAR;
-            s.append(to_string(((MessageInt*)msg)->GetValue()));
+            s += LABEL_ROBOT_TURN;
+            s += LABEL_ROBOT_SEPARATOR_CHAR;
+            s.append(to_string(((MessageInt*) msg)->GetValue()));
             break;
         default:
-            cerr<<"["<<__PRETTY_FUNCTION__<<"] Invalid message for robot ("<<msg->ToString()<<")"<<endl<<flush;
-            throw std::runtime_error {"Invalid message"};
+            cerr << "[" << __PRETTY_FUNCTION__ << "] Invalid message for robot (" << msg->ToString() << ")" << endl << flush;
+            throw std::runtime_error{"Invalid message"};
     }
 
     return s;
@@ -325,14 +329,14 @@ string ComRobot::MessageToString(Message *msg) {
  * @param[in,out] s String containing command for robot, without ending char (carriage return) 
  */
 void ComRobot::AddChecksum(string &s) {
-    unsigned char checksum=0;
-    
-    for (string::iterator it=s.begin(); it!=s.end(); ++it) {
-        checksum ^= (unsigned char)*it;
+    unsigned char checksum = 0;
+
+    for (string::iterator it = s.begin(); it != s.end(); ++it) {
+        checksum ^= (unsigned char) *it;
     }
-    
-    s+=(char)checksum; // Add calculated checksum
-    s+=(char)LABEL_ROBOT_ENDING_CHAR;
+
+    s += (char) checksum; // Add calculated checksum
+    s += (char) LABEL_ROBOT_ENDING_CHAR;
 }
 
 /**
@@ -342,15 +346,14 @@ void ComRobot::AddChecksum(string &s) {
  * @return true is checksum is valid, false otherwise.
  */
 bool ComRobot::VerifyChecksum(string &s) {
-    unsigned char checksum=0;
-    
-    for (string::iterator it=s.begin(); it!=s.end(); ++it) {
-        checksum ^= (unsigned char)*it;
+    unsigned char checksum = 0;
+
+    for (string::iterator it = s.begin(); it != s.end(); ++it) {
+        checksum ^= (unsigned char) *it;
     }
-    
-    if (checksum==0) { // checksum is ok, remove last char of string (checksum)
+
+    if (checksum == 0) { // checksum is ok, remove last char of string (checksum)
         s.pop_back(); // remove last char
         return true;
-    }
-    else return false;
+    } else return false;
 }

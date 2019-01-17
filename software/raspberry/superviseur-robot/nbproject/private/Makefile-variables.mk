@@ -3,8 +3,5 @@
 #
 # NOCDDL
 #
-# Debug configuration
-# Release configuration
+# Debug__PC_ configuration
 # Debug__RPI_ configuration
-# Debug__Pthread_ configuration
-# Debug__Pthread__RPI configuration

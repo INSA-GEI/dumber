@@ -47,16 +47,35 @@ typedef cv::Mat ImageMat;
 typedef vector<unsigned char> Jpg;
 
 /**
- * Position type used for store robot coordinates
+ * Class position, used for store robot coordinates
  * 
- * @brief Position type used for store robot coordinates
+ * @brief Class position, used for store robot coordinates
  */
-typedef struct {
+class Position {
+public:
+    int robotId;
+    float angle;
     cv::Point2f center; 
     cv::Point2f direction;
-    float angle;
-    int robotId;
-} Position;
+    
+    /**
+     * Constructor of Position object
+     */
+    Position() {
+        robotId = -1;
+        angle = 0.0;
+        center=cv::Point2f(0.0,0.0);
+        direction=cv::Point2f(0.0,0.0);
+    }
+    
+    /**
+     * Build a string representation of the object
+     * @return String containing object information
+     */
+    string ToString() {
+        return "Id=" + to_string(this->robotId) + ", Angle=" + to_string(this->angle) + ", center=(" + to_string(this->center.x) + ";" + to_string(this->center.y) + ")";
+    }
+};
 
 /**
  * Class arena, used for holding outline of arena on image and cropping image to only usefull area
@@ -66,20 +85,30 @@ typedef struct {
 class Arena {
 public:
     /**
-     * Constructor of Arena object
-     */
-    Arena() {}
-    
-    /**
      * Coordinate of arena, empty if no arena found
      */
     cv::Rect arena;
+    
+    /**
+     * Constructor of Arena object
+     */
+    Arena() {}
     
     /**
      * Tell if arena is empty (not found) or not
      * @return true if no arena found, false otherwise
      */
     bool IsEmpty();
+    
+    /**
+     * Build a string representation of the object
+     * @return String containing object information
+     */
+    string ToString() {
+        if (IsEmpty()) return "Arena empty";
+        else
+        return "Arena: (x;y)=(" + to_string(this->arena.x) + ";" + to_string(this->arena.x) + " (w;h)=(" + to_string(this->arena.width) + ";" + to_string(this->arena.height) + ")";
+    }
 };
 
 /**

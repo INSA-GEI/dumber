@@ -33,6 +33,10 @@ bool Arena::IsEmpty() {
  */
 Img::Img(ImageMat imgMatrice) {
     this->img = imgMatrice.clone();
+   
+#ifdef __WITH_ARUCO__
+    this->dictionary=cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME(3));
+#endif // __WITH_ARUCO__
 }
 
 /**
