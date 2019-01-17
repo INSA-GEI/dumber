@@ -33,7 +33,7 @@ namespace monitor
         /// <summary>
         /// Callback for sending received data to upper level
         /// </summary>
-        public delegate void CommandReceivedEvent(string msg, byte[] buffer);
+        public delegate void CommandReceivedEvent(string msg);
         public CommandReceivedEvent commandReceivedEvent = null;
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace monitor
         /// </summary>
         /// <param name="message">Message received from server</param>
         /// <param name="buffer">Raw buffer reived from server</param>
-        private void OnMessageReception(string message, byte[] buffer)
+        private void OnMessageReception(string message)
         {
             waitTimer.Stop(); // Stop timeout stopwatch
 
@@ -144,7 +144,7 @@ namespace monitor
                 
                 waitForAcknowledge = false;
 
-                this.commandReceivedEvent?.Invoke(message, buffer);
+                this.commandReceivedEvent?.Invoke(message);
             }
         }
 
@@ -158,7 +158,7 @@ namespace monitor
             messageReceived = null;
             // set buffer and message as null to indicate that no message was received
             // and call to OnMessagereception is due to timeout
-            OnMessageReception(messageReceived, null);
+            OnMessageReception(messageReceived);
         }
 
         /// <summary>

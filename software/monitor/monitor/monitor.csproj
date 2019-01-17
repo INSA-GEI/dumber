@@ -70,6 +70,7 @@
     <EmbeddedResource Include="ressources\robot-icon.png" />
     <EmbeddedResource Include="ressources\robot-icon.resized.png" />
     <EmbeddedResource Include="ressources\missing_picture.png" />
+    <EmbeddedResource Include="ressources\hand-filled-32.png" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="gtk-gui\generated.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Client.cs" />
     <Compile Include="CommandManager.cs" />
     <Compile Include="DestijlCommandManager.cs" />
+    <Compile Include="ImageWidget.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="afterBuild.sh" />

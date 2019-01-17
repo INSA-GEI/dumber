@@ -19,12 +19,19 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// 15/01/2019 dimercur
+// Demande #41: Modifier les messages envoyés par les flèches de direction
+
+// 15/10/2019 dimercur
+// Demande #43: Migrer le code lié à la gestion des images dans sa propre classe widget
 
 using System;
 using Gtk;
 using Gdk;
+using Cairo;
 
 using monitor;
+using System.Timers;
 
 /// <summary>
 /// Main part of the program, behavior of main window
@@ -37,9 +44,9 @@ public partial class MainWindow : Gtk.Window
     private DestijlCommandManager cmdManager;
 
     /// <summary>
-    /// Pixbuffer used for displaying image
+    /// Position used for displaying position
     /// </summary>
-    private Pixbuf drawingareaCameraPixbuf;
+    private DestijlCommandManager.Position position=new DestijlCommandManager.Position();
 
     /// <summary>
     /// List of availble state for the application
@@ -57,10 +64,18 @@ public partial class MainWindow : Gtk.Window
     private SystemState systemState = SystemState.NotConnected;
 
     /// <summary>
+    /// Object used for displaying image on a valid DrawingArea widget
+    /// </summary>
+    private ImageWidget imageWidget;
+
+    /// <summary>
     /// Timer for battery request
     /// </summary>
     private System.Timers.Timer batteryTimer;
 
+    /// <summary>
+    /// Counter for image reception and detecting bad picture ratio
+    /// </summary>
     private int imageReceivedCounter = 0;
     private int badImageReceivedCounter = 0;
 
@@ -72,6 +87,9 @@ public partial class MainWindow : Gtk.Window
         Build();
 
         cmdManager = new DestijlCommandManager(OnCommandReceivedEvent);
+
+        // Init of image widget
+        imageWidget = new ImageWidget(drawingAreaCamera);
 
         // create new timer for battery request, every 10s
         batteryTimer = new System.Timers.Timer(10000.0);
@@ -90,7 +108,7 @@ public partial class MainWindow : Gtk.Window
         ChangeState(SystemState.NotConnected);
 
         // Load "no picture" image from disque
-        drawingareaCameraPixbuf = Pixbuf.LoadFromResource("monitor.ressources.missing_picture.png");
+        imageWidget.ShowImage("monitor.ressources.missing_picture.png");
 
         // setup server controls
         entryServerName.Text = Client.defaultIP;
@@ -120,6 +138,11 @@ public partial class MainWindow : Gtk.Window
 
                 checkButtonCameraOn.Active = false;
                 checkButtonRobotPosition.Active = false;
+                checkButtonFPS.Active = false;
+
+                imageWidget.ShowFPS = false;
+                imageWidget.showPosition = false;
+
                 if (cmdManager != null) cmdManager.Close();
 
                 batteryTimer.Stop();
@@ -159,6 +182,10 @@ public partial class MainWindow : Gtk.Window
 
                 checkButtonCameraOn.Active = false;
                 checkButtonRobotPosition.Active = false;
+                checkButtonFPS.Active = false;
+
+                imageWidget.ShowFPS = false;
+                imageWidget.showPosition = false;
 
                 systemState = SystemState.NotConnected;
 
@@ -177,11 +204,9 @@ public partial class MainWindow : Gtk.Window
     /// <param name="message">Message</param>
     private void MessagePopup(MessageType type, ButtonsType buttons, string title, string message)
     {
-        MessageDialog md = new MessageDialog(this, DialogFlags.DestroyWithParent, type, buttons, message)
-        {
-            Title = title
-        };
+        MessageDialog md = new MessageDialog(this, DialogFlags.DestroyWithParent, type, buttons, message);
 
+        md.Title = title;
         md.Run();
         md.Destroy();
     }
@@ -200,26 +225,25 @@ public partial class MainWindow : Gtk.Window
         a.RetVal = true;
     }
 
-    private byte[] imageComplete;
-    private byte[] imageInProgress;
-
     /// <summary>
     /// Callback called when new message is received from server
     /// </summary>
     /// <param name="header">Header of message</param>
     /// <param name="data">Data of message</param>
-    /// <param name="buffer">Raw buffer corresponding of received message</param>
-    public void OnCommandReceivedEvent(string header, string data, byte[] buffer)
+    public void OnCommandReceivedEvent(string header, string data)
     {
-        if (buffer==null)
+        if (header == null)
         {
             // we have lost server
             ChangeState(SystemState.NotConnected);
 
-            MessagePopup(MessageType.Error,
+            Gtk.Application.Invoke(delegate
+            {
+                MessagePopup(MessageType.Error,
                      ButtonsType.Ok, "Server lost",
                          "Server is down: disconnecting");
-            cmdManager.Close();
+                cmdManager.Close();
+            });
         }
 
         // if we have received a valid message
@@ -228,75 +252,71 @@ public partial class MainWindow : Gtk.Window
 #if DEBUG
             // print message content
             if (header.Length > 4)
-                Console.WriteLine("Bad header(" + buffer.Length + ")");
-            else
-                Console.WriteLine("Received header (" + header.Length + "): " + header);
-            //if (header.ToUpper() != DestijlCommandList.HeaderStmImage)
-            //{
-            //    if (data != null) Console.WriteLine("Received data (" + data.Length + "): " + data);
-            //}
+            {
+                Console.WriteLine("Bad header(" + header.Length + ")");
+            }
 #endif
-            // Image management
-            if (header == DestijlCommandList.HeaderStmImage)
-            {
-                imageComplete = imageInProgress;
-                imageInProgress = buffer;
-            }
-            else
-            {
-                if (imageInProgress == null) imageInProgress = buffer;
-                else
-                {
-                    Array.Resize<byte>(ref imageInProgress, imageInProgress.Length + buffer.Length);
-                    System.Buffer.BlockCopy(buffer, 0, imageInProgress, imageInProgress.Length - buffer.Length, buffer.Length);
-                }
-            }
+            // Depending on message received (based on header), launch correponding action
+            header = header.ToUpper();
 
-            // depending on message received (based on header)
-            // launch correponding action
-            if (header.ToUpper() == DestijlCommandList.HeaderStmBat)
+            if (header == DestijlCommandList.ROBOT_BATTERY_LEVEL)
             {
+                string batLevel = "";
+
                 switch (data[0])
                 {
                     case '2':
-                        labelBatteryLevel.Text = "High";
+                        batLevel = "High";
                         break;
                     case '1':
-                        labelBatteryLevel.Text = "Low";
+                        batLevel = "Low";
                         break;
                     case '0':
-                        labelBatteryLevel.Text = "Empty";
+                        batLevel = "Empty";
                         break;
                     default:
-                        labelBatteryLevel.Text = "Invalid value";
+                        batLevel = "Invalid value";
                         break;
                 }
-            }
-            else if (header.ToUpper() == DestijlCommandList.HeaderStmImage)
-            {
-                // if message is an image, convert it to a pixbuf
-                // that can be displayed
-                if (imageComplete != null)
-                {
-                    byte[] image = new byte[imageComplete.Length - 4];
-                    System.Buffer.BlockCopy(imageComplete, 4, image, 0, image.Length);
 
-                    imageReceivedCounter++;
-                    try
-                    {
-                        drawingareaCameraPixbuf = new Pixbuf(image);
-                        drawingAreaCamera.QueueDraw();
-                    }
-                    catch (GLib.GException)
-                    {
-                        badImageReceivedCounter++;
-#if DEBUG
-                        Console.WriteLine("Bad Image: " + badImageReceivedCounter +
-                                          " / " + imageReceivedCounter +
-                                          " (" + badImageReceivedCounter * 100 / imageReceivedCounter + "%)");
-#endif
-                    }
+                Gtk.Application.Invoke(delegate
+                {
+                    labelBatteryLevel.Text = batLevel;
+                });
+            }
+            else if (header == DestijlCommandList.CAMERA_IMAGE)
+            {
+                imageReceivedCounter++;
+
+                byte[] image = new byte[2];
+                try
+                {
+                    image = Convert.FromBase64String(data);
                 }
+                catch (FormatException)
+                {
+                    badImageReceivedCounter++;
+                    Console.WriteLine("Unable to convert from base64 ");
+                }
+
+                try
+                {
+                    imageWidget.ShowImage(image);
+                }
+                catch (GLib.GException)
+                {
+                    badImageReceivedCounter++;
+#if DEBUG
+                    Console.WriteLine("Bad Image: " + badImageReceivedCounter +
+                                      " / " + imageReceivedCounter +
+                                      " (" + badImageReceivedCounter * 100 / imageReceivedCounter + "%)");
+#endif
+                }
+                //}
+            }
+            else if (header == DestijlCommandList.CAMERA_POSITION)
+            {
+                imageWidget.Position = DestijlCommandManager.DecodePosition(data);
             }
         }
     }
@@ -311,6 +331,7 @@ public partial class MainWindow : Gtk.Window
         Console.WriteLine("Bye bye 2");
         if (cmdManager != null) cmdManager.Close();
         this.Destroy();
+
         Application.Quit();
     }
 
@@ -417,10 +438,10 @@ public partial class MainWindow : Gtk.Window
         DestijlCommandManager.CommandStatus status;
 
         //if robot is not activated
-        if (buttonRobotActivation.Label == "Activate") 
+        if (buttonRobotActivation.Label == "Activate")
         {
             // if a startup with watchdog is requested
-            if (radioButtonWithWatchdog.Active) 
+            if (radioButtonWithWatchdog.Active)
             {
                 status = cmdManager.RobotStartWithWatchdog();
             }
@@ -481,19 +502,23 @@ public partial class MainWindow : Gtk.Window
         // depending on button clicked, launch appropriate action
         if (sender == buttonRight)
         {
-            cmdManager.RobotTurn(90);
+            cmdManager.RobotGoRight();
         }
         else if (sender == buttonLeft)
         {
-            cmdManager.RobotTurn(-90);
+            cmdManager.RobotGoLeft();
         }
         else if (sender == buttonForward)
         {
-            cmdManager.RobotMove(100);
+            cmdManager.RobotGoForward();
         }
         else if (sender == buttonDown)
         {
-            cmdManager.RobotMove(-100);
+            cmdManager.RobotGoBackward();
+        }
+        else if (sender == buttonStop)
+        {
+            cmdManager.RobotStop();
         }
         else
         {
@@ -557,9 +582,7 @@ public partial class MainWindow : Gtk.Window
         {
             if (cmdManager.CameraClose() != DestijlCommandManager.CommandStatus.Success)
             {
-                MessagePopup(MessageType.Error,
-                             ButtonsType.Ok, "Error",
-                             "Error when closing camera: bad answer for supervisor or timeout");
+                Console.WriteLine("Error when closing camera: bad answer for supervisor or timeout");
             }
         }
         else // camera is not active, switch it on
@@ -569,10 +592,8 @@ public partial class MainWindow : Gtk.Window
 
             if (cmdManager.CameraOpen() != DestijlCommandManager.CommandStatus.Success)
             {
-                MessagePopup(MessageType.Error,
-                             ButtonsType.Ok, "Error",
-                             "Error when opening camera: bad answer for supervisor or timeout");
-                checkButtonCameraOn.Active = false;
+                Console.WriteLine("Error when opening camera: bad answer for supervisor or timeout");
+                //checkButtonCameraOn.Active = false;
             }
         }
     }
@@ -589,74 +610,20 @@ public partial class MainWindow : Gtk.Window
         {
             if (cmdManager.CameraStopComputePosition() != DestijlCommandManager.CommandStatus.Success)
             {
-                MessagePopup(MessageType.Error,
-                             ButtonsType.Ok, "Error",
-                             "Error when stopping position reception: bad answer for supervisor or timeout");
+                Console.WriteLine("Error when stopping position reception: bad answer for supervisor or timeout");
             }
         }
         else // start reception of robot position
         {
             if (cmdManager.CameraComputePosition() != DestijlCommandManager.CommandStatus.Success)
             {
-                MessagePopup(MessageType.Error,
-                             ButtonsType.Ok, "Error",
-                             "Error when starting getting robot position: bad answer for supervisor or timeout");
+                Console.WriteLine("Error when starting getting robot position: bad answer for supervisor or timeout");
 
-                checkButtonRobotPosition.Active = false;
+                //checkButtonRobotPosition.Active = false;
             }
         }
-    }
 
-    /// <summary>
-    /// Callback called when drawingarea need refresh
-    /// </summary>
-    /// <param name="o">Sender object</param>
-    /// <param name="args">Expose arguments</param>
-    protected void OnDrawingAreaCameraExposeEvent(object o, ExposeEventArgs args)
-    {
-        //Console.WriteLine("Event expose. Args = " + args.ToString());
-
-        DrawingArea area = (DrawingArea)o;
-        Gdk.Pixbuf displayPixbuf;
-        int areaWidth, areaHeight;
-
-        // Get graphic context for background
-        Gdk.GC gc = area.Style.BackgroundGC(Gtk.StateType.Normal);
-
-        // get size of drawingarea widget
-        area.GdkWindow.GetSize(out areaWidth, out areaHeight);
-        int width = drawingareaCameraPixbuf.Width;
-        int height = drawingareaCameraPixbuf.Height;
-        float ratio = (float)width / (float)height;
-
-        // if widget is smaller than image, reduce it
-        if (areaWidth <= width)
-        {
-            width = areaWidth;
-            height = (int)(width / ratio);
-        }
-
-        // if image is smaller than widget, enlarge it
-        if (width > areaWidth)
-        {
-            width = areaWidth;
-        }
-
-        if (height > areaHeight)
-        {
-            height = areaHeight;
-        }
-
-        //scale original picture and copy result in local pixbuf
-        displayPixbuf = drawingareaCameraPixbuf.ScaleSimple(width, height, InterpType.Bilinear);
-
-        // draw local pixbuff centered on drawingarea
-        area.GdkWindow.DrawPixbuf(gc, displayPixbuf,
-                                  0, 0,
-                                  (areaWidth - displayPixbuf.Width) / 2,
-                                  (areaHeight - displayPixbuf.Height) / 2,
-                                  displayPixbuf.Width, displayPixbuf.Height,
-                                  RgbDither.Normal, 0, 0);
+        imageWidget.showPosition = checkButtonRobotPosition.Active;
     }
 
     /// <summary>
@@ -667,9 +634,8 @@ public partial class MainWindow : Gtk.Window
         DestijlCommandManager.CommandStatus status;
         MessageDialog md = new MessageDialog(this, DialogFlags.DestroyWithParent,
                                              MessageType.Question, ButtonsType.YesNo, "Arena is correct ?");
-        {
-            Title = "Check arena";
-        };
+
+        md.Title = "Check arena";
 
         ResponseType result = (ResponseType)md.Run();
         md.Destroy();
@@ -692,7 +658,7 @@ public partial class MainWindow : Gtk.Window
     }
 
     /// <summary>
-    /// Callback called when "detect Arena " button is clicked
+    /// Callback called when "Detect Arena" button is clicked
     /// </summary>
     /// <param name="sender">Sender object</param>
     /// <param name="e">Event</param>
@@ -709,5 +675,15 @@ public partial class MainWindow : Gtk.Window
 
         // show popup and wait for user to say if arena is ok or not 
         DetectArena();
+    }
+
+    /// <summary>
+    /// Callback function for FPS checkbutton
+    /// </summary>
+    /// <param name="sender">Sender object</param>
+    /// <param name="e">unused paramter</param>
+    protected void OnCheckButtonFPSToggled(object sender, EventArgs e)
+    {
+        imageWidget.ShowFPS = checkButtonFPS.Active;
     }
 }

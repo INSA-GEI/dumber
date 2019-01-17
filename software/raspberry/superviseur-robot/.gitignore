@@ -2,10 +2,17 @@ build/
 src.sav/
 cmake-build-debug/
 futur/
-build/
 CMakeFiles/
 
 Makefile
 *.cmake
 CMakeCache.txt
+
+docs/
+doc/
+
+workspace/
+dist/
+not_for_students/
+
 

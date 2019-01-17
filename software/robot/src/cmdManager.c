@@ -340,7 +340,7 @@ void cmdStartWithoutWatchdogAction(void) {
  *				Le type de commande à envoyer est :"M=val\r". Ou val
  *				peut être positif ou negatif.
  *
- * @param  		None
+ * @param  		NSTART_WITH_WDone
  * @retval 		None
  */
 void cmdMoveAction(void) {

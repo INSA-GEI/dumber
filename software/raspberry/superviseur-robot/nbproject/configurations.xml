@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="100">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>./lib/base64/base64.h</itemPath>
+      <itemPath>./lib/camera.h</itemPath>
+      <itemPath>./lib/commonitor.h</itemPath>
+      <itemPath>./lib/comrobot.h</itemPath>
+      <itemPath>./lib/img.h</itemPath>
+      <itemPath>./lib/messages.h</itemPath>
+      <itemPath>./tasks.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+      <itemPath>./gdbsudo.sh</itemPath>
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>./lib/base64/base64.cpp</itemPath>
+      <itemPath>./lib/camera.cpp</itemPath>
+      <itemPath>./lib/commonitor.cpp</itemPath>
+      <itemPath>./lib/comrobot.cpp</itemPath>
+      <itemPath>./lib/img.cpp</itemPath>
+      <itemPath>./main.cpp</itemPath>
+      <itemPath>./lib/messages.cpp</itemPath>
+      <itemPath>./tasks.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>./Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>lib</Elem>
+  </sourceRootList>
+  <projectmakefile>./Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug__PC_" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <incDir>
+            <pElem>./</pElem>
+            <pElem>./lib</pElem>
+          </incDir>
+          <commandLine>-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy</commandLine>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>./</pElem>
+            <pElem>./lib</pElem>
+            <pElem>/usr/xenomai/include</pElem>
+            <pElem>/usr/xenomai/include/mercury</pElem>
+          </incDir>
+          <commandLine>-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy -Wno-pmf-conversions</commandLine>
+          <preprocessorList>
+            <Elem>_WITH_TRACE_</Elem>
+            <Elem>__FOR_PC__</Elem>
+            <Elem>__WITH_ARUCO__</Elem>
+          </preprocessorList>
+        </ccTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerOptionItem>`pkg-config --libs opencv`</linkerOptionItem>
+          </linkerLibItems>
+          <commandLine>-Wl,--no-as-needed -lalchemy -lcopperplate /usr/xenomai/lib/xenomai/bootstrap.o -Wl,--wrap=main -Wl,--dynamic-list=/usr/xenomai/lib/dynlist.ld -L/usr/xenomai/lib -lmercury -lpthread -lrt</commandLine>
+        </linkerTool>
+      </compileType>
+      <item path="./gdbsudo.sh" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/base64/base64.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/base64/base64.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/camera.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/camera.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/commonitor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/commonitor.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/comrobot.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/comrobot.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/img.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/img.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/messages.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/messages.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./tasks.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./tasks.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Debug__RPI_" type="1">
+      <toolsSet>
+        <compilerSet>GNU|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <incDir>
+            <pElem>./</pElem>
+            <pElem>./lib</pElem>
+            <pElem>/usr/xenomai/include</pElem>
+            <pElem>/usr/xenomai/include/mercury</pElem>
+          </incDir>
+          <commandLine>-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy</commandLine>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>./</pElem>
+            <pElem>./lib</pElem>
+            <pElem>/usr/xenomai/include</pElem>
+            <pElem>/usr/xenomai/include/mercury</pElem>
+          </incDir>
+          <commandLine>-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy -Wno-pmf-conversions -std=gnu++11</commandLine>
+          <preprocessorList>
+            <Elem>_WITH_TRACE_</Elem>
+            <Elem>__WITH_ARUCO__</Elem>
+          </preprocessorList>
+        </ccTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerOptionItem>`pkg-config --libs opencv`</linkerOptionItem>
+            <linkerLibLibItem>raspicam_cv</linkerLibLibItem>
+            <linkerLibLibItem>raspicam</linkerLibLibItem>
+          </linkerLibItems>
+          <commandLine>-Wl,--no-as-needed -lalchemy -lcopperplate /usr/xenomai/lib/xenomai/bootstrap.o -Wl,--wrap=main -Wl,--dynamic-list=/usr/xenomai/lib/dynlist.ld -L/usr/xenomai/lib -lmercury -lpthread -lrt</commandLine>
+        </linkerTool>
+      </compileType>
+      <item path="./gdbsudo.sh" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/base64/base64.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/base64/base64.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/camera.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/camera.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/commonitor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/commonitor.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/comrobot.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/comrobot.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/img.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/img.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./lib/messages.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./lib/messages.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="./main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./tasks.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="./tasks.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
