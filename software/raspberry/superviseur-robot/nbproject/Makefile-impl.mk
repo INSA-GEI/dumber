@@ -31,7 +31,7 @@ DEFAULTCONF=Debug__PC_
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=Debug__PC_ Debug__RPI_ 
+ALLCONFS=Debug__PC_ Debug__RPI_ JPO2019_RPI_ 
 
 
 # build

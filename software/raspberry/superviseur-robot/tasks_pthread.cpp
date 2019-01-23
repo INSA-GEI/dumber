@@ -15,17 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "tasks.h"
-#include <stdexcept>
+#include "tasks_pthread.h"
+#include <time.h>
+
+#ifdef __WITH_PTHREAD__
 
 // Déclaration des priorités des taches
 #define PRIORITY_TSERVER 30
 #define PRIORITY_TOPENCOMROBOT 20
 #define PRIORITY_TMOVE 10
-#define PRIORITY_TSENDTOMON 22
-#define PRIORITY_TRECEIVEFROMMON 25
+#define PRIORITY_TSENDTOMON 25
+#define PRIORITY_TRECEIVEFROMMON 22
 #define PRIORITY_TSTARTROBOT 20
-#define PRIORITY_TCAMERA 21
 
 /*
  * Some remarks:
@@ -46,89 +47,8 @@
  * 7- Good luck !
  */
 
-/**
- * @brief Initialisation des structures de l'application (tâches, mutex, 
- * semaphore, etc.)
- */
 void Tasks::Init() {
     int status;
-    int err;
-
-    /**************************************************************************************/
-    /* 	Mutex creation                                                                    */
-    /**************************************************************************************/
-    if (err = rt_mutex_create(&mutex_robotStarted, NULL)) {
-        cerr << "Error mutex create: " << strerror(-err) << endl << flush;
-        exit(EXIT_FAILURE);
-    }
-    if (err = rt_mutex_create(&mutex_move, NULL)) {
-        cerr << "Error mutex create: " << strerror(-err) << endl << flush;
-        exit(EXIT_FAILURE);
-    }
-    cout << "Mutexes created successfully" << endl << flush;
-
-    /**************************************************************************************/
-    /* 	Semaphors creation       							  */
-    /**************************************************************************************/
-    if (err = rt_sem_create(&sem_barrier, NULL, 0, S_FIFO)) {
-        cerr << "Error semaphore create: " << strerror(-err) << endl << flush;
-        exit(EXIT_FAILURE);
-    }
-    if (err = rt_sem_create(&sem_openComRobot, NULL, 0, S_FIFO)) {
-        cerr << "Error semaphore create: " << strerror(-err) << endl << flush;
-        exit(EXIT_FAILURE);
-    }
-    if (err = rt_sem_create(&sem_serverOk, NULL, 0, S_FIFO)) {
-        cerr << "Error semaphore create: " << strerror(-err) << endl << flush;
-        exit(EXIT_FAILURE);
-    }
-    if (err = rt_sem_create(&sem_startRobot, NULL, 0, S_FIFO)) {
-        cerr << "Error semaphore create: " << strerror(-err) << endl << flush;
-        exit(EXIT_FAILURE);
-    }
-    cout << "Semaphores created successfully" << endl << flush;
-
-    /**************************************************************************************/
-    /* Tasks creation                                                                     */
-    /**************************************************************************************/
-    if (err = rt_task_create(&th_server, "th_server", 0, PRIORITY_TSERVER, 0)) {
-        cerr << "Error task create: " << strerror(-err) << endl << flush;
-        exit(EXIT_FAILURE);
-    }
-    if (err = rt_task_create(&th_receiveFromMon, "th_receiveFromMon", 0, PRIORITY_TRECEIVEFROMMON, 0)) {
-        cerr << "Error task create: " << strerror(-err) << endl << flush;
-        exit(EXIT_FAILURE);
-    }
-    if (err = rt_task_create(&th_sendToMon, "th_sendToMon", 0, PRIORITY_TSENDTOMON, 0)) {
-        cerr << "Error task create: " << strerror(-err) << endl << flush;
-        exit(EXIT_FAILURE);
-    }
-    if (err = rt_task_create(&th_openComRobot, "th_openComRobot", 0, PRIORITY_TOPENCOMROBOT, 0)) {
-        cerr << "Error task create: " << strerror(-err) << endl << flush;
-        exit(EXIT_FAILURE);
-    }
-    if (err = rt_task_create(&th_startRobot, "th_startRobot", 0, PRIORITY_TSTARTROBOT, 0)) {
-        cerr << "Error task create: " << strerror(-err) << endl << flush;
-        exit(EXIT_FAILURE);
-    }
-    if (err = rt_task_create(&th_move, "th_move", 0, PRIORITY_TMOVE, 0)) {
-        cerr << "Error task create: " << strerror(-err) << endl << flush;
-        exit(EXIT_FAILURE);
-    }
-    if (err = rt_task_create(&th_camera, "th_camera", 0, PRIORITY_TCAMERA, 0)) {
-        cerr << "Error task create: " << strerror(-err) << endl << flush;
-        exit(EXIT_FAILURE);
-    }
-    cout << "Tasks created successfully" << endl << flush;
-
-    /**************************************************************************************/
-    /* Message queues creation                                                            */
-    /**************************************************************************************/
-    if ((err = rt_queue_create(&q_messageToMon, "q_messageToMon", sizeof (Message*)*50, Q_UNLIMITED, Q_FIFO)) < 0) {
-        cerr << "Error msg queue create: " << strerror(-err) << endl << flush;
-        exit(EXIT_FAILURE);
-    }
-    cout << "Queues created successfully" << endl << flush;
 
     /* Open com port with STM32 */
     cout << "Open serial com (";
@@ -151,50 +71,19 @@ void Tasks::Init() {
     };
 }
 
-/**
- * @brief Démarrage des tâches
- */
 void Tasks::Run() {
-    int err;
-
-    if (err = rt_task_start(&th_receiveFromMon, (void(*)(void*)) & Tasks::ReceiveFromMonTask, this)) {
-        cerr << "Error task start: " << strerror(-err) << endl << flush;
-        exit(EXIT_FAILURE);
-    }
-
-    if (err = rt_task_start(&th_camera, (void(*)(void*)) & Tasks::CameraTask, this)) {
-        cerr << "Error task start: " << strerror(-err) << endl << flush;
-        exit(EXIT_FAILURE);
-    }
-
-    //    if (err = rt_task_start(&th_sendToMon, (void(*)(void*)) & Tasks::SendToMonTask, this)) {
-    //        cerr << "Error task start: " << strerror(-err) << endl << flush;
-    //        exit(EXIT_FAILURE);
-    //    }
+    threadTimer = new thread((void (*)(void*)) & Tasks::TimerTask, this);
+    threadServer = new thread((void (*)(void*)) & Tasks::ServerTask, this);
 
     cout << "Tasks launched" << endl << flush;
 }
 
-/**
- * @brief Arrêt des tâches
- */
 void Tasks::Stop() {
     monitor.Close();
     robot.Close();
 }
 
-/**
- */
-void Tasks::Join() {
-    rt_sem_broadcast(&sem_barrier);
-    pause();
-}
-
-/**
- * @brief Thread handling server communication.
- */
-
-void Tasks::ReceiveFromMonTask(void *arg) {
+void Tasks::ServerTask(void *arg) {
     Message *msgRcv;
     Message *msgSend;
     bool isActive = true;
@@ -309,23 +198,21 @@ void Tasks::ReceiveFromMonTask(void *arg) {
     }
 }
 
-/**
- * @brief Thread handling periodic image capture.
- */
-void Tasks::CameraTask(void* arg) {
+void Tasks::TimerTask(void* arg) {
     struct timespec tim, tim2;
     Message *msgSend;
     int counter;
     int cntFrame = 0;
     Position pos;
     Arena arena;
+    int counter_img;
 
     tim.tv_sec = 0;
     tim.tv_nsec = 50000000; // 50ms (20fps)
 
     cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
 
-    Camera camera = Camera(sm, 20);
+    Camera camera = Camera(sm, 15);
     cout << "Try opening camera" << endl << flush;
     if (camera.Open()) cout << "Camera opened successfully" << endl << flush;
     else {
@@ -334,14 +221,79 @@ void Tasks::CameraTask(void* arg) {
         exit(0);
     }
 
+    pos.angle = 0.0;
+    pos.robotId = -1;
+    pos.center = cv::Point2f(0, 0);
+    pos.direction = cv::Point2f(0, 0);
+
+    counter_img = 0;
+
     while (1) {
-        
+        Img image = camera.Grab(); // 15fps
+        cntFrame++;
+        cout << "cnt: " << to_string(cntFrame) << endl << flush;
+
+        if (sendPosition == true) {
+            counter++;
+
+            if (counter >= 5) { // div =15
+                counter = 0;
+
+                //if (!arena.IsEmpty()) {
+                image.dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME(3));
+
+                std::list<Position> poses = image.SearchRobot(arena);
+                cout << "Nbr of pos detected: " << to_string(poses.size()) << endl << flush;
+
+                if (poses.size() > 0) {
+                    Position firstPos = poses.front();
+
+                    pos.angle = firstPos.angle;
+                    pos.robotId = firstPos.robotId;
+                    pos.center = firstPos.center;
+                    pos.direction = firstPos.direction;
+                } else {
+                    // Nothing found
+                    pos.angle = 0.0;
+                    pos.robotId = -1;
+                    pos.center = cv::Point2f(0, 0);
+                    pos.direction = cv::Point2f(0, 0);
+                }
+
+                MessagePosition *msgp = new MessagePosition(MESSAGE_CAM_POSITION, pos);
+                monitor.Write(msgp);
+                cout << "Position sent" << endl << flush;
+            }
+        }
+
+        if (sendImage == true) {
+            counter_img++;
+
+            if (counter_img >= 1) {
+                counter_img = 0;
+
+                if (showArena) {
+                    arena = image.SearchArena();
+
+                    if (!arena.IsEmpty()) image.DrawArena(arena);
+                    else cout << "Arena not found" << endl << flush;
+                }
+
+                if (sendPosition == true) {
+                    image.DrawRobot(pos);
+                }
+
+                if (!arena.IsEmpty()) image.DrawArena(arena);
+
+                MessageImg *msg = new MessageImg(MESSAGE_CAM_IMAGE, &image);
+
+                monitor.Write(msg);
+                cout << "Image sent" << endl << flush;
+            }
+        }
     }
 }
 
-/**
- * @brief Thread sending data to monitor.
- */
 void Tasks::SendToMonTask(void* arg) {
     cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
 
@@ -350,34 +302,4 @@ void Tasks::SendToMonTask(void* arg) {
     }
 }
 
-/**
- * Write a message in a given queue
- * @param queue Queue identifier
- * @param msg Message to be stored
- */
-void WriteInQueue(RT_QUEUE &queue, Message *msg) {
-    int err;
-
-    if ((err = rt_queue_send(&queue, (const void *) msg, sizeof ((const void *) msg), Q_NORMAL)) < 0) {
-        cerr << "Write in queue failed: " << strerror(-err) << endl << flush;
-        throw std::runtime_error{"Error in write in queue"};
-    }
-}
-
-/**
- * Read a message from a given queue, block if empty
- * @param queue Queue identifier
- * @return Message read
- */
-Message *ReadInQueue(RT_QUEUE &queue) {
-    int err;
-    Message *msg;
-
-    if ((err = rt_queue_read(&queue, (void*) msg, sizeof ((void*) msg), TM_INFINITE)) < 0) {
-        cerr << "Write in queue failed: " << strerror(-err) << endl << flush;
-        throw std::runtime_error{"Error in write in queue"};
-    }
-
-    return msg;
-}
-
+#endif //__WITH_PTHREAD__

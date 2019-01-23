@@ -20,7 +20,8 @@
 
 OPENCV_VERSION='3.4.2'
 
-
+mkdir opencv
+cd opencv
 # 1. KEEP UBUNTU OR DEBIAN UP TO DATE
 
 sudo apt-get -y update
@@ -78,6 +79,22 @@ mkdir build
 cd build
 # cmake -DWITH_QT=ON -DWITH_OPENGL=ON -DFORCE_VTK=ON -DWITH_TBB=ON -DWITH_GDAL=ON -DWITH_XINE=ON -DBUILD_EXAMPLES=ON -DENABLE_PRECOMPILED_HEADERS=OFF ..
 cmake -DWITH_OPENGL=ON -DFORCE_VTK=ON -DWITH_TBB=ON -DWITH_GDAL=ON -DWITH_XINE=ON -DBUILD_EXAMPLES=ON -DENABLE_PRECOMPILED_HEADERS=ON -D INSTALL_C_EXAMPLES=ON -D BUILD_JAVA=OFF -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-${OPENCV_VERSION}/modules -DBUILD_aruco=ON ..
+make -j5
+sudo make install
+sudo ldconfig
+
+# 4. Compile raspicam
+cd ~
+cd opencv
+
+wget https://sourceforge.net/projects/raspicam/files/latest/raspicam.zip
+unzip raspicam.zip
+cd raspicam-0.1.6
+
+mkdir build
+cd build
+cmake ..
+
 make -j5
 sudo make install
 sudo ldconfig

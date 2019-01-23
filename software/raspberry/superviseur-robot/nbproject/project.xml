@@ -21,6 +21,10 @@
                     <name>Debug__RPI_</name>
                     <type>1</type>
                 </confElem>
+                <confElem>
+                    <name>JPO2019_RPI_</name>
+                    <type>1</type>
+                </confElem>
             </confList>
             <formatting>
                 <project-formatting-style>false</project-formatting-style>
