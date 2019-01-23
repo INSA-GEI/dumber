@@ -4,7 +4,6 @@ cmake-build-debug/
 futur/
 CMakeFiles/
 
-Makefile
 *.cmake
 CMakeCache.txt
 
