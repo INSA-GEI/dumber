@@ -46,7 +46,7 @@ public partial class MainWindow : Gtk.Window
     /// <summary>
     /// Position used for displaying position
     /// </summary>
-    private DestijlCommandManager.Position position=new DestijlCommandManager.Position();
+    //private DestijlCommandManager.Position position=new DestijlCommandManager.Position();
 
     /// <summary>
     /// List of availble state for the application
@@ -662,6 +662,7 @@ public partial class MainWindow : Gtk.Window
     /// </summary>
     /// <param name="sender">Sender object</param>
     /// <param name="e">Event</param>
+    /// 
     protected void OnButtonAskArenaClicked(object sender, EventArgs e)
     {
         // Send command to server for arean rendering
