@@ -67,7 +67,7 @@ LDLIBSOPTIONS=`pkg-config --libs opencv` -lraspicam_cv -lraspicam
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/superviseur-robot: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/superviseur-robot ${OBJECTFILES} ${LDLIBSOPTIONS} -Wl,--no-as-needed -Wl,--dynamic-list=/usr/xenomai/lib/dynlist.ld -lpthread -lrt
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/superviseur-robot ${OBJECTFILES} ${LDLIBSOPTIONS} -Wl,--no-as-needed -lpthread -lrt
 
 ${OBJECTDIR}/lib/base64/base64.o: lib/base64/base64.cpp
 	${MKDIR} -p ${OBJECTDIR}/lib/base64
