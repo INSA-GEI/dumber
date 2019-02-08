@@ -213,7 +213,7 @@
             <pElem>./</pElem>
             <pElem>./lib</pElem>
           </incDir>
-          <commandLine>-D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -Wno-pmf-conversions -std=gnu++11</commandLine>
+          <commandLine>-D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -Wno-pmf-conversions -std=gnu++11 -pg</commandLine>
           <preprocessorList>
             <Elem>_WITH_TRACE_</Elem>
             <Elem>__WITH_ARUCO__</Elem>
@@ -226,7 +226,7 @@
             <linkerLibLibItem>raspicam_cv</linkerLibLibItem>
             <linkerLibLibItem>raspicam</linkerLibLibItem>
           </linkerLibItems>
-          <commandLine>-Wl,--no-as-needed -lpthread -lrt</commandLine>
+          <commandLine>-Wl,--no-as-needed -lpthread -lrt -pg</commandLine>
         </linkerTool>
       </compileType>
       <item path="./gdbsudo.sh" ex="false" tool="3" flavor2="0">

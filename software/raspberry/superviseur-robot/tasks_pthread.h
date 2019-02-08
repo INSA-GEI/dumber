@@ -89,7 +89,7 @@ private:
     
     int counter;
     bool flag;
-    
+    bool isActive = true;
     bool showArena=false;
     
     thread *threadServer;

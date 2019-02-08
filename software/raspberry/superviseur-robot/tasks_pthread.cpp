@@ -72,6 +72,7 @@ void Tasks::Init() {
 }
 
 void Tasks::Run() {
+    
     threadTimer = new thread((void (*)(void*)) & Tasks::TimerTask, this);
     threadServer = new thread((void (*)(void*)) & Tasks::ServerTask, this);
 
@@ -86,7 +87,6 @@ void Tasks::Stop() {
 void Tasks::ServerTask(void *arg) {
     Message *msgRcv;
     Message *msgSend;
-    bool isActive = true;
 
     cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
 
@@ -115,6 +115,8 @@ void Tasks::ServerTask(void *arg) {
         if (msgRcv->CompareID(MESSAGE_ROBOT_START_WITH_WD)) {
             msgSend = robot.Write(msgRcv);
             cout << "Start with wd answer: " << msgSend->ToString() << endl << flush;
+            
+            isActive=false;
         }
 
         if (msgRcv->CompareID(MESSAGE_ROBOT_START_WITHOUT_WD)) {
@@ -135,7 +137,7 @@ void Tasks::ServerTask(void *arg) {
             msgSend = robot.Write(msgRcv);
 
             cout << "Movement answer: " << msgSend->ToString() << endl << flush;
-
+            
             if (msgSend->CompareID(MESSAGE_ANSWER_ACK)) {
                 delete (msgSend);
                 msgSend = NULL;
@@ -228,7 +230,7 @@ void Tasks::TimerTask(void* arg) {
 
     counter_img = 0;
 
-    while (1) {
+    while (isActive) {
         Img image = camera.Grab(); // 15fps
         cntFrame++;
         cout << "cnt: " << to_string(cntFrame) << endl << flush;
