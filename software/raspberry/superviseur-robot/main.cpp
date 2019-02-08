@@ -37,13 +37,15 @@ int main(int argc, char **argv) {
     cout<<"#################################"<<endl;
 
     tasks.Init();
+    tasks.Run();
+    tasks.Join();
     
-    if (tasks.AcceptClient()) {
+    /*if (tasks.AcceptClient()) {
         cout << "Rock'n'Roll baby, client accepted!"<<endl<<flush;
         tasks.Run();
         
         tasks.Join();
-    }
+    }*/
     
     tasks.Stop();
     

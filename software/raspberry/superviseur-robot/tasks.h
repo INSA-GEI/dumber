@@ -58,32 +58,23 @@ public:
      */
     void Join();
     
-    /**
-     */
-    bool AcceptClient() {
-        return monitor.AcceptClient();
-    }
+
     
 private:
     ComMonitor monitor;
     ComRobot robot;
-    
-    bool sendImage=false;
-    bool sendPosition=false;
-    
-    int counter;
-    bool flag;
-    
-    bool showArena=false;
-    
+    int robotStarted;
+    int move = MESSAGE_ROBOT_STOP;
+        
     RT_TASK th_server;
     RT_TASK th_sendToMon;
     RT_TASK th_receiveFromMon;
     RT_TASK th_openComRobot;
     RT_TASK th_startRobot;
     RT_TASK th_move;
-    RT_TASK th_camera;
-
+    
+    RT_MUTEX mutex_monitor;
+    RT_MUTEX mutex_robot;
     RT_MUTEX mutex_robotStarted;
     RT_MUTEX mutex_move;
 
@@ -93,10 +84,6 @@ private:
     RT_SEM sem_startRobot;
 
     RT_QUEUE q_messageToMon;
-
-    int etatCommMoniteur;
-    int robotStarted;
-    char robotMove;
 
     int MSG_QUEUE_SIZE;
 
@@ -115,50 +102,39 @@ private:
      * @return Message read
      */
     Message *ReadInQueue(RT_QUEUE *queue);
-    
-    /**
-     * @brief Thread handling server communication.
-     */
-    void ReceiveFromMonTask(void *arg);
 
     /**
-     * @brief Thread handling periodic image capture.
+     * @brief Thread handling server communication with the monitor.
      */
-    void CameraTask(void *arg);
-    
+    void ServerTask(void *arg);
+     
     /**
      * @brief Thread sending data to monitor.
      */
     void SendToMonTask(void *arg);
-//    /**
-//     * \brief       Thread handling server communication.
-//     */
-//    void f_server(void *arg);
-//
-//    /**
-//     * \brief       Thread handling communication to monitor.
-//     */
-//    void f_sendToMon(void *arg);
-//
-//    /**
-//     * \brief       Thread handling communication from monitor.
-//     */
-//    void f_receiveFromMon(void *arg);
-//
-//    /**
-//     * \brief       Thread handling opening of robot communication.
-//     */
-//    void f_openComRobot(void * arg);
-//
-//    /**
-//     * \brief       Thread handling robot mouvements.
-//     */
-//    void f_move(void *arg);
-//
-//    /**
-//     * \brief       Thread handling robot activation.
-//     */
-//    void f_startRobot(void *arg);
+        
+    /**
+     * @brief Thread receiving data from monitor.
+     */
+    void ReceiveFromMonTask(void *arg);
+    
+    /**
+     * @brief Thread opening communication with the robot.
+     */
+    void OpenComRobot(void *arg);
+
+    
+    /**
+     * @brief Thread starting the communication with the robot.
+     */
+    void StartRobotTask(void *arg);
+    
+        
+    /**
+     * @brief Thread handling control of the robot.
+     */
+    void MoveTask(void *arg);
+
 };
 
 #endif // __TASKS_H__ 

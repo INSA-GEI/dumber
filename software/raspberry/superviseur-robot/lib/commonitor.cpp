@@ -178,10 +178,16 @@ Message *ComMonitor::Read() {
     if (clientID > 0) {
         while (!endReception) {
             if ((length = recv(clientID, (void*) &data, 1, MSG_WAITALL)) > 0) {
+                //cout << "length = " << to_string(length) << endl << flush;
                 if (data != '\n') {
                     s += data;
                 } else endReception = true;
             }
+            else {
+                endReception = true;
+            }
+            
+            //cout << "2- length = " << to_string(length) << endl << flush;
         }
 
         if (length <= 0) msg = new Message(MESSAGE_MONITOR_LOST);
