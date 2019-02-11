@@ -1,0 +1,224 @@
+\documentclass[11pt]{paper}
+\usepackage[frenchb]{babel}
+
+\usepackage[T1]{fontenc}
+
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amstext}
+\usepackage{amsmath}
+\usepackage{a4wide,color}
+\usepackage[utf8]{inputenc}
+\usepackage{xspace}
+\usepackage{anysize}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{fancybox}
+\usepackage{fancyhdr}
+\usepackage{bbding}
+
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+
+\usepackage{threeparttable}
+\usepackage{color}
+\usepackage{float}
+
+\usepackage[toc,page]{appendix} 
+\usepackage{lscape}
+\usepackage{xspace}
+
+\usepackage{placeins}
+
+\usepackage{listingsutf8}
+
+\usepackage{todonotes}
+
+\lstset{% general command to set parameter(s)
+	basicstyle=\footnotesize, % print whole listing small
+	keywordstyle=\color{magenta}\bfseries, % underlined bold black keywords
+	identifierstyle=, % nothing happens
+	commentstyle=\color{black}, % white comments
+	stringstyle=\ttfamily, % typewriter type for strings
+	showstringspaces=false % no special string spaces
+} 
+
+\lstdefinelanguage{aald}
+	{morekeywords={system, implementation},
+	sensitive=false,
+	morecomment=[l]{//},
+	morecomment=[s]{/*}{*/},
+	morestring=[b]",
+}
+
+\usepackage[colorlinks=true]{hyperref}
+
+\usepackage[normalem]{ulem}
+\usepackage{color}
+
+\definecolor{Fond}{gray}{0.9}
+
+\renewcommand{\floatpagefraction}{.99}
+\renewcommand{\textfraction}{.01}
+\newcommand{\modif}[1]{\textcolor{red}{\uline{#1}}}
+
+\newcounter{cptreq}
+\newcommand{\req}[1]{
+\stepcounter{cptreq}
+	\noindent\fcolorbox{black}{Fond}{%                couleur du texte, couleur du fond
+		\begin{minipage}[t]{\textwidth}
+		{\bf Fonctionnalité \thecptreq}\, :  #1
+		\end{minipage}
+	}
+}
+
+\newcommand{\raspi}{Raspberry Pi\xspace}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[RE,RO]{\thepage}
+\fancyhead[LE]{}
+\fancyhead[LO]{Programmation et conception de systémes temps réel -- 4éme année AE/IR}
+\fancyfoot[LO]{INSA Toulouse — P.-E. Hladik}
+\fancypagestyle{plain}{%
+  \fancyhf{} % get rid of headers
+  \renewcommand{\headrulewidth}{0pt} % and the line
+}
+
+\newenvironment{maliste}%
+{ \begin{list}%
+	{\ArrowBoldRightStrobe}%
+	{\setlength{\labelwidth}{30pt}%
+	 \setlength{\leftmargin}{35pt}%
+	 \setlength{\itemsep}{\parsep}}}%
+{ \end{list} }
+
+\renewcommand{\appendixtocname}{Annexes} 
+\renewcommand{\appendixpagename}{Annexes}
+
+
+\title{{\Huge Projet De Stijl 2.0}
+{\small : Plateforme pour robots mobiles}\\
+{\scriptsize Programmation et conception de systémes temps réel -- 4éme année AE/IR}\\
+{\scriptsize Institut National des Sciences Appliquées de Toulouse}\\
+---\\
+Guide des outils de développement \\
+{\large Version 1.0.1 (\today)}\\
+{\scriptsize Référent pédagogique : P.-E. Hladik (\texttt{pehladik@insa-toulouse.fr})}\\
+{\scriptsize Référents plateforme : S. Di Mercurio (\texttt{dimercur@insa-toulouse.fr})}\\
+---
+}
+
+
+
+\begin{document}
+
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%
+\section{Code initial du projet}
+\label{sec:git}
+%%%%%%%%%%%%%%%%%%%%
+
+Le code du projet est disponible sur un dépôt git hébergé sur GitHub. Pour le récupérer, placer vous le répertoire cible et exécuter la commande\\ \indent\indent {\tt git clone https://github.com/INSA-GEI/dumber.git}\\
+
+Tout le code relatif au projet est disponible, cependant vous n'aurez besoin que des codes présents dans les répertoires :
+\begin{itemize}
+	\item {\tt ./dumber/software/raspberry/superviseur-robot} : ce répertoire contient un projet Netbeans avec l'ensemble du code source pour le projet initial,
+	\item {\tt ./dumber/software/monitor/monitor} : ce répertoire contient un projet Mono contenant l'ensemble du code source pour le moniteur.\\
+\end{itemize}
+
+Le répertoire {\tt superviseur-robot} est constitué des fichiers suivants :
+\begin{itemize}
+\item {\tt /destijl\_init/main.cpp} qui contient le main de l'application et lance la création des objets et leur exécution,
+\item {\tt /destijl\_init/src/tasks.h} qui contient l'entête des différentes fonctions,
+\item {\tt /destijl\_init/src/tasks.cpp} qui contient l'implémentation des fonctions de création des objets (tâches, sémaphores, mutex, etc.) ainsi que les fonction de traitement.
+\end{itemize}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%
+\section{Compilation d'une application distante}
+%%%%%%%%%%%%%%%%%%%%
+
+L'application étant sur une \raspi, il vous faut compiler le programme pour cette architecture. Nous vous proposons d'utiliser Netbeans pour écrire votre code et faire la compilation distante. Cela signifie que votre code est stocké sur votre compte INSA, que vous éditer le code sur la machine de TP, que ce code est ensuite automatiquement chargé sur la \raspi puis compilé (Netbeans permet de faire tout cela).
+
+Pour commencer lancer Netbeans et ouvrez le projet {\tt superviseur-robot}.
+
+Avant de compiler, il vous faut configurer la cible sur laquelle la compilation va se faire:
+\begin{enumerate}
+\item Cliquez droit sur le projet et choisir {\tt Properties},
+\item Allez dans l'onglet {\tt Build},
+\item Choisir {\tt ...} pour {\tt Build Host},
+\item Cliquez sur {\tt Add},
+\item Remplir {\tt Hostname} avec {\tt 10.105.1.x} l'adresse de la \raspi,
+\item Cliquez {\tt Next},
+\item Saisir {\tt pi} pour le {\tt login},
+\item Cliquez {\tt Next},
+\item Attendre l'ouverture de la communication,
+\item Saisir {\tt insa} comme mot de passe,
+\item Sélectionner {\tt  SFTP} pour {\tt Access project files via},
+\item Cliquez {\tt Finish},
+\item Cliquez {\tt OK},
+\item Cliquez {\tt Apply},
+\item Cliquez {\tt OK}.
+\end{enumerate}
+
+Pour compiler, il suffit ensuite de cliquer sur l'icône en forme de marteau. Vous pourrez voir dans le terminal les étapes de compilation qui commence par le transfert des fichiers suivi de la compilation proprement dite.
+
+{\bf Remarque} : la première compilation est un peu longue, mais devrait ensuite se fluidifier avec la compilation incrémentale.
+
+
+%%%%%%%%%%%%%%%%%%%%
+\section{Exécution du superviseur}
+\label{sec:utilisation}
+%%%%%%%%%%%%%%%%%%%%
+
+Pour exécuter l'application sur le superviseur, il faut après avoir mis en place un terminal distant (voir ci-dessous) puis démarrer l'exécution avec la commande {\tt sudo ./path/app} où {\tt path} est le chemin du répertoire où se trouve l'application et {\tt app} est le nom de votre application. Attention les droits {\tt sudo} sont nécessaires pour des questions d'accès à certains services Xenomai de gestion de la mémoire.
+
+Si vous utilisez Netbeans, le répertoire dans lequel est compilée l'application se trouve dans l'arboressence commençant par {\tt .netbeans} (attention au "." au début). Il faut descendre dans cette arboressence jusqu'à une bifurcation, puis choisir le répertoire {\tt dist} et aller jusqu'au bout. L'application se trouve au bout de cette branche.
+
+
+%%%%%%%%%%%%%%%%%%%%
+\section{Mise en place d'un terminal distant avec la \raspi}
+\label{sec:ssh}
+%%%%%%%%%%%%%%%%%%%%
+
+Pour se connecter à la \raspi, vous aurez besoin de créer un accès via ssh. Pour cela, depuis un PC d'une salle informatique utilisez la commande :\\ \indent\indent{\tt ssh pi@10.105.1.x}\\
+avec {\tt x} le numéro sur le boitier de la \raspi.
+
+Le mot de passe est : insa.
+
+
+%%%%%%%%%%%%%%%%%%%%
+\section{Exécution du moniteur}
+\label{sec:utilisation}
+%%%%%%%%%%%%%%%%%%%%
+
+Pour exécuter le moniteur, il suffit depuis votre PC de travail de se placer dans le répertoire {\tt ./dumber/software/monitor/monitor} et de lancer {\tt ./monitor}.
+
+{\bf Attention} : avant de lancer la première fois l'application, il vous faut ouvrir l'environnement de développement MonoDevelop et ouvrir le projet {\tt ./dumber/software/monitor/monitor}  et l'exécuter (cela recompile le projet et permet de faire les liens avec les librairies de votre PC). Cette étape ne sera plus à faire par la suite.
+
+
+%%%%%%%%%%%%%%%%%%%%
+\section{Comprendre la structuration du code}
+\label{sec:code}
+%%%%%%%%%%%%%%%%%%%%
+ L'ensemble du code du projet initial est contenu dans le répertorie {\tt superviseur-robot}. Les bibliothèques de traitement sont disponibles dans le repertoire {\tt lib}. Vous n'aurez pas à modifier ces bibliothèques, par contre vous devrez les utiliser. La documentation est directement écrite dans le code source.
+ 
+ Les seuls fichiers que vous allez avoir à modifier sont les fichiers {\tt tasks.h} et {\tt tasks.cpp}. La classe {\tt Tasks} a pour attributs privés l'ensemble des structures constituant l'application (tâches, mutex, sémarphores, ressources, etc.). Les fonctions de traitement associées aux tâches sont déclarées comme des méthodes privées de {\tt Tasks}.
+ 
+ La classe {\tt Tasks} propose quatre méthodes publics :
+ \begin{itemize}
+ 	\item {\tt Init()} qui crée les structures de l'application,
+	\item {\tt Run()} qui lance les tâches,
+	\item {\tt Stop()} qui termine les tâches,
+	\item {\tt Join()} qui suspend l'exécution du {\tt main}.\\
+ \end{itemize}
+
+Pour ajoutez des structures à l'application, il suffit de les déclarer dans le fichier {\tt tasks.h} puis de s'assurer qu'elles sont bien instanciées dans les méthodes adéquates de {\tt tasks.cpp}. Pour une tâche, il faut en plus déclarer une nouvelle méthode privée dans {tasks.h} et fournir son implémentation dans {tasks.cpp}. Cette nouvelle méthode sera le point d'entrée de la tâche.
+
+Toute la documentation de Xenomai se trouve en ligne (attention c'est Xenomai 3) et nous utilisons l'\href{https://xenomai.org/documentation/xenomai-3/html/xeno3prm/group__alchemy.html}{API alchemy}.
+
+\end{document}

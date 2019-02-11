@@ -1,8 +1,10 @@
 # Dumber
 
-## Branche invalide :
-La branche master ne contient rien. Vous devez selectionner la branche stable avant de pouvoir commencer à utiliser le depot:
-	git checkout stable
+Depot du projet de temps reel 4eme année au departement GEI de l'INSA Toulouse.
 
-Vous pouvez aussi selectionner la branche dev pour avoir les derniers developpements (instable)
-	git checkout dev
+## Repertoires
+- hardware : contient les plans pour la partie mecanique du robot et de son chargeur, ainsi que les plans de conception des PCB du robot, du chargeur, de l'adaptateur Xbee pour la raspberry  et les plans des CAP du robot
+- software: rassemble les parties logicielles du robot, du chargeur, les bibliotheques et superviseur coté raspberry et l'interface Web
+- doc: contient les sujets de TD et TP
+- aruco_markers: Script de generation des tags (aruco) utilisés sur les robots
+

@@ -1,0 +1,142 @@
+\documentclass[11pt]{paper}
+\usepackage[frenchb]{babel}
+
+\usepackage[T1]{fontenc}
+
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amstext}
+\usepackage{amsmath}
+\usepackage{a4wide,color}
+\usepackage[utf8]{inputenc}
+\usepackage{xspace}
+\usepackage{anysize}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{fancybox}
+\usepackage{fancyhdr}
+\usepackage{bbding}
+
+\usepackage{threeparttable}
+\usepackage{color}
+\usepackage{float}
+
+\usepackage[toc,page]{appendix} 
+\usepackage{lscape}
+
+\usepackage{placeins}
+
+\usepackage{listingsutf8}
+
+\usepackage{todonotes}
+
+\lstset{% general command to set parameter(s)
+	basicstyle=\footnotesize, % print whole listing small
+	keywordstyle=\color{magenta}\bfseries, % underlined bold black keywords
+	identifierstyle=, % nothing happens
+	commentstyle=\color{black}, % white comments
+	stringstyle=\ttfamily, % typewriter type for strings
+	showstringspaces=false % no special string spaces
+} 
+
+\lstdefinelanguage{aald}
+	{morekeywords={system, implementation},
+	sensitive=false,
+	morecomment=[l]{//},
+	morecomment=[s]{/*}{*/},
+	morestring=[b]",
+}
+
+\usepackage[colorlinks=true]{hyperref}
+
+\usepackage[normalem]{ulem}
+\usepackage{color}
+
+\definecolor{Fond}{gray}{0.9}
+
+\renewcommand{\floatpagefraction}{.99}
+\renewcommand{\textfraction}{.01}
+\newcommand{\modif}[1]{\textcolor{red}{\uline{#1}}}
+
+\newcounter{cptreq}
+\newcommand{\req}[1]{
+\stepcounter{cptreq}
+	\noindent\fcolorbox{black}{Fond}{%                couleur du texte, couleur du fond
+		\begin{minipage}[t]{\textwidth}
+		{\bf Fonctionnalité \thecptreq}\, :  #1
+		\end{minipage}
+	}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[RE,RO]{\thepage}
+\fancyhead[LE]{}
+\fancyhead[LO]{Programmation et conception de systémes temps réel -- 4éme année AE/IR}
+\fancyfoot[LO]{INSA Toulouse — P.-E. Hladik}
+\fancypagestyle{plain}{%
+  \fancyhf{} % get rid of headers
+  \renewcommand{\headrulewidth}{0pt} % and the line
+}
+
+\newenvironment{maliste}%
+{ \begin{list}%
+	{\ArrowBoldRightStrobe}%
+	{\setlength{\labelwidth}{30pt}%
+	 \setlength{\leftmargin}{35pt}%
+	 \setlength{\itemsep}{\parsep}}}%
+{ \end{list} }
+
+\renewcommand{\appendixtocname}{Annexes} 
+\renewcommand{\appendixpagename}{Annexes}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{{\Huge Projet De Stijl 2.0}
+{\small : Plateforme pour robots mobiles}\\
+{\scriptsize Programmation et conception de systémes temps réel -- 4éme année AE/IR}\\
+{\scriptsize Institut National des Sciences Appliquées de Toulouse}\\
+---\\
+Cahier des charges fonctionnel \\
+{\large Version 3.0.1 (\today)}\\
+{\scriptsize Référent pédagogique : P.-E. Hladik (\texttt{pehladik@insa-toulouse.fr})}\\
+{\scriptsize Référents plateforme : S. Di Mercurio (\texttt{dimercur@insa-toulouse.fr})}\\
+---
+}
+
+
+\begin{document}
+\maketitle
+
+%\tableofcontents
+%\newpage
+
+\section*{Travail demandé}
+
+\begin{enumerate}
+	\item Le travail sera réalisé dans le cadre d'un groupe de trois ou quatre étudiants sur deux séances de TD et cinq séances de TP.
+	\item Il est attendu une conception complète lors lors de la 3e séance de TP. La conception sera sous forme de brouillon, mais doit couvrir l'ensemble des exigences.
+	\item Le projet fera l'objet d'un rapport évalué ainsi qu'une démonstration (si l'emploi du temps le permet). Un squelette pour le rapport est disponible sur la page moodle de l'enseignement.
+	\item L'évaluation a pour but de juger de vos compétences pour rédiger un compte rendu, réaliser la conception d'une application temps réel et programmer sur un système temps réel, mais aussi sur vos connaissances plus générale des systèmes temps réel.
+	\item Le code réalisé devra être rendu sous forme d'archive ne comprenant que les codes sources modifiés.
+	\item Le rendu du rapport et du code se fera sous la forme d'une archive à envoyer à votre encadrant de TP.
+	\item La démonstration aura lieu la semaine qui suit la dernière séance de TP.
+\end{enumerate}
+
+\section*{Ressources indispensables}
+\begin{enumerate}
+	\item Page Moodle : \href{https://moodle.insa-toulouse.fr/course/view.php?id=235}{Programmation et conception sur exécutif temps réel}
+	\item Dépôt GEI-INSA sur GitHub : \href{https://github.com/INSA-GEI/dumber/}{dumber}
+\end{enumerate}
+
+\newpage
+\input{src/plateforme}
+
+\newpage
+\input{src/besoins}
+
+\newpage
+\input{src/annexes}
+
+\end{document}

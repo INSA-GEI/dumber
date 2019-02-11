@@ -1,0 +1,17 @@
+build/
+src.sav/
+cmake-build-debug/
+futur/
+CMakeFiles/
+
+*.cmake
+CMakeCache.txt
+
+docs/
+doc/
+
+workspace/
+dist/
+not_for_students/
+
+
