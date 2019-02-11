@@ -93,7 +93,7 @@
 {\scriptsize Institut National des Sciences Appliquées de Toulouse}\\
 ---\\
 Dossier de conception \\
-{\large Version 2.0.$\beta$ (\today)}\\
+{\large Version 2.0.1 (\today)}\\
 {\scriptsize Référent pédagogique : P.-E. Hladik (\texttt{pehladik@insa-toulouse.fr})}\\
 ---
 }
@@ -248,19 +248,7 @@ Jusqu'ici tout a été réalisé au brouillon par le concepteur, il faut donc ma
 Ensuite, pour chacun des threads, un diagramme d'activité UML est utilisé pour décrire son comportement. Les diagrammes ont été produits avec \href{https://www.planttext.com}{https://www.planttext.com} et les codes sources sont disponibles en annexe (disponibles numériquement sur la page moodle).
 
 \subsection{Thread th\_server}
-%@startuml
-%skinparam monochrome true
-%start
-%:err = run_nodejs();
-%if (err) then (failed)
-%    :print("Failed to start nodejs");
-%stop
-%else (succeed)
-%    :open_server();
-%    :serverOk!;
-%    stop
-%endif
-%@enduml
+
  \begin{figure}[htbp]
 \begin{center}
 \includegraphics[scale=0.4]{figures_pdf/activity/th_server}
@@ -270,16 +258,7 @@ Ensuite, pour chacun des threads, un diagramme d'activité UML est utilisé pour
 \FloatBarrier
 
 \subsection{Thread th\_sendToMon}
-%@startuml
-%skinparam monochrome true
-%start
-%:serverOK?;
-%while ()
-%  :messageToMon?header,data;
-%  :send_message_to_monitor(header,data);
-%endwhile
-%stop
-%@enduml
+
  \begin{figure}[htbp]
 \begin{center}
 \includegraphics[scale=0.4]{figures_pdf/activity/th_sendToMon}
@@ -290,29 +269,7 @@ Ensuite, pour chacun des threads, un diagramme d'activité UML est utilisé pour
 
 
 \subsection{Thread th\_receiveFromMon}
-%@startuml
-%skinparam monochrome true
-%start
-%:serverOk?;
-%while ()
-%  :receive_message_from_monitor(header,data);
-%  if (header) then (HEADER_MTS_COM_DMB)
-%    if (data) then (OPEN_COM_DMB)
-%    :openComRobot!;
-%    endif
-%    else (HEADER_MTS_DMB_ORDER)
-%    if (data) then (DMB_START_WITHOUT_WD)
-%    :startRobot!;
-%    else (DMB_GO_FORWARD || DMB_GO_BACK 
-%    || DMB_GO_LEFT || DMB_GO_RIGHT 
-%    || DMB_STOP_MOVE)
-%    :move = data;
-%    endif
-%  endif
-%endwhile
-%stop
-%@enduml
-%
+
  \begin{figure}[htbp]
 \begin{center}
 \includegraphics[scale=0.4]{figures_pdf/activity/th_receiveFromMon}
@@ -322,19 +279,7 @@ Ensuite, pour chacun des threads, un diagramme d'activité UML est utilisé pour
 \FloatBarrier
 
 \subsection{Thread th\_openComRobot}
-%@startuml
-%skinparam monochrome true
-%start
-%while ()
-%  :openComRobot?;
-%  :err = open_communication_robot();
-%  if (err) then (robot_ok)
-%  :messageToMon!ACK;
-%  else
-%  :messageToMon!NAC;
-%  endif
-%endwhile
-%stop
+
  \begin{figure}[htbp]
 \begin{center}
 \includegraphics[scale=0.4]{figures_pdf/activity/th_openComRobot}
@@ -343,23 +288,8 @@ Ensuite, pour chacun des threads, un diagramme d'activité UML est utilisé pour
 \end{figure}
 \FloatBarrier
 
-\subsection{Thread th\_openStartRobot}
-%@startuml
-%skinparam monochrome true
-%start
-%while ()
-%  :startRobot?;
-%  :err = send_command_robot(START_WITHOUT_WD);
-%  if (err) then (robot_ok)
-%  :messageToMon!ACK;
-%  :robotStarted = true;
-%  else
-%  :messageToMon!NAC;
-%  endif
-%endwhile
-%stop
-%@enduml
-%
+\subsection{Thread th\_startRobot}
+
  \begin{figure}[htbp]
 \begin{center}
 \includegraphics[scale=0.4]{figures_pdf/activity/th_startRobot}
@@ -369,18 +299,7 @@ Ensuite, pour chacun des threads, un diagramme d'activité UML est utilisé pour
 \FloatBarrier
 
 \subsection{Thread th\_move}
-%@startuml
-%skinparam monochrome true
-%start
-%:start_period(100 ms);
-%while ()
-%  :wait_next_period();
-%  if (robotStarted) then (true)
-%  :send_command_robot(move);
-%  endif
-%endwhile
-%stop
-%@enduml
+
  \begin{figure}[htbp]
 \begin{center}
 \includegraphics[scale=0.4]{figures_pdf/activity/th_move}
@@ -825,10 +744,9 @@ Les {\em event} et {\em event data ports} ont par défaut une file associée ave
 @startuml
 skinparam monochrome true
 start
-:monitor = new ComMonitor()
-:err = monitor.Open();
-if (err) then (failed)
-    :print("Failed to start server");
+:status = monitor.Open();
+if (status) then (failed)
+    :print("Unable to start server");
 stop
 else (succeed)
     :monitor.AcceptClient();
@@ -862,13 +780,25 @@ skinparam monochrome true
 start
 :serverOk?;
 while ()
-  :msg = monitor.Read();
-  if (msg.GetId()) then (MESSAGE_ROBOT_COM_OPEN)
-    :openComRobot!;
-  else (MESSAGE_ROBOT_GO_FORWARD || MESSAGE_ROBOT_GO_BACKWARD 
-    || MESSAGE_ROBOT_GO_LEFT || MESSAGE_ROBOT_GO_RIGHT 
-    || MESSAGE_ROBOT_STOP)
-    :move = msg.GetId();
+  :msgRcv = monitor.Read();
+  if (msgRcv.CompareID(MESSAGE_MONITOR_LOST)) then (true)
+    stop
+  else (false)
+    if (msgRcv.CompareID(MESSAGE_ROBOT_COM_OPEN)) then (true)
+      :openComRobot!;
+        else (false)
+        if (msgRcv.CompareID(MESSAGE_ROBOT_START_WITHOUT_WD)) then (true)
+            :startRobot!;
+        else (false)
+            if (msgRcv.CompareID(MESSAGE_ROBOT_GO_FORWARD
+                || msgRcv.CompareID(MESSAGE_ROBOT_GO_BACKWARD 
+                || msgRcv.CompareID(MESSAGE_ROBOT_GO_LEFT
+                || msgRcv.CompareID(MESSAGE_ROBOT_GO_RIGHT
+                || msgRcv.CompareID(MESSAGE_ROBOT_STOP)) then (true)
+                :move = msg.GetId();
+            endif
+        endif
+    endif
   endif
 endwhile
 stop
@@ -885,14 +815,12 @@ start
 while ()
   :openComRobot?;
   :err = robot.Open();
-  : msg = new Message();
   if (err) then (robot_ok)
-    :msg.SetId(MESSAGE_ANSWER_ACK);
-    :messageToMon!msg;
+    :msgSend = new Message(MESSAGE_ANSWER_ACK);
   else
-    :msg.SetId(MESSAGE_ANSWER_NACK);
-    :messageToMon!msg;
+    :msgSend = new Message(MESSAGE_ANSWER_NACK);
   endif
+  :messageToMon!msgSend;
 endwhile
 stop
 @enduml
@@ -908,15 +836,10 @@ skinparam monochrome true
 start
 while ()
   :startRobot?;
-  :err = robot.Write(new Message(MESSAGE_ROBOT_START_WITH_WD));
-  : msg = new Message();
-  if (err) then (robot_ok)
-    :msg.SetId(MESSAGE_ANSWER_ACK);
-    :messageToMon!msg;
-  :robotStarted = true;
-  else
-    :msg.SetId(MESSAGE_ANSWER_NACK);
-    :messageToMon!msg;
+  :msgSend = robot.Write(new Message(MESSAGE_ROBOT_START_WITH_WD));
+  :messageToMon!msgSend;
+  if (msgSend->getId()) then (MESSAGE_ANSWER_ACK)
+    :robotStarted = true;
   endif
 endwhile
 stop

@@ -335,7 +335,7 @@ void Tasks::MoveTask(void *arg) {
     cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
     // Synchronization barrier (waiting that all tasks are starting)
     rt_sem_p(&sem_barrier, TM_INFINITE);
-    rt_task_set_periodic(NULL, TM_NOW, 1000000000);
+    rt_task_set_periodic(NULL, TM_NOW, 100000000);
 
     while (1) {
         rt_task_wait_period(NULL);
