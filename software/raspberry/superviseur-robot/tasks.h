@@ -39,33 +39,37 @@ using namespace std;
 class Tasks {
 public:
     /**
-     * @brief Initialisation des structures de l'application (tâches, mutex, 
-     * semaphore, etc.)
+     * @brief Initializes main structures (semaphores, tasks, mutex, etc.)
      */
     void Init();
 
     /**
-     * @brief Démarrage des tâches
+     * @brief Starts tasks
      */
     void Run();
 
     /**
-     * @brief Arrêt des tâches
+     * @brief Stops tasks
      */
     void Stop();
     
     /**
+     * @brief Suspends main thread
      */
     void Join();
     
-
-    
 private:
+    /**********************************************************************/
+    /* Shared data                                                        */
+    /**********************************************************************/
     ComMonitor monitor;
     ComRobot robot;
     int robotStarted;
     int move = MESSAGE_ROBOT_STOP;
-        
+    
+    /**********************************************************************/
+    /* Tasks                                                              */
+    /**********************************************************************/
     RT_TASK th_server;
     RT_TASK th_sendToMon;
     RT_TASK th_receiveFromMon;
@@ -73,36 +77,31 @@ private:
     RT_TASK th_startRobot;
     RT_TASK th_move;
     
+    /**********************************************************************/
+    /* Mutex                                                              */
+    /**********************************************************************/
     RT_MUTEX mutex_monitor;
     RT_MUTEX mutex_robot;
     RT_MUTEX mutex_robotStarted;
     RT_MUTEX mutex_move;
 
+    /**********************************************************************/
+    /* Semaphores                                                         */
+    /**********************************************************************/
     RT_SEM sem_barrier;
     RT_SEM sem_openComRobot;
     RT_SEM sem_serverOk;
     RT_SEM sem_startRobot;
 
-    RT_QUEUE q_messageToMon;
-
+    /**********************************************************************/
+    /* Message queues                                                     */
+    /**********************************************************************/
     int MSG_QUEUE_SIZE;
-
-    char mode_start;
+    RT_QUEUE q_messageToMon;
     
-    /**
-     * Write a message in a given queue
-     * @param queue Queue identifier
-     * @param msg Message to be stored
-     */
-    void WriteInQueue(RT_QUEUE *queue, Message *msg);
-
-    /**
-     * Read a message from a given queue, block if empty
-     * @param queue Queue identifier
-     * @return Message read
-     */
-    Message *ReadInQueue(RT_QUEUE *queue);
-
+    /**********************************************************************/
+    /* Tasks' functions                                                   */
+    /**********************************************************************/
     /**
      * @brief Thread handling server communication with the monitor.
      */
@@ -123,17 +122,32 @@ private:
      */
     void OpenComRobot(void *arg);
 
-    
     /**
      * @brief Thread starting the communication with the robot.
      */
     void StartRobotTask(void *arg);
     
-        
     /**
      * @brief Thread handling control of the robot.
      */
     void MoveTask(void *arg);
+    
+    /**********************************************************************/
+    /* Queue services                                                     */
+    /**********************************************************************/
+    /**
+     * Write a message in a given queue
+     * @param queue Queue identifier
+     * @param msg Message to be stored
+     */
+    void WriteInQueue(RT_QUEUE *queue, Message *msg);
+    
+    /**
+     * Read a message from a given queue, block if empty
+     * @param queue Queue identifier
+     * @return Message read
+     */
+    Message *ReadInQueue(RT_QUEUE *queue);
 
 };
 

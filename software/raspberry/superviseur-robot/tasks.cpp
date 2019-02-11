@@ -147,18 +147,18 @@ void Tasks::Run() {
         cerr << "Error task start: " << strerror(-err) << endl << flush;
         exit(EXIT_FAILURE);
     }
-    /**/if (err = rt_task_start(&th_sendToMon, (void(*)(void*)) & Tasks::SendToMonTask, this)) {
+    if (err = rt_task_start(&th_sendToMon, (void(*)(void*)) & Tasks::SendToMonTask, this)) {
         cerr << "Error task start: " << strerror(-err) << endl << flush;
         exit(EXIT_FAILURE);
-    }/**/
-    /**/if (err = rt_task_start(&th_receiveFromMon, (void(*)(void*)) & Tasks::ReceiveFromMonTask, this)) {
+    }
+    if (err = rt_task_start(&th_receiveFromMon, (void(*)(void*)) & Tasks::ReceiveFromMonTask, this)) {
         cerr << "Error task start: " << strerror(-err) << endl << flush;
         exit(EXIT_FAILURE);
-    }/**/
-    /**/if (err = rt_task_start(&th_openComRobot, (void(*)(void*)) & Tasks::OpenComRobot, this)) {
+    }
+    if (err = rt_task_start(&th_openComRobot, (void(*)(void*)) & Tasks::OpenComRobot, this)) {
         cerr << "Error task start: " << strerror(-err) << endl << flush;
         exit(EXIT_FAILURE);
-    }/**/
+    }
     if (err = rt_task_start(&th_startRobot, (void(*)(void*)) & Tasks::StartRobotTask, this)) {
         cerr << "Error task start: " << strerror(-err) << endl << flush;
         exit(EXIT_FAILURE);
@@ -191,12 +191,17 @@ void Tasks::Join() {
  * @brief Thread handling server communication with the monitor.
  */
 void Tasks::ServerTask(void *arg) {
+    int status;
+    
     cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
     // Synchronization barrier (waiting that all tasks are started)
     rt_sem_p(&sem_barrier, TM_INFINITE);
 
+    /**************************************************************************************/
+    /* The task server starts here                                                        */
+    /**************************************************************************************/
     rt_mutex_acquire(&mutex_monitor, TM_INFINITE);
-    int status = monitor.Open(SERVER_PORT);
+    status = monitor.Open(SERVER_PORT);
     rt_mutex_release(&mutex_monitor);
 
     cout << "Open server on port " << (SERVER_PORT) << " (" << status << ")" << endl;
@@ -213,18 +218,23 @@ void Tasks::ServerTask(void *arg) {
  * @brief Thread sending data to monitor.
  */
 void Tasks::SendToMonTask(void* arg) {
+    Message *msg;
+    
     cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
     // Synchronization barrier (waiting that all tasks are starting)
     rt_sem_p(&sem_barrier, TM_INFINITE);
 
+    /**************************************************************************************/
+    /* The task sendToMon starts here                                                     */
+    /**************************************************************************************/
     rt_sem_p(&sem_serverOk, TM_INFINITE);
 
     while (1) {
         cout << "wait msg to send" << endl << flush;
-        Message *msg = ReadInQueue(&q_messageToMon);
+        msg = ReadInQueue(&q_messageToMon);
         cout << "Send msg to mon: " << msg->ToString() << endl << flush;
         rt_mutex_acquire(&mutex_monitor, TM_INFINITE);
-        monitor.Write(msg);
+        monitor.Write(msg); // The message is deleted with the Write
         rt_mutex_release(&mutex_monitor);
     }
 }
@@ -233,15 +243,19 @@ void Tasks::SendToMonTask(void* arg) {
  * @brief Thread receiving data from monitor.
  */
 void Tasks::ReceiveFromMonTask(void *arg) {
+    Message *msgRcv;
+    
     cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
     // Synchronization barrier (waiting that all tasks are starting)
     rt_sem_p(&sem_barrier, TM_INFINITE);
-
+    
+    /**************************************************************************************/
+    /* The task receiveFromMon starts here                                                */
+    /**************************************************************************************/
     rt_sem_p(&sem_serverOk, TM_INFINITE);
     cout << "Received message from monitor activated" << endl << flush;
 
     while (1) {
-        Message *msgRcv;
         msgRcv = monitor.Read();
         cout << "Rcv <= " << msgRcv->ToString() << endl << flush;
 
@@ -262,7 +276,7 @@ void Tasks::ReceiveFromMonTask(void *arg) {
             move = msgRcv->GetID();
             rt_mutex_release(&mutex_move);
         }
-        delete msgRcv; // mus be deleted manually, no consumer
+        delete(msgRcv); // mus be deleted manually, no consumer
     }
 }
 
@@ -276,7 +290,10 @@ void Tasks::OpenComRobot(void *arg) {
     cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
     // Synchronization barrier (waiting that all tasks are starting)
     rt_sem_p(&sem_barrier, TM_INFINITE);
-
+    
+    /**************************************************************************************/
+    /* The task openComRobot starts here                                                  */
+    /**************************************************************************************/
     while (1) {
         rt_sem_p(&sem_openComRobot, TM_INFINITE);
         cout << "Open serial com (";
@@ -292,7 +309,7 @@ void Tasks::OpenComRobot(void *arg) {
         } else {
             msgSend = new Message(MESSAGE_ANSWER_ACK);
         }
-        WriteInQueue(&q_messageToMon, msgSend);
+        WriteInQueue(&q_messageToMon, msgSend); // msgSend will be deleted by sendToMon
     }
 }
 
@@ -303,7 +320,10 @@ void Tasks::StartRobotTask(void *arg) {
     cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
     // Synchronization barrier (waiting that all tasks are starting)
     rt_sem_p(&sem_barrier, TM_INFINITE);
-
+    
+    /**************************************************************************************/
+    /* The task startRobot starts here                                                    */
+    /**************************************************************************************/
     while (1) {
 
         Message * msgSend;
@@ -316,7 +336,7 @@ void Tasks::StartRobotTask(void *arg) {
         cout << ")" << endl;
 
         cout << "Movement answer: " << msgSend->ToString() << endl << flush;
-        WriteInQueue(&q_messageToMon, msgSend);
+        WriteInQueue(&q_messageToMon, msgSend);  // msgSend will be deleted by sendToMon
 
         if (msgSend->GetID() == MESSAGE_ANSWER_ACK) {
             rt_mutex_acquire(&mutex_robotStarted, TM_INFINITE);
@@ -332,9 +352,14 @@ void Tasks::StartRobotTask(void *arg) {
 void Tasks::MoveTask(void *arg) {
     int rs;
     int cpMove;
+    
     cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
     // Synchronization barrier (waiting that all tasks are starting)
     rt_sem_p(&sem_barrier, TM_INFINITE);
+    
+    /**************************************************************************************/
+    /* The task starts here                                                               */
+    /**************************************************************************************/
     rt_task_set_periodic(NULL, TM_NOW, 100000000);
 
     while (1) {

@@ -40,13 +40,6 @@ int main(int argc, char **argv) {
     tasks.Run();
     tasks.Join();
     
-    /*if (tasks.AcceptClient()) {
-        cout << "Rock'n'Roll baby, client accepted!"<<endl<<flush;
-        tasks.Run();
-        
-        tasks.Join();
-    }*/
-    
     tasks.Stop();
     
     //tasks.Run();
