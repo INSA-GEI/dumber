@@ -1,6 +1,6 @@
 \section{Vue générale de la plate-forme}
 
-Le projet {\it De Stijl} est une plate-forme de contrôle d'un robot mobile développée au département Génie \'Electronique et Informatique.  Les éléments constituant la plate-forme sont fournis et ont été testés de manière unitaire, mais nous ne garantissons pas un fonctionnement parfait. Toutes suggestions, corrections et modifications seront appréciées pour faire évoluer ce TP. Vous pouvez soumettre vos corrections (sujet, code ou autre) via le dépôt \href{https://github.com/INSA-GEI/dumber/tree/stable}{GitHub}.
+Le projet {\it De Stijl} est une plate-forme de contrôle d'un robot mobile développée au département Génie \'Electronique et Informatique.  Les éléments constituant la plate-forme sont fournis et ont été testés de manière unitaire, mais nous ne garantissons pas un fonctionnement parfait. Toutes suggestions, corrections et modifications seront appréciées pour faire évoluer ce TP. Vous pouvez soumettre vos corrections (sujet, code ou autre) via le dépôt \href{https://github.com/INSA-GEI/dumber/}{GitHub}.
 
 \subsection{\'Eléments de la plate-forme}
 
@@ -67,7 +67,7 @@ Le code embarqué dans les robots a été produit par S. Di Mercurio et L. Senan
   \subsubsection{Superviseur}
 
 
-Le superviseur orchestre le fonctionnement de la plate-forme en assurant le respect des contraintes temporelles du système. Il est déployé sur une Raspberry Pi 3B sur laquelle est installé un Ubuntu patché PREEMPT-RT avec l'extension mercury de Xenomai 3.0. Une Raspberry~Pi est un ordinateur à processeur ARM de taille réduite. La version 3B possède un processeur Broadcom BCM2837 64 bit à quatre cœurs ARM Cortex-A53 à 1,2 GHz, de puces WiFi 802.11n et Bluetooth 4.1.
+Le superviseur orchestre le fonctionnement de la plate-forme en assurant le respect des contraintes temporelles du système. Il est déployé sur une Raspberry Pi 3B sur laquelle est installé un Ubuntu patché PREEMPT-RT avec l'extension mercury de Xenomai 3.0. Une Raspberry~Pi est un ordinateur à processeur ARM de taille réduite. La version 3B possède un processeur Broadcom BCM2837 64 bit à quatre cœurs ARM Cortex-A53 à 1,2 GHz, de puces WiFi 802.11n et Bluetooth 4.1. Un module Xbee a été ajouté pour communiquer avec le robot.
 
 La webcam est intégrée au bloc du superviseur et est une caméra Raspberry.
 
@@ -77,8 +77,6 @@ Le moniteur permet à l'utilisateur de saisir les ordres que le robot doit réal
 
 \subsection{Bibliothèques logicielles}
 
-\todo[inline]{Mettre à jour}
-
 \framebox[\textwidth]{
 \begin{minipage}{0.9\textwidth}
 Votre travail consistera à concevoir uniquement l'architecture logicielle du superviseur. Toutes les fonctions de traitement (communication, vidéo, etc.) {\bf ont déjà été implémentées} par L. Senaneuch et S. Di Mercurio. Vous n'aurez pas à modifier ce code, simplement à faire appel aux fonctions. Il n'en reste pas moins un gros travail d'architecte logiciel à faire.
@@ -87,19 +85,19 @@ Votre travail consistera à concevoir uniquement l'architecture logicielle du su
 
 
 
-Le code est disponible sur la branche stage du dépôt \href{https://github.com/INSA-GEI/dumber/tree/stable}{GEI-INSA/dumber} sur GitHub . L'annexe~\ref{ann:diag_class} présente sous forme de diagramme de classes les fonctions disponibles dans les bibliothèques.\\
+Le code est disponible sur la branche stage du dépôt \href{https://github.com/INSA-GEI/dumber/}{GEI-INSA/dumber} sur GitHub . L'annexe~\ref{ann:diag_class} présente sous forme de diagramme de classes les bibliothèques disponibles.\\
 
 Les fonctions de traitement sont réparties en cinq bibliothèques :
 \begin{itemize}
-	\item server : services permettant de mette en place le serveur de communication avec le moniteur.
-	\item monitor : services de communication entre le superviseur et le moniteur,
-	\item robot : services de communication entre le superviseur et le robot,
+	\item commonitor : services de communication entre le superviseur et le moniteur,
+	\item comrobot : services de communication entre le superviseur et le robot,
 	\item message : services définissant le format des messages entre le moniteur, le superviseur et le robot,
-	\item image : services réalisant tous les traitements vidéos.\\
+	\item camera : services de gestion de la caméra,
+	\item img : services réalisant tous les traitements vidéos. \\
 \end{itemize}
 
 \framebox[\textwidth]{
 \begin{minipage}{0.9\textwidth}
-Toutes les bibliothèques ont été développées en C++, mais vous n'avez pas besoin de connaissances évoluées pour les utiliser (aucun support ne sera fourni par les encadrants pour le C++). Quelques explications sont fournies en annexe pour manipuler les bibliothèques, mais d'une manière générale, vous n'avez pas besoin de connaissances évoluées en programmation objet pour les utiliser.
+Toutes les bibliothèques ont été développées en C++, mais vous n'avez pas besoin de connaissances évoluées pour les utiliser (aucun support ne sera fourni par les encadrants pour le C++). Des explications sont fournies dans un document annexe pour manipuler les bibliothèques, mais d'une manière générale, vous n'avez pas besoin de connaissances évoluées en programmation objet pour les utiliser.
 \end{minipage}
 }
