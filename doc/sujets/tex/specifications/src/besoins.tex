@@ -84,7 +84,7 @@ Les figures~\ref{fig:diag1_2} et~\ref{fig:diag3_6}  illustrent le mode de foncti
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
-\paragraph{Etablissement du socket.} La connexion entre le moniteur et le superviseur est réalisée site à la demande de l'utilisateur via l'interface graphique. Lorsque la demande est faite, un socket est créé, il faut donc que le serveur soit en attente d'une demande de connexion, c'est-à-dire que la méthode {\tt AcceptClient} de la classe {\tt ComMonitor} soit en cours d'exécution. Cette méthode est bloquante.\\
+\paragraph{Etablissement du socket.} La connexion entre le moniteur et le superviseur est réalisée suite à la demande de l'utilisateur via l'interface graphique. Lorsque la demande est faite, un socket est créé, il faut donc que le serveur soit en attente d'une demande de connexion, c'est-à-dire que la méthode {\tt AcceptClient} de la classe {\tt ComMonitor} soit en cours d'exécution. Cette méthode est bloquante.\\
 
 \req{La connexion entre le moniteur et le superviseur (via le socket) doit être établie suite à la demande de connexion de l'utilisateur.}
 
