@@ -25,6 +25,11 @@
 // 15/10/2019 dimercur
 // Demande #43: Migrer le code lié à la gestion des images dans sa propre classe widget
 
+// 11/04/2019 dimercur
+// Suppression du timer battery
+// suppression de la case à cocher getbattery
+// Prise en charge des messages ANSWER_TIMEOUT et ANSWER_COM_ERROR dans OnCommandReceivedEvent
+
 using System;
 using Gtk;
 using Gdk;
@@ -69,11 +74,6 @@ public partial class MainWindow : Gtk.Window
     private ImageWidget imageWidget;
 
     /// <summary>
-    /// Timer for battery request
-    /// </summary>
-    private System.Timers.Timer batteryTimer;
-
-    /// <summary>
     /// Counter for image reception and detecting bad picture ratio
     /// </summary>
     private int imageReceivedCounter = 0;
@@ -90,10 +90,6 @@ public partial class MainWindow : Gtk.Window
 
         // Init of image widget
         imageWidget = new ImageWidget(drawingAreaCamera);
-
-        // create new timer for battery request, every 10s
-        batteryTimer = new System.Timers.Timer(10000.0);
-        batteryTimer.Elapsed += OnBatteryTimerElapsed;
 
         // Customize controls
         AdjustControls();
@@ -145,7 +141,6 @@ public partial class MainWindow : Gtk.Window
 
                 if (cmdManager != null) cmdManager.Close();
 
-                batteryTimer.Stop();
                 break;
             case SystemState.ServerConnected:
                 buttonServerConnection.Label = "Disconnect";
@@ -159,14 +154,12 @@ public partial class MainWindow : Gtk.Window
                 labelRobotControl.Sensitive = false;
                 gtkAlignmentRobotControl.Sensitive = false;
 
-                batteryTimer.Stop();
                 break;
             case SystemState.RobotConnected:
                 buttonRobotActivation.Label = "Reset";
                 labelRobotControl.Sensitive = true;
                 gtkAlignmentRobotControl.Sensitive = true;
 
-                batteryTimer.Start();
                 break;
             default:
                 labelRobot.Sensitive = false;
@@ -259,64 +252,81 @@ public partial class MainWindow : Gtk.Window
             // Depending on message received (based on header), launch correponding action
             header = header.ToUpper();
 
-            if (header == DestijlCommandList.ROBOT_BATTERY_LEVEL)
+            switch (header)
             {
-                string batLevel = "";
+                case DestijlCommandList.ANSWER_TIMEOUT:
+                case DestijlCommandList.ANSWER_COM_ERROR:
+                    Console.WriteLine("Communication lost with robot");
+                    Gtk.Application.Invoke(delegate
+                    {
+                        MessagePopup(MessageType.Error, ButtonsType.Ok, "Robot lost", "Communication with robot lost !");
+                    });
 
-                switch (data[0])
-                {
-                    case '2':
-                        batLevel = "High";
-                        break;
-                    case '1':
-                        batLevel = "Low";
-                        break;
-                    case '0':
-                        batLevel = "Empty";
-                        break;
-                    default:
-                        batLevel = "Invalid value";
-                        break;
-                }
+                    ChangeState(SystemState.ServerConnected);
 
-                Gtk.Application.Invoke(delegate
-                {
-                    labelBatteryLevel.Text = batLevel;
-                });
-            }
-            else if (header == DestijlCommandList.CAMERA_IMAGE)
-            {
-                imageReceivedCounter++;
+                    break;
+                case DestijlCommandList.ROBOT_BATTERY_LEVEL:
+                    string batLevel = "";
 
-                byte[] image = new byte[2];
-                try
-                {
-                    image = Convert.FromBase64String(data);
-                }
-                catch (FormatException)
-                {
-                    badImageReceivedCounter++;
-                    Console.WriteLine("Unable to convert from base64 ");
-                }
+                    switch (data[0])
+                    {
+                        case '2':
+                            batLevel = "High";
+                            break;
+                        case '1':
+                            batLevel = "Low";
+                            break;
+                        case '0':
+                            batLevel = "Empty";
+                            break;
+                        default:
+                            batLevel = "Invalid value";
+                            break;
+                    }
 
-                try
-                {
-                    imageWidget.ShowImage(image);
-                }
-                catch (GLib.GException)
-                {
-                    badImageReceivedCounter++;
+                    Gtk.Application.Invoke(delegate
+                    {
+                        labelBatteryLevel.Text = batLevel;
+                    });
+
+                    break;
+                case DestijlCommandList.CAMERA_IMAGE:
+                    imageReceivedCounter++;
+
+                    byte[] image = new byte[2];
+                    try
+                    {
+                        image = Convert.FromBase64String(data);
+                    }
+                    catch (FormatException)
+                    {
+                        badImageReceivedCounter++;
+                        Console.WriteLine("Unable to convert from base64 ");
+                    }
+
+                    try
+                    {
+                        imageWidget.ShowImage(image);
+                    }
+                    catch (GLib.GException)
+                    {
+                        badImageReceivedCounter++;
 #if DEBUG
-                    Console.WriteLine("Bad Image: " + badImageReceivedCounter +
-                                      " / " + imageReceivedCounter +
-                                      " (" + badImageReceivedCounter * 100 / imageReceivedCounter + "%)");
+                        Console.WriteLine("Bad Image: " + badImageReceivedCounter +
+                                          " / " + imageReceivedCounter +
+                                          " (" + badImageReceivedCounter * 100 / imageReceivedCounter + "%)");
 #endif
-                }
-                //}
-            }
-            else if (header == DestijlCommandList.CAMERA_POSITION)
-            {
-                imageWidget.Position = DestijlCommandManager.DecodePosition(data);
+                    }
+
+                    break;
+                case DestijlCommandList.CAMERA_POSITION:
+                    imageWidget.Position = DestijlCommandManager.DecodePosition(data);
+
+                    break;
+                default:
+                    Console.WriteLine("Untreated message from supervisor: " + header + ": " + data);
+
+                    break;
             }
         }
     }
@@ -524,50 +534,6 @@ public partial class MainWindow : Gtk.Window
         {
             MessagePopup(MessageType.Warning, ButtonsType.Ok, "Abnormal behavior", "Callback OnButtonMouvClicked called by unknown sender");
         }
-    }
-
-    /// <summary>
-    /// Callback called when battery timer expired
-    /// </summary>
-    /// <param name="sender">Sender object</param>
-    /// <param name="e">Event</param>
-    void OnBatteryTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
-    {
-        DestijlCommandManager.CommandStatus status;
-        batteryTimer.Stop();
-
-        // if battery checkbox is checked, a request for battery level is done
-        if (checkButtonGetBattery.Active)
-        {
-            status = cmdManager.RobotGetBattery();
-
-            // if status is not ok, show appropriate message and print "Unknown" for battery level
-            switch (status)
-            {
-                case DestijlCommandManager.CommandStatus.Success:
-                    batteryTimer.Start();
-                    break;
-                case DestijlCommandManager.CommandStatus.CommunicationLostWithServer:
-                    Console.WriteLine("Error: Connection lost with server");
-                    batteryTimer.Stop();
-                    labelBatteryLevel.Text = "Unknown";
-
-                    ChangeState(SystemState.NotConnected);
-                    break;
-                case DestijlCommandManager.CommandStatus.CommunicationLostWithRobot:
-                    Console.WriteLine("Error: Connection lost with robot");
-                    batteryTimer.Stop();
-                    labelBatteryLevel.Text = "Unknown";
-
-                    ChangeState(SystemState.ServerConnected);
-                    break;
-                default:
-                    labelBatteryLevel.Text = "Unknown";
-                    batteryTimer.Start();
-                    break;
-            }
-        }
-        else batteryTimer.Start();
     }
 
     /// <summary>
