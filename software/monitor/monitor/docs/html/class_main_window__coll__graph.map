@@ -1,0 +1,4 @@
+<map id="MainWindow" name="MainWindow">
+<area shape="rect" id="node3" href="$classmonitor_1_1_destijl_command_manager.html" title="Specialization class for command manager, which implemnent destijl protocol between monitor and serve..." alt="" coords="179,184,395,211"/>
+<area shape="rect" id="node4" href="$classmonitor_1_1_command_manager.html" title="Command Manager. Use for timeout managment during reception of data Used as intermediate layer betwee..." alt="" coords="188,95,367,121"/>
+</map>

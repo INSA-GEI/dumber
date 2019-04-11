@@ -809,20 +809,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <widget class="Gtk.CheckButton" id="checkButtonGetBattery">
-                                        <property name="MemberName" />
-                                        <property name="CanFocus">True</property>
-                                        <property name="Label" translatable="yes">Get battery level</property>
-                                        <property name="DrawIndicator">True</property>
-                                        <property name="HasLabel">True</property>
-                                        <property name="UseUnderline">True</property>
-                                      </widget>
-                                      <packing>
-                                        <property name="Position">3</property>
-                                        <property name="AutoSize">True</property>
-                                        <property name="Expand">False</property>
-                                        <property name="Fill">False</property>
-                                      </packing>
+                                      <placeholder />
                                     </child>
                                   </widget>
                                 </child>
