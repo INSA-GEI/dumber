@@ -131,7 +131,7 @@ Message* Message::Copy() {
 }
 
 /**
- * Check message ID
+ * Get message ID
  * @return Current message ID
  */
 bool Message::CheckID(MessageID id) {
@@ -162,6 +162,7 @@ MessageInt::MessageInt() {
  */
 MessageInt::MessageInt(MessageID id, int val) {
     MessageInt::SetID(id);
+
     value = val;
 }
 
@@ -281,7 +282,6 @@ bool MessageString::CheckID(MessageID id) {
  * Create a new, empty image message
  */
 MessageImg::MessageImg() {
-    this->messageID = MESSAGE_CAM_IMAGE;
     image = NULL;
 }
 
@@ -362,7 +362,6 @@ bool MessageImg::CheckID(MessageID id) {
  * Create a new, empty battery message
  */
 MessageBattery::MessageBattery() {
-    this->messageID = MESSAGE_ROBOT_BATTERY_LEVEL;
     this->level = BATTERY_UNKNOWN;
 }
 
@@ -456,10 +455,9 @@ bool MessageBattery::CheckID(MessageID id) {
 /* class MessagePosition */
 
 /**
- * Create a new, empty position message
+ * Create a new, empty string message
  */
 MessagePosition::MessagePosition() {
-    this->messageID = MESSAGE_CAM_POSITION;
     this->pos.angle = 0.0;
     this->pos.robotId = 0;
     this->pos.center.x=0.0;
@@ -469,9 +467,9 @@ MessagePosition::MessagePosition() {
 }
 
 /**
- * Create a new position message, with given ID and position
+ * Create a new string message, with given ID and string
  * @param id Message ID
- * @param pos Message position
+ * @param s Message string
  * @throw std::runtime_error if message ID is incompatible with string data
  */
 MessagePosition::MessagePosition(MessageID id, Position& pos) {

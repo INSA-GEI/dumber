@@ -22,13 +22,6 @@
 using namespace cv;
 
 /**
- * Create an object for accessing camera with default values (size = sm and 
- * fps = 10)
- */
-Camera::Camera():Camera(sm, 10){
-}
-
-/**
  * Create an object for accessing camera
  * @param size Size of picture to grab (@see captureSize)
  * @param fps speed of sampling
