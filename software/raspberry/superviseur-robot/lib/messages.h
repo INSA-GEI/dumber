@@ -47,7 +47,7 @@ typedef enum {
     MESSAGE_ROBOT_COM_OPEN,
     MESSAGE_ROBOT_COM_CLOSE,
          
-    // Messages for camera   
+    // Messages for camera from Monitor to Supervisor
     MESSAGE_CAM_OPEN,
     MESSAGE_CAM_CLOSE,
     MESSAGE_CAM_ASK_ARENA,
@@ -55,6 +55,8 @@ typedef enum {
     MESSAGE_CAM_ARENA_INFIRM,
     MESSAGE_CAM_POSITION_COMPUTE_START,
     MESSAGE_CAM_POSITION_COMPUTE_STOP,
+            
+    // Messages for camera from Supervisor to Monitor 
     MESSAGE_CAM_POSITION,
     MESSAGE_CAM_IMAGE,
             
@@ -499,7 +501,14 @@ protected:
  * Message class for holding battery level, based on Message class
  * 
  * @brief Battery message class
- * 
+ * How to use:
+ *  1. Ask the battery level to the robot:
+ *      MessageBattery * msg;
+ *      msg = (MessageBattery*)robot.Write(new Message(MESSAGE_ROBOT_BATTERY_GET));
+ *  2. Send the message, for example:
+ *          monitor.send(msg);
+ *      or
+ *          WriteInQueue(&q_messageToMon, msg);
  */
 class MessageBattery : public Message {
 public:
