@@ -245,7 +245,7 @@ Le principe est simple : au démarrage du robot (c.-à-d. quand le robot traite 
 
 \req{Lorsque l'utilisateur demande, via le moniteur, le démarrage avec watchdog, le robot doit démarrer dans ce mode. Un message d'acquittement est retourné au moniteur. En cas d'échec, un message indiquant l'échec est transmis au moniteur.
 
-Une fois le démarrage effectué, le robot doit rester vivant en envoyant régulièrement le message de rechargement du watchdog.}
+Une fois le démarrage effectué, le robot doit rester vivant. Pour cela, il faut que le moniteur envoie régulièrement le message de rechargement du watchdog.}
 
 %alt
 %note right of Monitor
@@ -339,7 +339,7 @@ Les fonctions permettant la manipulation des images sont fournies dans les libra
 \req{La caméra doit être démarrée suite à une demande provenant du moniteur. Si l'ouverture de la  caméra a échoué, il faut envoyer un message au moniteur.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
-\paragraph{Capture d'une image (mode nominal).} La méthode {\tt Grab} de {\tt Camera} permet de capturer une image. La compression de l'image se fait à l'aide de la fonction {\tt ToJpg} de {\tt Img}. L'envoi de l'image au moniteur s'effectue normalement par l'envoi d'un message. La fréquence de capture d'une image est fixée par un paramètre lors de l'instanciation d'un objet {\tt Camera}.\\
+\paragraph{Capture d'une image (mode nominal).} La méthode {\tt Grab} de {\tt Camera} permet de capturer une image. L'envoi de l'image au moniteur s'effectue normalement par l'envoi d'un message\footnote{L'image est compressée lors de l'envoi du message.}. La fréquence de capture d'une image est fixée par un paramètre lors de l'instanciation d'un objet {\tt Camera}.\\
 
 \req{Dès que la caméra est ouverte, une image doit être envoyée au moniteur toutes les 100 ms.}
 
