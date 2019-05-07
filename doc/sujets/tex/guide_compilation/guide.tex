@@ -132,7 +132,7 @@ Le répertoire {\tt superviseur-robot} est constitué des fichiers suivants :
 \begin{itemize}
 \item {\tt /destijl\_init/main.cpp} qui contient le main de l'application et lance la création des objets et leur exécution,
 \item {\tt /destijl\_init/src/tasks.h} qui contient l'entête des différentes fonctions,
-\item {\tt /destijl\_init/src/tasks.cpp} qui contient l'implémentation des fonctions de création des objets (tâches, sémaphores, mutex, etc.) ainsi que les fonction de traitement.
+\item {\tt /destijl\_init/src/tasks.cpp} qui contient l'implémentation des fonctions de création des objets (tâches, sémaphores, mutex, etc.) ainsi que les fonctions de traitement.
 \end{itemize}
 
 
@@ -142,9 +142,9 @@ Le répertoire {\tt superviseur-robot} est constitué des fichiers suivants :
 \section{Compilation d'une application distante}
 %%%%%%%%%%%%%%%%%%%%
 
-L'application étant sur une \raspi, il vous faut compiler le programme pour cette architecture. Nous vous proposons d'utiliser Netbeans pour écrire votre code et faire la compilation distante. Cela signifie que votre code est stocké sur votre compte INSA, que vous éditer le code sur la machine de TP, que ce code est ensuite automatiquement chargé sur la \raspi puis compilé (Netbeans permet de faire tout cela).
+L'application étant sur une \raspi, il vous faut compiler le programme pour cette architecture. Nous vous proposons d'utiliser Netbeans pour écrire votre code et faire la compilation distante. Cela signifie que votre code est stocké sur votre compte INSA, que vous éditez le code sur la machine de TP, que ce code est ensuite automatiquement chargé sur la \raspi puis compilé (Netbeans permet de faire tout cela).
 
-Pour commencer lancer Netbeans et ouvrez le projet {\tt superviseur-robot}.
+Pour commencer, lancez Netbeans et ouvrez le projet {\tt superviseur-robot}.
 
 Avant de compiler, il vous faut configurer la cible sur laquelle la compilation va se faire:
 \begin{enumerate}
@@ -165,7 +165,7 @@ Avant de compiler, il vous faut configurer la cible sur laquelle la compilation 
 \item Cliquez {\tt OK}.
 \end{enumerate}
 
-Pour compiler, il suffit ensuite de cliquer sur l'icône en forme de marteau. Vous pourrez voir dans le terminal les étapes de compilation qui commence par le transfert des fichiers suivi de la compilation proprement dite.
+Pour compiler, il suffit ensuite de cliquer sur l'icône en forme de marteau. Vous pourrez voir dans le terminal les étapes de compilation qui commencent par le transfert des fichiers suivi de la compilation proprement dite.
 
 {\bf Remarque} : la première compilation est un peu longue, mais devrait ensuite se fluidifier avec la compilation incrémentale.
 
@@ -175,7 +175,7 @@ Pour compiler, il suffit ensuite de cliquer sur l'icône en forme de marteau. Vo
 \label{sec:utilisation}
 %%%%%%%%%%%%%%%%%%%%
 
-Pour exécuter l'application sur le superviseur, il faut après avoir mis en place un terminal distant (voir ci-dessous) puis démarrer l'exécution avec la commande {\tt sudo ./path/app} où {\tt path} est le chemin du répertoire où se trouve l'application et {\tt app} est le nom de votre application. Attention les droits {\tt sudo} sont nécessaires pour des questions d'accès à certains services Xenomai de gestion de la mémoire.
+Pour exécuter l'application sur le superviseur, il faut avoir mis en place un terminal distant (voir ci-dessous) puis démarrer l'exécution avec la commande {\tt sudo ./path/app} où {\tt path} est le chemin du répertoire où se trouve l'application et {\tt app} est le nom de votre application. Attention les droits {\tt sudo} sont nécessaires pour des questions d'accès à certains services Xenomai de gestion de la mémoire.
 
 Si vous utilisez Netbeans, le répertoire dans lequel est compilée l'application se trouve dans l'arboressence commençant par {\tt .netbeans} (attention au "." au début). Il faut descendre dans cette arboressence jusqu'à une bifurcation, puis choisir le répertoire {\tt dist} et aller jusqu'au bout. L'application se trouve au bout de cette branche.
 
@@ -209,7 +209,7 @@ Pour exécuter le moniteur, il suffit depuis votre PC de travail de se placer da
  
  Les seuls fichiers que vous allez avoir à modifier sont les fichiers {\tt tasks.h} et {\tt tasks.cpp}. La classe {\tt Tasks} a pour attributs privés l'ensemble des structures constituant l'application (tâches, mutex, sémarphores, ressources, etc.). Les fonctions de traitement associées aux tâches sont déclarées comme des méthodes privées de {\tt Tasks}.
  
- La classe {\tt Tasks} propose quatre méthodes publics :
+ La classe {\tt Tasks} propose quatre méthodes publiques :
  \begin{itemize}
  	\item {\tt Init()} qui crée les structures de l'application,
 	\item {\tt Run()} qui lance les tâches,
@@ -217,7 +217,7 @@ Pour exécuter le moniteur, il suffit depuis votre PC de travail de se placer da
 	\item {\tt Join()} qui suspend l'exécution du {\tt main}.\\
  \end{itemize}
 
-Pour ajoutez des structures à l'application, il suffit de les déclarer dans le fichier {\tt tasks.h} puis de s'assurer qu'elles sont bien instanciées dans les méthodes adéquates de {\tt tasks.cpp}. Pour une tâche, il faut en plus déclarer une nouvelle méthode privée dans {tasks.h} et fournir son implémentation dans {tasks.cpp}. Cette nouvelle méthode sera le point d'entrée de la tâche.
+Pour ajouter des structures à l'application, il suffit de les déclarer dans le fichier {\tt tasks.h} puis de s'assurer qu'elles sont bien instanciées dans les méthodes adéquates de {\tt tasks.cpp}. Pour une tâche, il faut en plus déclarer une nouvelle méthode privée dans {tasks.h} et fournir son implémentation dans {tasks.cpp}. Cette nouvelle méthode sera le point d'entrée de la tâche.
 
 Toute la documentation de Xenomai se trouve en ligne (attention c'est Xenomai 3) et nous utilisons l'\href{https://xenomai.org/documentation/xenomai-3/html/xeno3prm/group__alchemy.html}{API alchemy}.
 
