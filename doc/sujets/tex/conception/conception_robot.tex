@@ -212,7 +212,7 @@ La dernière fonctionnalité qui sera traitée dans cette conception introduit d
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Identification des threads}
-Après avoir identifier les fonctions de l'application, le concepteur doit préciser quand l'exécution des fonctions se produit. La première étape consiste à considérer chaque fonction comme un thread. Deux questions se posent alors :
+Après avoir identifié les fonctions de l'application, le concepteur doit préciser quand l'exécution des fonctions se produit. La première étape consiste à considérer chaque fonction comme un thread. Deux questions se posent alors :
 \begin{itemize}
 	\item Quel est le type du thread ? Un thread apériodique (noté par un A dans un rond) est un thread dont l'exécution est contrôlé par des événements alors qu'un thread périodique (noté par la valeur de la période dans un rond) aura une exécution qui revient périodiquement.
 	\item Quel est la priorité du thread ? Une règle simple pour les threads périodiques est d'attribuer les priorités par ordre décroissant des périodes, c'est-à-dire qu'un thread sera d'autant plus prioritaire que sa période sera petite.  Pour les threads apériodiques, le niveau de priorité va dépendre de la criticité des fonctions.\\
@@ -229,7 +229,7 @@ Après avoir identifier les fonctions de l'application, le concepteur doit préc
 
 Une seconde étape consiste à avoir un regard critique sur sa conception, par exemple en se demandant s'il est possible de réunir des threads ensembles. Ici, le thread {\tt Etablissement de la communication avec le moniteur} ne peut être appelé qu'après {\tt démarrer serveur}, il est donc possible de les réunir en un seul thread.
 
-C'est aussi le moment de se demande si toutes les fonctionnalités sont couvertes. Pour cela on reprend chaque fonctionnalité et on vérifie qu'elles sont bien traitées. Ici tout semble correct, bien qu'un doute subsiste pour la gestion des déplacements du robot...
+C'est aussi le moment de se demander si toutes les fonctionnalités sont couvertes. Pour cela on reprend chaque fonctionnalité et on vérifie qu'elles sont bien traitées. Ici tout semble correct, bien qu'un doute subsiste pour la gestion des déplacements du robot...
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Formalisation}
@@ -328,7 +328,7 @@ Elle ne se veut pas exhaustive, mais simplement présenter les éléments néces
 
 Le diagramme d'activité est un diagramme comportemental d'UML, permettant de représenter le déclenchement d'événements en fonction des états du système et de modéliser des comportements parallélisables (multi-threads ou multi-processus).
 
-Les diagrammes d'activités permettent de spécifier des traitements a priori séquentiels et offrent une vision très proche de celle des langages de programmation impératifs comme C++ ou Java. Il serait utilisé ici dans ce but.
+Les diagrammes d'activité permettent de spécifier des traitements à priori séquentiels et offrent une vision très proche de celle des langages de programmation impératifs comme C++ ou Java. Il serait utilisé ici dans ce but.
 
 \subsection{N{\oe}uds d'activité}
 
@@ -442,7 +442,7 @@ Chaque composant appartient à une {\bf catégorie}. Ces catégories sont préd�
 
 Chaque composant comprend deux parties. La première, \textbf{le type}, correspond à son interface fonctionnelle, c'est-à-dire ce qui est visible pour les autres composants. La seconde, \textbf{l'implémentation}, décrit son contenu : sous-composants, propriétés, connexions, etc.
 
-Chaque implémentation est associée à un type. ¿ chaque type est associé aucune, une ou plusieurs implémentations. La figure~\ref{fig:type_implementation} donne un exemple de deux types de composants dont le premier est associé à deux implémentations de composants (component implementations).  Textuellement, le type est introduit par le mot décrivant le type du composant, alors que l'implémentation est décrite par le type suivi du mot {\em implementation}.
+Chaque implémentation est associée à un type. À chaque type est associé aucune, une ou plusieurs implémentations. La figure~\ref{fig:type_implementation} donne un exemple de deux types de composants dont le premier est associé à deux implémentations de composants (component implementations).  Textuellement, le type est introduit par le mot décrivant le type du composant, alors que l'implémentation est décrite par le type suivi du mot {\em implementation}.
 
 
 \begin{figure}[htbp]
