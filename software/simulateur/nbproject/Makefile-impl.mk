@@ -24,14 +24,14 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=superviseur-robot
+PROJECTNAME=simulateur
 
 # Active Configuration
-DEFAULTCONF=Debug__PC_
+DEFAULTCONF=Debug
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=Debug__PC_ 
+ALLCONFS=Debug Release 
 
 
 # build
