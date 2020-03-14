@@ -80,12 +80,16 @@ int ComRobot::Open(string usart) {
     struct termios options;
 
 #ifdef __SIMULATION__
-    
+
     struct sockaddr_in serv_addr;
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         printf("\n Socket creation error \n");
         return -1;
     }
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 80000;
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof tv);
 
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
@@ -99,10 +103,6 @@ int ComRobot::Open(string usart) {
     if (connect(sock, (struct sockaddr *) &serv_addr, sizeof (serv_addr)) < 0) {
         return -1;
     }
-    /*send(sock , hello , strlen(hello) , 0 ); 
-    printf("Hello message sent\n"); 
-    valread = read( sock , buffer, 1024); 
-    printf("%s\n",buffer ); */
     return 1;
 #else
 
@@ -154,11 +154,18 @@ Message *ComRobot::Write(Message* msg) {
 #ifdef __SIMULATION__
 
         char buffer[1024] = {0};
-        cout << "[" <<__PRETTY_FUNCTION__<<"] Send command: "<<s<<endl<<flush;
+        cout << "[" << __PRETTY_FUNCTION__ << "] Send command: " << s << endl << flush;
         send(sock, s.c_str(), s.length(), 0);
+
         int valread = read(sock, buffer, 1024);
-        msgAnswer = new Message(MESSAGE_ANSWER_ACK);
-        printf("%s\n", buffer);
+        if (valread < 0) {
+            msgAnswer = new Message(MESSAGE_ANSWER_ROBOT_TIMEOUT);
+        } else {
+            string s(&buffer[0], valread);
+            msgAnswer = StringToMessage(s);
+            //msgAnswer = new Message(MESSAGE_ANSWER_ACK);
+        }
+        cout << "response: " <<  buffer << ", id: " << msgAnswer->GetID() << endl;
 #else       
         AddChecksum(s);
 
