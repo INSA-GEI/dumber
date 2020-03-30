@@ -131,7 +131,11 @@ int ComRobot::Open(string usart) {
  * @return Success if above 0, failure if below 0
  */
 int ComRobot::Close() {
+#ifdef __SIMULATION__
+    return close(sock);
+#elif
     return close(fd);
+#endif
 }
 
 /**
