@@ -31,6 +31,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 int sock = 0;
+const char* host = "127.0.0.1";
 #define PORT 6699
 #endif
 
@@ -88,14 +89,14 @@ int ComRobot::Open(string usart) {
     }
     struct timeval tv;
     tv.tv_sec = 0;
-    tv.tv_usec = 80000;
+    tv.tv_usec = 200000;
     setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof tv);
 
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
 
     // Convert IPv4 and IPv6 addresses from text to binary form 
-    if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, host, &serv_addr.sin_addr) <= 0) {
         printf("\nInvalid address/ Address not supported \n");
         return -1;
     }
@@ -156,6 +157,7 @@ Message *ComRobot::Write(Message* msg) {
 
         s = MessageToString(msg);
 #ifdef __SIMULATION__
+        s += "\r";
 
         char buffer[1024] = {0};
         cout << "[" << __PRETTY_FUNCTION__ << "] Send command: " << s << endl << flush;
