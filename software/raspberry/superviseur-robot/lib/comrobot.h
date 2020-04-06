@@ -60,6 +60,14 @@ public:
     int Open(string usart);
 
     /**
+     * Open tcp client for the graphical simulator
+     * @param host Host address
+     * @param port Port number
+     * @return 1 if ok or -1
+     */
+    int Open(string shost, int nport);
+
+    /**
      * Close serial link
      * @return Success if above 0, failure if below 0
      */
@@ -89,9 +97,9 @@ public:
      */
     virtual void Write_Post() {
     }
-    
+
     Message *SendCommand(Message* msg, MessageID answerID, int maxRetries);
-    
+
     static Message *Ping() {
         return new Message(MESSAGE_ROBOT_PING);
     }
