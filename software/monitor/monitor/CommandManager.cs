@@ -180,11 +180,16 @@ namespace monitor
                 isBusy = true;
 
                 // Send command to server
+                if (timeout > 0) // Command request an acknowledge
+                {
+                    waitForAcknowledge = true;  // Flag used in OnMessageReception callback to avoid
+                                                // sending acknowledge message to upper level
+                }
+
                 Client.Write(cmd);
 
                 if (timeout > 0) // Command request an acknowledge
-                {
-                    
+                {   
                     waitForAcknowledge = true;  // Flag used in OnMessageReception callback to avoid
                                                 // sending acknowledge message to upper level
                     waitTimer.Interval = timeout;
