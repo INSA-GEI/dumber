@@ -7,12 +7,8 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home_pers/pehladik/dumber/software/raspberry/superviseur-robot/lib/camera.h</file>
-            <file>file:/home_pers/pehladik/dumber/software/raspberry/superviseur-robot/lib/messages.cpp</file>
-            <file>file:/home_pers/pehladik/dumber/software/raspberry/superviseur-robot/tasks.h</file>
-            <file>file:/home_pers/pehladik/dumber/software/raspberry/superviseur-robot/lib/camera.cpp</file>
-            <file>file:/home_pers/pehladik/dumber/software/raspberry/superviseur-robot/tasks.cpp</file>
-            <file>file:/home_pers/pehladik/dumber/software/raspberry/superviseur-robot/lib/messages.h</file>
+            <file>file:/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/commonitor.cpp</file>
+            <file>file:/home/dimercur/Documents/Travail/git/dumber/software/raspberry/superviseur-robot/lib/messages.cpp</file>
         </group>
     </open-files>
 </project-private>

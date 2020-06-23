@@ -41,7 +41,7 @@
     </conf>
     <conf name="Debug__RPI_" type="1">
       <toolsSet>
-        <developmentServer>pi@10.105.1.08:22</developmentServer>
+        <developmentServer>pi@10.105.1.96:22</developmentServer>
         <platform>2</platform>
       </toolsSet>
       <dbx_gdbdebugger version="1">
