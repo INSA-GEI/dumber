@@ -11,11 +11,14 @@ import time
 import sys
 
 class GlobVar:
-    connectedToPi = False
-    port = 5544
-    timeout=1000
-    address = "10.105.1.13"
+    port = 5544              # default server port
+    timeout=1.0              # default waiting time for an answer. May be increased for debugging purpose
+    address = "localhost"    # default server address. Use this with 'nc -l <port>' for testing on your machine
+    getBatteryLevelPeriod=-1 # periodic delay for requesting battery level. If value is 0 or below, not battery check is done
 
+    # do not modify value below this line
+    
+    connectedToPi = False
     connectedToDumber = False
     dumberStarted = False
     
@@ -28,11 +31,17 @@ class GlobVar:
     
     exceptionmsg= ""
     
+# Network event from socket. 
+# Event are 'Connected to server' or 'disconnected from server'
 class NetworkEvents:
     EVENT_CONNECTED=1
     EVENT_CONNECTION_LOST=0
     UNKNOWN_EVENT=-1
     
+# Network managment class
+# Contain a thread for conenction to server and data reception
+# Contains functions for sending message to server
+# Contains functions for answer decoding
 class Network():
     receiveCallback=None
     eventCallback=None
@@ -41,12 +50,19 @@ class Network():
     receiveEvent = None
     receivedAnswer = ""
     
+    # List of possible answers from server
     ANSWER_ACK = "AACK"
     ANSWER_NACK = "ANAK"
     ANSWER_COM_ERROR = "ACER"
     ANSWER_TIMEOUT = "ATIM"
     ANSWER_CMD_REJECTED = "ACRJ"
+    
+    # List of possible messages from server
     MESSAGE = "MSSG"
+    ROBOT_BATTERY_LEVEL = "RBLV"
+    ROBOT_CURRENT_STATE = "RCST"
+    
+    # List of accepted command by server
     CAMERA_OPEN = "COPN"
     CAMERA_CLOSE = "CCLS"
     CAMERA_IMAGE = "CIMG"
@@ -71,13 +87,12 @@ class Network():
     ROBOT_GO_RIGHT = "RGRI"
     ROBOT_STOP = "RSTP"
     ROBOT_POWEROFF = "RPOF"
-    ROBOT_BATTERY_LEVEL = "RBLV"
     ROBOT_GET_BATTERY = "RGBT"
     ROBOT_GET_STATE = "RGST"
-    ROBOT_CURRENT_STATE = "RCST"
 
     SEPARATOR_CHAR = ':'
     
+    # Decoded answers
     ACK = 1 
     NACK =2
     COM_ERROR =3
@@ -85,13 +100,18 @@ class Network():
     CMD_REJECTED=5
     UNKNOWN=-1
     
+    # Initialisation method.
     def __init__(self, receiveCallback=None, eventCallback=None) -> None:
         self.receiveCallback = receiveCallback
         self.eventCallback = eventCallback
         self.waitForAnswer=False
         self.receiveEvent = threading.Event()
     
-    def ReceptionThread(self):   
+    # Reception thread used for conencting to server and receiving data.
+    # Never stop, auto reconnect if connection is lost
+    # Send event when conencting to or disconnecting from server
+    # send received message to appropriate callback
+    def ReceptionThread(self) -> None:   
         while True:
             try:
                 self.__connect()
@@ -109,12 +129,14 @@ class Network():
                 pass
             
             time.sleep(2.0)
-             
+         
+    # Method helper for starting reception thread    
     def startReceptionThread(self) -> None:
         self.threadId = threading.Thread(target=self.ReceptionThread, args=())
         self.threadId.daemon=True
         self.threadId.start()
-                 
+            
+    # Private method for connecting to server     
     def __connect(self) -> None:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         
@@ -125,6 +147,7 @@ class Network():
     
         self.waitForAnswer=False
         
+    # Private method for sending raw data to server
     def __write(self, msg: str) -> None:
         totalsent = 0
         if msg[-1] != '\n':
@@ -140,6 +163,8 @@ class Network():
                 raise RuntimeError("Unable to send data to " + GlobVar.address + ":" + str(GlobVar.port))
             totalsent = totalsent + sent
             
+    # Private method for receiving data from server. 
+    # Data received are sent to callback __receiveHandler for decoding
     def __read(self) -> None:
         chunks = []
         bytes_recd = 0
@@ -159,6 +184,8 @@ class Network():
             bytes_recd =0
             last_char=0
     
+    # private callback for reception and decoding of data. 
+    # If no answer is wait, send data to caller callback
     def __receiveHandler(self, data: str) -> None:
         # traitement a faire lors de la reception de donnée
         if self.waitForAnswer:
@@ -170,7 +197,8 @@ class Network():
             if self.receiveCallback != None:
                 self.receiveCallback(data)
 
-    def __sendCommand(self,cmd, waitans) -> str:
+    # Private method for sending command to server
+    def __sendCommand(self,cmd, waitans: bool) -> str:
         if waitans == True:
             self.waitForAnswer = True
         else:
@@ -181,7 +209,7 @@ class Network():
         if waitans:
             ans = self.ANSWER_TIMEOUT
             try:
-                self.receiveEvent.wait(timeout=1.0) # timeout set to 0.3 sec
+                self.receiveEvent.wait(timeout=GlobVar.timeout) # Max waiting time = GlobVar.timeout
                 
                 if self.receiveEvent.is_set():
                     ans=self.receivedAnswer
@@ -199,8 +227,9 @@ class Network():
             return ans
         else:
             return self.ANSWER_ACK
-                    
-    def __decodeAnswer(self, ans) -> int:
+               
+    # Private method for decoding answer from server     
+    def __decodeAnswer(self, ans: str) -> int:
         if self.ANSWER_ACK in ans:
             return self.ACK
         elif self.ANSWER_NACK in ans:
@@ -214,49 +243,61 @@ class Network():
         else:
             return self.UNKNOWN
     
+    # Send OpenCom command to server
     def robotOpenCom(self) -> int:
         ans = self.__sendCommand(self.ROBOT_COM_OPEN, True)
         return self.__decodeAnswer(ans)
     
+    # Send CloseCom command to server
     def robotCloseCom(self) -> int:
         ans = self.__sendCommand(self.ROBOT_COM_CLOSE, True)
         return self.__decodeAnswer(ans)
     
+    # Send StartWithWatchdog command to server
     def robotStartWithWatchdog(self) -> int:
         ans = self.__sendCommand(self.ROBOT_START_WITH_WD, True)
         return self.__decodeAnswer(ans)
     
+    # Send StartWithoutWatchdog command to server
     def robotStartWithoutWatchdog(self) -> int:
         ans = self.__sendCommand(self.ROBOT_START_WITHOUT_WD, True)
         return self.__decodeAnswer(ans)
     
+    # Send Reset command to server
     def robotReset(self) -> int:
         ans = self.__sendCommand(self.ROBOT_RESET, True)
         return self.__decodeAnswer(ans)
     
+    # Send Stop command to server
     def robotStop(self) -> int:
         ans = self.__sendCommand(self.ROBOT_STOP, True)
         return self.__decodeAnswer(ans)
     
+    # Send GoLeft command to server
     def robotGoLeft(self) -> int:
         ans = self.__sendCommand(self.ROBOT_GO_LEFT, True)
         return self.__decodeAnswer(ans)
     
+    # Send GoRight command to server
     def robotGoRight(self) -> int:
         ans = self.__sendCommand(self.ROBOT_GO_RIGHT, True)
         return self.__decodeAnswer(ans)
     
+    # Send GoForward command to server
     def robotGoForward(self) -> int:
         ans = self.__sendCommand(self.ROBOT_GO_FORWARD, True)
         return self.__decodeAnswer(ans)
     
+    # Send GoBackward command to server
     def robotGoBackward(self) -> int:
         ans = self.__sendCommand(self.ROBOT_GO_BACKWARD, True)
         return self.__decodeAnswer(ans)
     
+    # Send GetBattery command to server
     def robotGetBattery(self) -> None:
         ans = self.__sendCommand(self.ROBOT_GET_BATTERY,False)
         
+# Function for decoding battery level
 def batterylevelToStr(batlvl: int) -> str:
     switcher = {
         2: "Full",
@@ -266,6 +307,7 @@ def batterylevelToStr(batlvl: int) -> str:
     
     return switcher.get(batlvl, "Unknown")
 
+# Function for display human readable answer
 def answertoStr(ans: int) -> str:
     switcher = {
         Network.ACK: "Acknowledged",
@@ -277,7 +319,8 @@ def answertoStr(ans: int) -> str:
     
     return switcher.get(ans, "Unknown answer")
 
-def threadRefreshScreen(currentWindow):
+# Thread for updtating display
+def threadRefreshScreen(currentWindow) -> None:
     while 1:
         currentWindow.clear()
         currentWindow.addstr("Connected to " + GlobVar.address + ":" + str(GlobVar.port) +" = " + str(GlobVar.connectedToPi))
@@ -293,12 +336,12 @@ def threadRefreshScreen(currentWindow):
         currentWindow.addstr("Last answer received = " + answertoStr(GlobVar.last_answer))
         currentWindow.move(9,0)
         currentWindow.addstr("Messages received (log)")
+        
+        # up to 8 messages
         for i in range(0,len(GlobVar.message)):
             currentWindow.move(10+i,0)
             currentWindow.addstr("[mes "+str(i)+ "] ")
             currentWindow.addstr(str(GlobVar.message[i]))
-        
-        # up to 8 messages
         
         currentWindow.move(20,0)
         currentWindow.addstr("Commands : \'O\' = Open COM with robot/ \'C\' = Close COM with robot")
@@ -311,7 +354,8 @@ def threadRefreshScreen(currentWindow):
         currentWindow.refresh()
         time.sleep(0.5)
 
-def threadGetKeys(win, net:Network):
+# Thread for reading keyboard keys and sending corresponding commands to server
+def threadGetKeys(win: curses.window, net:Network) -> None:
     while 1: 
         try:                          
             key = win.getkey() 
@@ -366,15 +410,20 @@ def threadGetKeys(win, net:Network):
         except Exception as e:
             GlobVar.exceptionmsg="Exception received: " + str(e)
 
-def threadPeriodic(net: Network):
+# Thread used for requesting battery level, exit if getBatteryLevelPeriod is 0 or below
+def threadPeriodic(net: Network) -> None:
     while True:
-        time.sleep(5.0)
+        if GlobVar.getBatteryLevelPeriod>0:
+            time.sleep(GlobVar.getBatteryLevelPeriod)
         
-        GlobVar.batteryLevel = -1
-        if GlobVar.connectedToPi:
-            net.robotGetBattery() 
+            GlobVar.batteryLevel = -1
+            if GlobVar.connectedToPi:
+                net.robotGetBattery() 
+        else:
+            break
         
-def receptionCallback(s:str):
+# Callback used to decode non answer message from server (mainly battery level and log message)
+def receptionCallback(s:str) -> None:
     if Network.ROBOT_BATTERY_LEVEL in s:
         str_split = s.split(':')
         
@@ -394,13 +443,15 @@ def receptionCallback(s:str):
         if len(GlobVar.message) > 8:
             GlobVar.message.pop(0)
 
-def eventCallback(event):
+# Callback for connection/deconnection event from network manager
+def eventCallback(event: NetworkEvents) -> None:
     if event == NetworkEvents.EVENT_CONNECTED:
         GlobVar.connectedToPi = True
     elif event == NetworkEvents.EVENT_CONNECTION_LOST:
         GlobVar.connectedToPi = False
 
-def main(win):
+# Main program, wait for keys thread to end (CTRL-C)
+def main(win: curses.window) -> None:
     win.keypad(True)
     
     net = Network(receiveCallback=receptionCallback, eventCallback=eventCallback)
@@ -417,7 +468,7 @@ def main(win):
 
     periodicThread = threading.Thread(target=threadPeriodic, args=(net,))
     periodicThread.daemon=True
-    # periodicThread.start()
+    periodicThread.start()
 
     keyThread.join()
     
@@ -431,18 +482,13 @@ try:
         print ("No target address specified")
         print ("Usage: monitor-python.py address [port]")
         
-        exit (-1) 
-        #GlobVar.address = "10.105.1.12"
+        #exit (-1) # Comment this line for connecting to localhost
         
     if len(sys.argv)>=3:
         GlobVar.port = int(sys.argv[2])
-    else:
-        GlobVar.port = 5544
         
     curses.wrapper(main) 
     
-except KeyboardInterrupt:
+except KeyboardInterrupt: # exception when pressing CTRL-C
     print ("Bye bye")
-except:
-    raise
 
