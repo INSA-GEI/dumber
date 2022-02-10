@@ -422,12 +422,12 @@ void Tasks::CheckBattery() {
     
     while (1) {
         rt_task_wait_period(NULL);
-        cout << "Battery Periodic";
+        cout << "Battery Periodic" << endl << flush;
         rt_mutex_acquire(&mutex_robotStarted, TM_INFINITE);
-        if (robotStarted) {
+        if (robotStarted==1) {
             rt_mutex_acquire(&mutex_robot, TM_INFINITE);
-            //robot.Write(new Message((Message)robot.GetBattery()));
-            cout << "on regarde la batterie" << endl << flush;
+            MessageBattery* bat = (MessageBattery*)robot.Write(new Message(MESSAGE_ROBOT_BATTERY_GET));
+            cout << "Battery level : " << bat->ToString() << endl << flush;
             rt_mutex_release(&mutex_robot);
         }
         rt_mutex_release(&mutex_robotStarted);
