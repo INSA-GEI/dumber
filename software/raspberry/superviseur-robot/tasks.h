@@ -74,7 +74,8 @@ private:
     RT_TASK th_sendToMon;
     RT_TASK th_receiveFromMon;
     RT_TASK th_openComRobot;
-    RT_TASK th_startRobot;
+    RT_TASK th_startRobotWithoutWD;
+    RT_TASK th_startRobotWithWD;
     RT_TASK th_move;
     RT_TASK th_checkBattery;
     
@@ -92,7 +93,8 @@ private:
     RT_SEM sem_barrier;
     RT_SEM sem_openComRobot;
     RT_SEM sem_serverOk;
-    RT_SEM sem_startRobot;
+    RT_SEM sem_startRobotWithoutWD;
+    RT_SEM sem_startRobotWithWD;
 
     /**********************************************************************/
     /* Message queues                                                     */
@@ -124,10 +126,15 @@ private:
     void OpenComRobot(void *arg);
 
     /**
-     * @brief Thread starting the communication with the robot.
+     * @brief Thread starting the communication with the robot without Watchdog.
      */
-    void StartRobotTask(void *arg);
-    
+    void StartRobotTaskWithoutWD(void *arg);
+
+    /**
+     * @brief Thread starting the communication with the robot without Watchdog.
+     */
+    void StartRobotTaskWithWD(void *arg);
+  
     /**
      * @brief Thread handling control of the robot.
      */
