@@ -81,6 +81,10 @@ void Tasks::Init() {
         cerr << "Error mutex create: " << strerror(-err) << endl << flush;
         exit(EXIT_FAILURE);
     }
+    if (err = rt_mutex_create(&mutex_comRobotErrorCounter, NULL)) {
+        cerr << "Error mutex create: " << strerror(-err) << endl << flush;
+        exit(EXIT_FAILURE);
+    }
     cout << "Mutexes created successfully" << endl << flush;
 
     /**************************************************************************************/
@@ -110,7 +114,7 @@ void Tasks::Init() {
         cerr << "Error semaphore create: " << strerror(-err) << endl << flush;
         exit(EXIT_FAILURE);
     }
-    if (err = rt_sem_create(&sem_stopSystem, NULL, 0, S_FIFO)) {
+    if (err = rt_sem_create(&sem_stopRobot, NULL, 0, S_FIFO)) {
         cerr << "Error semaphore create: " << strerror(-err) << endl << flush;
         exit(EXIT_FAILURE);
     }
@@ -155,7 +159,7 @@ void Tasks::Init() {
         cerr << "Error task create: " << strerror(-err) << endl << flush;
         exit(EXIT_FAILURE);
     }
-        if (err = rt_task_create(&th_stopSystem, "th_stopSystem", 0, PRIORITY_STOP_SYSTEM, 0)) {
+    if (err = rt_task_create(&th_stopRobot, "th_stopRobot", 0, PRIORITY_STOP_SYSTEM, 0)) {
         cerr << "Error task create: " << strerror(-err) << endl << flush;
         exit(EXIT_FAILURE);
     }
@@ -215,7 +219,7 @@ void Tasks::Run() {
         cerr << "Error task start: " << strerror(-err) << endl << flush;
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_start(&th_stopSystem, (void(*)(void*)) & Tasks::StopSystem, this)) {
+    if (err = rt_task_start(&th_stopRobot, (void(*)(void*)) & Tasks::StopRobot, this)) {
         cerr << "Error task start: " << strerror(-err) << endl << flush;
         exit(EXIT_FAILURE);
     }
@@ -313,7 +317,8 @@ void Tasks::ReceiveFromMonTask(void *arg) {
 
         if (msgRcv->CompareID(MESSAGE_MONITOR_LOST)) {
             cout << "Connection lost with the monitor, exiting program" << endl << flush;
-            rt_sem_v(&sem_stopSystem);
+            rt_sem_v(&sem_stopRobot);
+            monitor.Close();
         } else if (msgRcv->CompareID(MESSAGE_ROBOT_COM_OPEN)) {
             rt_sem_v(&sem_openComRobot);
         } else if (msgRcv->CompareID(MESSAGE_ROBOT_RELOAD_WD)) {
@@ -460,7 +465,7 @@ void Tasks::Watchdog(void *arg) {
             counter = watchdogCounter++;
             rt_mutex_release(&mutex_watchdogCounter);
             if (counter > 3) {
-                rt_sem_v(&sem_stopSystem);
+                rt_sem_v(&sem_stopRobot);
             }
         }
     }
@@ -505,6 +510,7 @@ void Tasks::MoveTask(void *arg) {
     /* The task starts here                                                               */
     /**************************************************************************************/
     rt_task_set_periodic(NULL, TM_NOW, 100000000);
+    Message * msgSend;
 
     while (1) {
         rt_task_wait_period(NULL);
@@ -519,8 +525,23 @@ void Tasks::MoveTask(void *arg) {
             cout << " move: " << cpMove << endl << flush;
 
             rt_mutex_acquire(&mutex_robot, TM_INFINITE);
-            robot.Write(new Message((MessageID)cpMove));
+            msgSend = robot.Write(new Message((MessageID)cpMove));
             rt_mutex_release(&mutex_robot);
+            UpdateErrorCounter(msgSend);
+        }
+    }
+}
+
+// Add to the other functions
+void Tasks::UpdateErrorCounter(Message * msg) {
+    int counter;
+    if (msg->CompareID(MESSAGE_ANSWER_NACK) ||msg->CompareID(MESSAGE_ANSWER_COM_ERROR) ||msg->CompareID(MESSAGE_ANSWER_ROBOT_UNKNOWN_COMMAND) || msg->CompareID(MESSAGE_ANSWER_ROBOT_TIMEOUT)|| msg->CompareID(MESSAGE_ANSWER_COM_ERROR)) {
+        rt_mutex_acquire(&mutex_comRobotErrorCounter, TM_INFINITE);
+        counter = ++comRobotErrorCounter;
+        rt_mutex_release(&mutex_comRobotErrorCounter);
+
+        if (counter > 3) {
+            rt_sem_v(&sem_stopRobot);
         }
     }
 }
@@ -557,11 +578,11 @@ Message *Tasks::ReadInQueue(RT_QUEUE *queue) {
     return msg;
 }
 
-void Tasks::StopSystem(void *arg) {
+void Tasks::StopRobot(void *arg) {
     cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
     // Synchronization barrier (waiting that all tasks are starting)
     rt_sem_p(&sem_barrier, TM_INFINITE);
-    rt_sem_p(&sem_stopSystem, TM_INFINITE);
+    rt_sem_p(&sem_stopRobot, TM_INFINITE);
     rt_mutex_acquire(&mutex_robotStarted, TM_INFINITE);
     int rs = robotStarted;
     rt_mutex_release(&mutex_robotStarted);
@@ -570,6 +591,5 @@ void Tasks::StopSystem(void *arg) {
         robot.Write(new Message(MESSAGE_ROBOT_STOP));
         rt_mutex_release(&mutex_robot);
     }
-    monitor.Close();
     robot.Close();
 }

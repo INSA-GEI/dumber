@@ -67,6 +67,7 @@ private:
     int robotStarted = 0;
     int move = MESSAGE_ROBOT_STOP;
     int watchdogCounter = 0;
+    int comRobotErrorCounter = 0;
 
     /**********************************************************************/
     /* Tasks                                                              */
@@ -80,7 +81,8 @@ private:
     RT_TASK th_move;
     RT_TASK th_checkBattery;
     RT_TASK th_watchdog;
-    RT_TASK th_stopSystem;
+    RT_TASK th_stopRobot;
+    RT_TASK th_stopRobot;
 
     /**********************************************************************/
     /* Mutex                                                              */
@@ -90,6 +92,7 @@ private:
     RT_MUTEX mutex_robotStarted;
     RT_MUTEX mutex_move;
     RT_MUTEX mutex_watchdogCounter;
+    RT_MUTEX mutex_comRobotErrorCounter;
 
     /**********************************************************************/
     /* Semaphores                                                         */
@@ -100,7 +103,8 @@ private:
     RT_SEM sem_startRobotWithoutWD;
     RT_SEM sem_startRobotWithWD;
     RT_SEM sem_watchdog;
-    RT_SEM sem_stopSystem;
+    RT_SEM sem_stopRobot;
+    RT_SEM sem_stopRobot;
 
     /**********************************************************************/
     /* Message queues                                                     */
@@ -150,7 +154,7 @@ private:
 
     void Watchdog(void *arg);
 
-    void StopSystem(void *arg);
+    void StopRobot(void *arg);
 
     /**********************************************************************/
     /* Queue services                                                     */
