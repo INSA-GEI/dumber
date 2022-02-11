@@ -52,12 +52,12 @@ public:
      * @brief Stops tasks
      */
     void Stop();
-    
+
     /**
      * @brief Suspends main thread
      */
     void Join();
-    
+
 private:
     /**********************************************************************/
     /* Shared data                                                        */
@@ -67,7 +67,7 @@ private:
     int robotStarted = 0;
     int move = MESSAGE_ROBOT_STOP;
     int watchdogCounter = 0;
-    
+
     /**********************************************************************/
     /* Tasks                                                              */
     /**********************************************************************/
@@ -80,7 +80,8 @@ private:
     RT_TASK th_move;
     RT_TASK th_checkBattery;
     RT_TASK th_watchdog;
-    
+    RT_TASK th_stopSystem;
+
     /**********************************************************************/
     /* Mutex                                                              */
     /**********************************************************************/
@@ -99,13 +100,14 @@ private:
     RT_SEM sem_startRobotWithoutWD;
     RT_SEM sem_startRobotWithWD;
     RT_SEM sem_watchdog;
+    RT_SEM sem_stopSystem;
 
     /**********************************************************************/
     /* Message queues                                                     */
     /**********************************************************************/
     int MSG_QUEUE_SIZE;
     RT_QUEUE q_messageToMon;
-    
+
     /**********************************************************************/
     /* Tasks' functions                                                   */
     /**********************************************************************/
@@ -113,17 +115,17 @@ private:
      * @brief Thread handling server communication with the monitor.
      */
     void ServerTask(void *arg);
-     
+
     /**
      * @brief Thread sending data to monitor.
      */
     void SendToMonTask(void *arg);
-        
+
     /**
      * @brief Thread receiving data from monitor.
      */
     void ReceiveFromMonTask(void *arg);
-    
+
     /**
      * @brief Thread opening communication with the robot.
      */
@@ -138,13 +140,17 @@ private:
      * @brief Thread starting the communication with the robot without Watchdog.
      */
     void StartRobotTaskWithWD(void *arg);
-  
+
     /**
      * @brief Thread handling control of the robot.
      */
     void MoveTask(void *arg);
-    
+
     void CheckBattery(void *arg);
+
+    void Watchdog(void *arg);
+
+    void StopSystem(void *arg);
 
     /**********************************************************************/
     /* Queue services                                                     */
@@ -155,7 +161,7 @@ private:
      * @param msg Message to be stored
      */
     void WriteInQueue(RT_QUEUE *queue, Message *msg);
-    
+
     /**
      * Read a message from a given queue, block if empty
      * @param queue Queue identifier
@@ -165,5 +171,4 @@ private:
 
 };
 
-#endif // __TASKS_H__ 
-
+#endif // __TASKS_H__

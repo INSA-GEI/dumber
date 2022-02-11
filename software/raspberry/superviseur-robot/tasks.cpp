@@ -29,6 +29,7 @@
 #define PRIORITY_TSTARTROBOTWITHWD 20
 #define PRIORITY_TCAMERA 21
 #define PRIORITY_WATCHDOG 40
+#define PRIORITY_STOP_SYSTEM 40
 
 /*
  * Some remarks:
@@ -109,6 +110,10 @@ void Tasks::Init() {
         cerr << "Error semaphore create: " << strerror(-err) << endl << flush;
         exit(EXIT_FAILURE);
     }
+    if (err = rt_sem_create(&sem_stopSystem, NULL, 0, S_FIFO)) {
+        cerr << "Error semaphore create: " << strerror(-err) << endl << flush;
+        exit(EXIT_FAILURE);
+    }
     cout << "Semaphores created successfully" << endl << flush;
 
     /**************************************************************************************/
@@ -147,6 +152,10 @@ void Tasks::Init() {
         exit(EXIT_FAILURE);
     }
     if (err = rt_task_create(&th_watchdog, "th_watchdog", 0, PRIORITY_WATCHDOG, 0)) {
+        cerr << "Error task create: " << strerror(-err) << endl << flush;
+        exit(EXIT_FAILURE);
+    }
+        if (err = rt_task_create(&th_stopSystem, "th_stopSystem", 0, PRIORITY_STOP_SYSTEM, 0)) {
         cerr << "Error task create: " << strerror(-err) << endl << flush;
         exit(EXIT_FAILURE);
     }
@@ -203,6 +212,10 @@ void Tasks::Run() {
         exit(EXIT_FAILURE);
     }
     if (err = rt_task_start(&th_watchdog, (void(*)(void*)) & Tasks::Watchdog, this)) {
+        cerr << "Error task start: " << strerror(-err) << endl << flush;
+        exit(EXIT_FAILURE);
+    }
+    if (err = rt_task_start(&th_stopSystem, (void(*)(void*)) & Tasks::StopSystem, this)) {
         cerr << "Error task start: " << strerror(-err) << endl << flush;
         exit(EXIT_FAILURE);
     }
@@ -299,9 +312,8 @@ void Tasks::ReceiveFromMonTask(void *arg) {
         cout << "Rcv <= " << msgRcv->ToString() << endl << flush;
 
         if (msgRcv->CompareID(MESSAGE_MONITOR_LOST)) {
-            delete(msgRcv);
             cout << "Connection lost with the monitor, exiting program" << endl << flush;
-            exit(-1);
+            rt_sem_v(&sem_stopSystem);
         } else if (msgRcv->CompareID(MESSAGE_ROBOT_COM_OPEN)) {
             rt_sem_v(&sem_openComRobot);
         } else if (msgRcv->CompareID(MESSAGE_ROBOT_RELOAD_WD)) {
@@ -448,7 +460,7 @@ void Tasks::Watchdog(void *arg) {
             counter = watchdogCounter++;
             rt_mutex_release(&mutex_watchdogCounter);
             if (counter > 3) {
-                Stop();
+                rt_sem_v(&sem_stopSystem);
             }
         }
     }
@@ -543,4 +555,21 @@ Message *Tasks::ReadInQueue(RT_QUEUE *queue) {
     } /**/
 
     return msg;
+}
+
+void Tasks::StopSystem(void *arg) {
+    cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
+    // Synchronization barrier (waiting that all tasks are starting)
+    rt_sem_p(&sem_barrier, TM_INFINITE);
+    rt_sem_p(&sem_stopSystem, TM_INFINITE);
+    rt_mutex_acquire(&mutex_robotStarted, TM_INFINITE);
+    int rs = robotStarted;
+    rt_mutex_release(&mutex_robotStarted);
+    if (rs == 1) {
+        rt_mutex_acquire(&mutex_robot, TM_INFINITE);
+        robot.Write(new Message(MESSAGE_ROBOT_STOP));
+        rt_mutex_release(&mutex_robot);
+    }
+    monitor.Close();
+    robot.Close();
 }
