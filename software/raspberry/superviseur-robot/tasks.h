@@ -66,6 +66,7 @@ private:
     ComRobot robot;
     int robotStarted = 0;
     int move = MESSAGE_ROBOT_STOP;
+    int watchdogCounter = 0;
     
     /**********************************************************************/
     /* Tasks                                                              */
@@ -78,6 +79,7 @@ private:
     RT_TASK th_startRobotWithWD;
     RT_TASK th_move;
     RT_TASK th_checkBattery;
+    RT_TASK th_watchdog;
     
     /**********************************************************************/
     /* Mutex                                                              */
@@ -86,6 +88,7 @@ private:
     RT_MUTEX mutex_robot;
     RT_MUTEX mutex_robotStarted;
     RT_MUTEX mutex_move;
+    RT_MUTEX mutex_watchdogCounter;
 
     /**********************************************************************/
     /* Semaphores                                                         */
@@ -95,6 +98,7 @@ private:
     RT_SEM sem_serverOk;
     RT_SEM sem_startRobotWithoutWD;
     RT_SEM sem_startRobotWithWD;
+    RT_SEM sem_watchdog;
 
     /**********************************************************************/
     /* Message queues                                                     */
