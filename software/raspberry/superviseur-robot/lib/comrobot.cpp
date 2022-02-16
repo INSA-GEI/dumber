@@ -147,6 +147,8 @@ Message *ComRobot::Write(Message* msg) {
         cerr << __PRETTY_FUNCTION__ << ": Com port not open" << endl << flush;
         throw std::runtime_error{"Com port not open"};
     }
+    
+    cout << msg->ToString() << endl << flush;
 
     // deallocation of msg
     delete(msg);
