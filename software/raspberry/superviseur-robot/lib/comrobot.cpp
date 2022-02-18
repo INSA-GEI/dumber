@@ -18,10 +18,10 @@
 #include "comrobot.h"
 
 #include <stdio.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <termios.h>  
+#include <termios.h>
 
 #include <string>
 #include <stdexcept>
@@ -104,7 +104,7 @@ int ComRobot::Close() {
  * @return 1 if success, 0 otherwise
  * @attention Message is destroyed (delete) after being sent. You do not need to delete it yourself
  * @attention Write is blocking until message is written into buffer (linux side)
- * @warning Write is not thread save : check that multiple tasks can't access this method simultaneously  
+ * @warning Write is not thread save : check that multiple tasks can't access this method simultaneously
  */
 Message *ComRobot::Write(Message* msg) {
     Message *msgAnswer;
@@ -147,8 +147,6 @@ Message *ComRobot::Write(Message* msg) {
         cerr << __PRETTY_FUNCTION__ << ": Com port not open" << endl << flush;
         throw std::runtime_error{"Com port not open"};
     }
-    
-    cout << msg->ToString() << endl << flush;
 
     // deallocation of msg
     delete(msg);
@@ -328,7 +326,7 @@ string ComRobot::MessageToString(Message *msg) {
 
 /**
  * Add a checksum and carriage return to a command string
- * @param[in,out] s String containing command for robot, without ending char (carriage return) 
+ * @param[in,out] s String containing command for robot, without ending char (carriage return)
  */
 void ComRobot::AddChecksum(string &s) {
     unsigned char checksum = 0;
@@ -342,7 +340,7 @@ void ComRobot::AddChecksum(string &s) {
 }
 
 /**
- * Verify if checksum of an incoming answer from robot is valid, 
+ * Verify if checksum of an incoming answer from robot is valid,
  * then remove checksum from incoming answer (if checksum is ok)
  * @param[in,out] s String containing incoming answer from robot
  * @return true is checksum is valid, false otherwise.

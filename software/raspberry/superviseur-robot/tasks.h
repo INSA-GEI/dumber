@@ -102,6 +102,7 @@ private:
     RT_SEM sem_startRobotWithoutWD;
     RT_SEM sem_startRobotWithWD;
     RT_SEM sem_stopRobot;
+    RT_SEM sem_monitorDown;
 
     /**********************************************************************/
     /* Message queues                                                     */
