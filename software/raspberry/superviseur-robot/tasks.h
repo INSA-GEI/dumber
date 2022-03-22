@@ -76,6 +76,7 @@ private:
     RT_TASK th_openComRobot;
     RT_TASK th_startRobot;
     RT_TASK th_move;
+    RT_TASK th_battery;
     
     /**********************************************************************/
     /* Mutex                                                              */
@@ -141,6 +142,15 @@ private:
      * @param msg Message to be stored
      */
     void WriteInQueue(RT_QUEUE *queue, Message *msg);
+    
+    
+    /*
+     * @brief Check the battery level and send a message
+     */
+    void CheckBattery();  
+
+    
+    
     
     /**
      * Read a message from a given queue, block if empty
