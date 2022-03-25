@@ -17060,47 +17060,7 @@ diff -ruN linux-org/fs/exec.c linux/fs/exec.c
  	tsk->mm->vmacache_seqnum = 0;
  	vmacache_flush(tsk);
  	task_unlock(tsk);
-Les fichiers binaires linux-org/.git/index et linux/.git/index sont différents
-diff -ruN linux-org/.git/logs/HEAD linux/.git/logs/HEAD
---- linux-org/.git/logs/HEAD	2022-03-25 09:55:44.009445510 +0100
-+++ linux/.git/logs/HEAD	2022-03-25 10:14:36.545179323 +0100
-@@ -1,2 +1,2 @@
--0000000000000000000000000000000000000000 1fe617a917eac75800a8174373b3c0a5c1df26e1 vezde <dimercur@insa-toulouse.fr> 1648138287 +0100	clone: from https://github.com/raspberrypi/linux.git
--1fe617a917eac75800a8174373b3c0a5c1df26e1 29653ef5475124316b9284adb6cbfc97e9cae48f vezde <dimercur@insa-toulouse.fr> 1648198544 +0100	reset: moving to 29653ef5475124316b9284adb6cbfc97e9cae48f
-+0000000000000000000000000000000000000000 1fe617a917eac75800a8174373b3c0a5c1df26e1 vezde <dimercur@insa-toulouse.fr> 1648199366 +0100	clone: from https://github.com/raspberrypi/linux.git
-+1fe617a917eac75800a8174373b3c0a5c1df26e1 29653ef5475124316b9284adb6cbfc97e9cae48f vezde <dimercur@insa-toulouse.fr> 1648199676 +0100	reset: moving to 29653ef5475124316b9284adb6cbfc97e9cae48f
-diff -ruN linux-org/.git/logs/refs/heads/rpi-5.15.y linux/.git/logs/refs/heads/rpi-5.15.y
---- linux-org/.git/logs/refs/heads/rpi-5.15.y	2022-03-25 09:55:44.009445510 +0100
-+++ linux/.git/logs/refs/heads/rpi-5.15.y	2022-03-25 10:14:36.545179323 +0100
-@@ -1,2 +1,2 @@
--0000000000000000000000000000000000000000 1fe617a917eac75800a8174373b3c0a5c1df26e1 vezde <dimercur@insa-toulouse.fr> 1648138287 +0100	clone: from https://github.com/raspberrypi/linux.git
--1fe617a917eac75800a8174373b3c0a5c1df26e1 29653ef5475124316b9284adb6cbfc97e9cae48f vezde <dimercur@insa-toulouse.fr> 1648198544 +0100	reset: moving to 29653ef5475124316b9284adb6cbfc97e9cae48f
-+0000000000000000000000000000000000000000 1fe617a917eac75800a8174373b3c0a5c1df26e1 vezde <dimercur@insa-toulouse.fr> 1648199366 +0100	clone: from https://github.com/raspberrypi/linux.git
-+1fe617a917eac75800a8174373b3c0a5c1df26e1 29653ef5475124316b9284adb6cbfc97e9cae48f vezde <dimercur@insa-toulouse.fr> 1648199676 +0100	reset: moving to 29653ef5475124316b9284adb6cbfc97e9cae48f
-diff -ruN linux-org/.git/logs/refs/remotes/origin/HEAD linux/.git/logs/refs/remotes/origin/HEAD
---- linux-org/.git/logs/refs/remotes/origin/HEAD	2022-03-24 17:11:27.591134119 +0100
-+++ linux/.git/logs/refs/remotes/origin/HEAD	2022-03-25 10:09:26.586346923 +0100
-@@ -1 +1 @@
--0000000000000000000000000000000000000000 1fe617a917eac75800a8174373b3c0a5c1df26e1 vezde <dimercur@insa-toulouse.fr> 1648138287 +0100	clone: from https://github.com/raspberrypi/linux.git
-+0000000000000000000000000000000000000000 1fe617a917eac75800a8174373b3c0a5c1df26e1 vezde <dimercur@insa-toulouse.fr> 1648199366 +0100	clone: from https://github.com/raspberrypi/linux.git
-Les fichiers binaires linux-org/.git/objects/pack/pack-09fd62d13c1f4f537f3594ed0080e5de8cefc004.idx et linux/.git/objects/pack/pack-09fd62d13c1f4f537f3594ed0080e5de8cefc004.idx sont différents
-Les fichiers binaires linux-org/.git/objects/pack/pack-09fd62d13c1f4f537f3594ed0080e5de8cefc004.pack et linux/.git/objects/pack/pack-09fd62d13c1f4f537f3594ed0080e5de8cefc004.pack sont différents
-Les fichiers binaires linux-org/.git/objects/pack/pack-32c57340fe3719aac43b5cfcaf4fb453d6717494.idx et linux/.git/objects/pack/pack-32c57340fe3719aac43b5cfcaf4fb453d6717494.idx sont différents
-Les fichiers binaires linux-org/.git/objects/pack/pack-32c57340fe3719aac43b5cfcaf4fb453d6717494.pack et linux/.git/objects/pack/pack-32c57340fe3719aac43b5cfcaf4fb453d6717494.pack sont différents
-diff -ruN linux-org/.git/packed-refs linux/.git/packed-refs
---- linux-org/.git/packed-refs	2022-03-24 17:11:27.591134119 +0100
-+++ linux/.git/packed-refs	2022-03-25 10:09:26.586346923 +0100
-@@ -60,8 +60,8 @@
- d8ac3c3c15fddf400b8e2b96cfa0c8517db937a4 refs/remotes/origin/rpi-5.13.y
- 14c1845ff9a92a3a0650d17e24031af640924e8d refs/remotes/origin/rpi-5.14.y
- 1fe617a917eac75800a8174373b3c0a5c1df26e1 refs/remotes/origin/rpi-5.15.y
--42e48fd866ca5f243b1e2725fb0675418bc560f0 refs/remotes/origin/rpi-5.16.y
--3ed4dd4a43838444bf5ab91f28336fce62eb7373 refs/remotes/origin/rpi-5.17.y
-+96aaf167afe6a832e0e9158fedcb043ee83e99ee refs/remotes/origin/rpi-5.16.y
-+98d7292483498f5eb2f3e1da9e06d3f4ccc9c809 refs/remotes/origin/rpi-5.17.y
- 94dbfa7606fc2f3df44979ed9c2d1d3676f2c159 refs/remotes/origin/rpi-5.2.y
- 32ba05a62a8071d091d7582cc37b4bac2962b1dd refs/remotes/origin/rpi-5.3.y
- ec0dcf3064b8ba99f226438214407fcea9870f76 refs/remotes/origin/rpi-5.4.y
+
 diff -ruN linux-org/include/asm-generic/atomic.h linux/include/asm-generic/atomic.h
 --- linux-org/include/asm-generic/atomic.h	2022-03-25 09:55:42.269452065 +0100
 +++ linux/include/asm-generic/atomic.h	2022-03-25 10:15:23.353003010 +0100
