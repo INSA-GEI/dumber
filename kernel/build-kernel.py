@@ -9,7 +9,11 @@ from datetime import datetime
 from shutil import copytree
 from shutil import rmtree
 
-import paramiko
+try:
+    import paramiko
+except Exception as e:
+    print ("Paramiko not present ("+str(e)+")")
+    
 from getpass import getpass
 
 import argparse
