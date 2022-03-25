@@ -12,6 +12,8 @@ from shutil import rmtree
 import paramiko
 from getpass import getpass
 
+import argparse
+
 # Parameters to configure
 TEMPORARY_DIRECTORY     = '~/tmp/rpi-kernel'
 BUILD_DIRECTORY         = '/rt-kernel'
@@ -148,7 +150,7 @@ def installXenomai(tmp_dir, build_dir, image_path ):
     os.system('sudo cp -a dev/* %s/rootfs/dev/'%image_path)
     os.system('sudo cp -a usr/* %s/rootfs/usr/'%image_path)
 
-def main():
+def main(build_only=False):
     # prepare build environment
     temp_dir = os.path.expanduser (TEMPORARY_DIRECTORY)
     build_dir = temp_dir + BUILD_DIRECTORY
@@ -166,6 +168,7 @@ def main():
     print ("Temp directory : " + temp_dir)
     print ("Build directory : " + build_dir)
     print ("Script directory : " + script_dir)
+    print ("Build only: " + str(build_only))
     print()
     
     if not os.path.exists(temp_dir):
@@ -197,16 +200,29 @@ def main():
     print ('\nBuild Xenomai libraries')
     buildXenomai(temp_dir, build_dir, [])
     
-    print ('\nInstalling kernel')
-    installKernel(temp_dir, build_dir, PATH_TO_IMAGE)
+    if not build_only:
+        print ('\nInstalling kernel')
+        installKernel(temp_dir, build_dir, PATH_TO_IMAGE)
     
-    print ('\nInstall Xenomai libraries')
-    installXenomai(temp_dir, build_dir, PATH_TO_IMAGE)
+        print ('\nInstall Xenomai libraries')
+        installXenomai(temp_dir, build_dir, PATH_TO_IMAGE)
     
     os.chdir(currentdir)
     
+def parseCommandLine() -> str:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--build-only', action='store_true', help='Build only')
+    
+    args = parser.parse_args()
+    return args.build_only
+
 if __name__ == '__main__':
-    val=main()
+    build_only = parseCommandLine()
+    if build_only == None or build_only == False:
+        val=main(False)
+    else:
+        val=main(True)
+        
     if val ==None:
         val =0
         
