@@ -1,0 +1,15 @@
+(kicad_sch (version 20211123) (generator eeschema)
+
+  (uuid 8d9a12b3-6e6b-4763-b5ec-9f4ad9b4c93c)
+
+  (paper "A4")
+
+  (title_block
+    (date "2022-06-08")
+    (company "INSA - GEI")
+  )
+
+  (lib_symbols
+  )
+
+)
