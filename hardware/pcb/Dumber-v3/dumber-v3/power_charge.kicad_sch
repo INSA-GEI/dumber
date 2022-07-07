@@ -2287,7 +2287,7 @@
     (property "Value" "Li-ION" (id 1) (at 174.371 153.3402 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "Battery:BatteryHolder_Keystone_2460_1xAA" (id 2) (at 171.45 152.146 90)
+    (property "Footprint" "INSA:Battery-14500" (id 2) (at 171.45 152.146 90)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (id 3) (at 171.45 152.146 90)

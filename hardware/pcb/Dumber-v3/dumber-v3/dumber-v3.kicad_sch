@@ -472,7 +472,7 @@
       (reference "#PWR0109") (unit 1) (value "+2V5") (footprint "")
     )
     (path "/3615d78e-1dd3-4b20-9017-3539b8f88e06/053dd8a9-6683-412e-b95b-646ea38b2cad"
-      (reference "BT1") (unit 1) (value "Li-ION") (footprint "Battery:BatteryHolder_Keystone_2460_1xAA")
+      (reference "BT1") (unit 1) (value "Li-ION") (footprint "INSA:Battery-14500")
     )
     (path "/3615d78e-1dd3-4b20-9017-3539b8f88e06/bd71a09f-c787-4676-9eaf-0b8a418617b8"
       (reference "C1") (unit 1) (value "10nF") (footprint "Capacitor_SMD:C_0805_2012Metric")
