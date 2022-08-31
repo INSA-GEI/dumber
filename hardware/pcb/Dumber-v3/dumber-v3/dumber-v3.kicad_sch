@@ -420,9 +420,6 @@
     (path "/3615d78e-1dd3-4b20-9017-3539b8f88e06/b427fe8c-7fb6-4600-ae56-cd492ddac2fd"
       (reference "#PWR026") (unit 1) (value "GND") (footprint "")
     )
-    (path "/3615d78e-1dd3-4b20-9017-3539b8f88e06/79c9aa72-bbcd-4fd1-8dee-7dc7b1d9b70d"
-      (reference "#PWR027") (unit 1) (value "+BATT") (footprint "")
-    )
     (path "/1b100198-bac5-4efe-bc54-3b6ec493e580/6f9a5a58-ab28-4346-bc05-af16f57c158d"
       (reference "#PWR028") (unit 1) (value "GND") (footprint "")
     )
@@ -583,13 +580,13 @@
       (reference "R1") (unit 1) (value "100K") (footprint "Resistor_SMD:R_0805_2012Metric")
     )
     (path "/3615d78e-1dd3-4b20-9017-3539b8f88e06/ed4d428a-cc2a-4f53-afda-674212f35d1e"
-      (reference "R2") (unit 1) (value "10R") (footprint "Resistor_SMD:R_0805_2012Metric")
+      (reference "R2") (unit 1) (value "100K") (footprint "Resistor_SMD:R_0805_2012Metric")
     )
     (path "/3615d78e-1dd3-4b20-9017-3539b8f88e06/468f85cf-b8ed-4484-8706-38e3909e7f05"
       (reference "R3") (unit 1) (value "1K") (footprint "Resistor_SMD:R_0805_2012Metric")
     )
     (path "/3615d78e-1dd3-4b20-9017-3539b8f88e06/97f52b40-ab06-42cd-8299-1f1d164626ad"
-      (reference "R4") (unit 1) (value "10K") (footprint "Resistor_SMD:R_0805_2012Metric")
+      (reference "R4") (unit 1) (value "100K") (footprint "Resistor_SMD:R_0805_2012Metric")
     )
     (path "/3615d78e-1dd3-4b20-9017-3539b8f88e06/bdd1b1f3-79e7-447d-9aa5-d02adb05078a"
       (reference "R5") (unit 1) (value "1K") (footprint "Resistor_SMD:R_0805_2012Metric")
@@ -676,7 +673,7 @@
       (reference "U2") (unit 1) (value "STM32L010C6Tx") (footprint "Package_QFP:LQFP-48_7x7mm_P0.5mm")
     )
     (path "/3615d78e-1dd3-4b20-9017-3539b8f88e06/d1632f43-8228-45f5-b90a-b4352f510caf"
-      (reference "U3") (unit 1) (value "LTC2954") (footprint "Package_TO_SOT_SMD:SOT-23-8")
+      (reference "U3") (unit 1) (value "LTC2954-2") (footprint "Package_TO_SOT_SMD:SOT-23-8")
     )
     (path "/3615d78e-1dd3-4b20-9017-3539b8f88e06/b11c64a9-01d5-4411-a940-0a1faea7840e"
       (reference "U4") (unit 1) (value "L6924U") (footprint "INSA:L6924UTR")
