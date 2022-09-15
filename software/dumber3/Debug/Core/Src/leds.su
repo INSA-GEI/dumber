@@ -1,0 +1,3 @@
+leds.c:30:6:LEDS_Init	24	static
+leds.c:51:6:LEDS_RegleAnimation	16	static
+leds.c:55:6:LEDS_AnimationThread	40	static

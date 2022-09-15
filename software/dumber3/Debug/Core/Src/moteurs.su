@@ -1,0 +1,8 @@
+moteurs.c:43:6:MOTEURS_DesactiveAlim	8	static
+moteurs.c:51:6:MOTEURS_ActiveAlim	8	static
+moteurs.c:59:15:MOTEURS_EtatAlim	8	static
+moteurs.c:63:9:MOTEUR_LireEncodeursGauche	16	static
+moteurs.c:80:9:MOTEUR_LireEncodeursDroit	16	static
+moteurs.c:102:6:MOTEURS_Init	8	static
+moteurs.c:137:6:MOTEURS_Set	24	static
+moteurs.c:170:6:MOTEURS_Test	16	static

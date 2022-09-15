@@ -32,6 +32,16 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "cmsis_os.h"
+
+#include "config.h"
+
+#include "messages.h"
+#include "leds.h"
+#include "moteurs.h"
+#include "batterie.h"
+#include "sequenceur.h"
+#include "xbee.h"
 
 /* USER CODE END Includes */
 
