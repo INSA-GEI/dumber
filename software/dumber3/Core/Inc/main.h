@@ -70,8 +70,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define ENC_PHA_GAUCHE_Pin GPIO_PIN_0
-#define ENC_PHA_GAUCHE_GPIO_Port GPIOC
 #define BATTERY_SENSE_Pin GPIO_PIN_0
 #define BATTERY_SENSE_GPIO_Port GPIOA
 #define PWM_B_GAUCHE_Pin GPIO_PIN_1
@@ -80,12 +78,18 @@ void Error_Handler(void);
 #define ENC_PHA_DROIT_GPIO_Port GPIOA
 #define ENC_PHB_DROIT_Pin GPIO_PIN_3
 #define ENC_PHB_DROIT_GPIO_Port GPIOA
-#define ENC_PHB_GAUCHE_Pin GPIO_PIN_5
+#define ENC_PHB_GAUCHE_Pin GPIO_PIN_6
 #define ENC_PHB_GAUCHE_GPIO_Port GPIOA
+#define ENC_PHA_GAUCHE_Pin GPIO_PIN_7
+#define ENC_PHA_GAUCHE_GPIO_Port GPIOA
 #define PWM_A_DROIT_Pin GPIO_PIN_0
 #define PWM_A_DROIT_GPIO_Port GPIOB
 #define PWM_B_DROIT_Pin GPIO_PIN_1
 #define PWM_B_DROIT_GPIO_Port GPIOB
+#define USART_TX_Pin GPIO_PIN_10
+#define USART_TX_GPIO_Port GPIOB
+#define USART_RX_Pin GPIO_PIN_11
+#define USART_RX_GPIO_Port GPIOB
 #define LED_ROUGE_Pin GPIO_PIN_12
 #define LED_ROUGE_GPIO_Port GPIOB
 #define LED_ORANGE_Pin GPIO_PIN_13
@@ -94,13 +98,16 @@ void Error_Handler(void);
 #define LED_VERTE_GPIO_Port GPIOB
 #define SHUTDOWN_ENCODERS_Pin GPIO_PIN_15
 #define SHUTDOWN_ENCODERS_GPIO_Port GPIOB
-#define PWM_A_GAUCHE_Pin GPIO_PIN_8
+#define XBEE_RESET_Pin GPIO_PIN_10
+#define XBEE_RESET_GPIO_Port GPIOA
+#define PWM_A_GAUCHE_Pin GPIO_PIN_15
 #define PWM_A_GAUCHE_GPIO_Port GPIOA
 #define BUTTON_SENSE_Pin GPIO_PIN_3
 #define BUTTON_SENSE_GPIO_Port GPIOB
 #define BUTTON_SENSE_EXTI_IRQn EXTI2_3_IRQn
 #define USB_SENSE_Pin GPIO_PIN_4
 #define USB_SENSE_GPIO_Port GPIOB
+#define USB_SENSE_EXTI_IRQn EXTI4_15_IRQn
 #define CHARGER_ST2_Pin GPIO_PIN_6
 #define CHARGER_ST2_GPIO_Port GPIOB
 #define CHARGER_ST1_Pin GPIO_PIN_7

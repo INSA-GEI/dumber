@@ -33,6 +33,7 @@ void LEDS_Init(void) {
 	LEDS_EteintRouge();
 
 	LEDS_Animation=leds_off;
+	LEDS_AnimationAncien =LEDS_Animation;
 
 	/* Mailbox is created in messages.c */
 
@@ -48,9 +49,6 @@ void LEDS_Init(void) {
 	vTaskResume(xHandleLeds);
 }
 
-void LEDS_RegleAnimation(LEDS_State etat) {
-	LEDS_Animation=etat;
-}
 
 void LEDS_AnimationThread(void* params) {
 	MESSAGE_Typedef msg;

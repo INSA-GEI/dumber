@@ -7,7 +7,7 @@
 
 #include "main.h"
 
-extern LPTIM_HandleTypeDef hlptim1;
+//extern LPTIM_HandleTypeDef hlptim1;
 
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim21;
@@ -78,22 +78,23 @@ int16_t MOTEUR_LireEncodeursGauche(void) {
 }
 
 int16_t MOTEUR_LireEncodeursDroit(void) {
-	uint16_t loc_val= hlptim1.Instance->CNT;
-	uint32_t status = hlptim1.Instance->ISR;
-	int16_t val_end;
-
-	hlptim1.Instance->ICR=0xFF; // refait descendre les flags ISR
-
-	if (status & LPTIM_ISR_ARRM) {
-		val_end = 0xFFFF-loc_val + MOTEUR_DerniereValEncodeursD;
-	} else {
-		val_end = MOTEUR_DerniereValEncodeursD-loc_val;
-	}
-
-	val_end= -val_end;
-
-	MOTEUR_DerniereValEncodeursD = loc_val;
-	return val_end;
+//	uint16_t loc_val= hlptim1.Instance->CNT;
+//	uint32_t status = hlptim1.Instance->ISR;
+//	int16_t val_end;
+//
+//	hlptim1.Instance->ICR=0xFF; // refait descendre les flags ISR
+//
+//	if (status & LPTIM_ISR_ARRM) {
+//		val_end = 0xFFFF-loc_val + MOTEUR_DerniereValEncodeursD;
+//	} else {
+//		val_end = MOTEUR_DerniereValEncodeursD-loc_val;
+//	}
+//
+//	val_end= -val_end;
+//
+//	MOTEUR_DerniereValEncodeursD = loc_val;
+//	return val_end;
+	return 0;
 }
 
 /**
@@ -103,13 +104,13 @@ void MOTEURS_Init(void) {
 	/* Desactive les alimentations des moteurs */
 	MOTEURS_DesactiveAlim();
 
-	/* Lance les timers (timers PWM + timers encodeurs) et regle tout à zero*/
-	hlptim1.Instance->CR = LPTIM_CR_ENABLE;
-	hlptim1.Instance->CR =  LPTIM_CR_ENABLE | LPTIM_CR_CNTSTRT;
-	hlptim1.Instance->ARR = 65535;
-	hlptim1.Instance->CFGR = LPTIM_CFGR_ENC;
-
-	hlptim1.Instance->CNT = 0;
+//	/* Lance les timers (timers PWM + timers encodeurs) et regle tout à zero*/
+//	hlptim1.Instance->CR = LPTIM_CR_ENABLE;
+//	hlptim1.Instance->CR =  LPTIM_CR_ENABLE | LPTIM_CR_CNTSTRT;
+//	hlptim1.Instance->ARR = 65535;
+//	hlptim1.Instance->CFGR = LPTIM_CFGR_ENC;
+//
+//	hlptim1.Instance->CNT = 0;
 
 	htim21.Instance->ARR = 65535;
 	htim21.Instance->CR1 = htim21.Instance->CR1 | TIM_CR1_CEN| TIM_CR1_URS;

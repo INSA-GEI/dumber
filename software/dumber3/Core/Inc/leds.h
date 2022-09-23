@@ -29,5 +29,4 @@ typedef enum {
 } LEDS_State;
 
 void LEDS_Init(void);
-void LEDS_RegleAnimation(LEDS_State etat);
 #endif /* INC_LEDS_H_ */

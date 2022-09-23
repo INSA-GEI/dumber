@@ -60,5 +60,17 @@ void MESSAGE_SendMailbox(QueueHandle_t mbx_dest, uint16_t id, QueueHandle_t mbx_
 	}
 }
 
+void MESSAGE_SendMailboxFromISR(QueueHandle_t mbx_dest, uint16_t id, QueueHandle_t mbx_sender, void *data, BaseType_t *xHigherPriorityTaskWoken) {
+	MESSAGE_Typedef msg;
+
+	msg.id=id;
+	msg.sender = &mbx_sender;
+	msg.data=data;
+
+	if (!xQueueSendFromISR( mbx_dest, &msg, xHigherPriorityTaskWoken)) { // envoi sans attendre
+		//printf("Failed to send data, Queue full.\r\n");
+	}
+}
+
 
 

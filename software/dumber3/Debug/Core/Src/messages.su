@@ -1,4 +1,0 @@
-messages.c:19:7:MESSAGE_Init	8	static
-messages.c:27:17:MESSAGE_ReadMailbox	40	static
-messages.c:42:17:MESSAGE_ReadMailboxNoDelay	40	static
-messages.c:51:6:MESSAGE_SendMailbox	40	static
