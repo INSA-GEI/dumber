@@ -666,8 +666,8 @@
     (path "/1b100198-bac5-4efe-bc54-3b6ec493e580/a2266a25-f3f8-4b9b-b976-3534cc857ce9"
       (reference "U1") (unit 1) (value "XBEE-3") (footprint "INSA:XBEE-3-TH")
     )
-    (path "/1b100198-bac5-4efe-bc54-3b6ec493e580/6722b7e9-40cc-4d50-8602-5539f45465db"
-      (reference "U2") (unit 1) (value "STM32L010C6Tx") (footprint "Package_QFP:LQFP-48_7x7mm_P0.5mm")
+    (path "/1b100198-bac5-4efe-bc54-3b6ec493e580/aaa8473f-a3e4-47b7-a194-0a55d2850cad"
+      (reference "U2") (unit 1) (value "STM32F071CBTx") (footprint "Package_QFP:LQFP-48_7x7mm_P0.5mm")
     )
     (path "/3615d78e-1dd3-4b20-9017-3539b8f88e06/d1632f43-8228-45f5-b90a-b4352f510caf"
       (reference "U3") (unit 1) (value "LTC2954-2") (footprint "Package_TO_SOT_SMD:SOT-23-8")
