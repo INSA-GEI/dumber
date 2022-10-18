@@ -20,6 +20,7 @@
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/videoio/legacy/constants_c.h>
 
 #ifndef __FOR_PC__
 #include "raspicam/raspicam_cv.h"
