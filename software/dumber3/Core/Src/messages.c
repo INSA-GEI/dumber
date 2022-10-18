@@ -20,8 +20,6 @@ void  MESSAGE_Init(void) {
 	LEDS_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
 	MOTEURS_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
 	SEQUENCEUR_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
-	BATTERIE_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
-	XBEE_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
 }
 
 MESSAGE_Typedef MESSAGE_ReadMailbox(QueueHandle_t mbx) {

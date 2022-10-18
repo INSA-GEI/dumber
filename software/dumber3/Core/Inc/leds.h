@@ -25,7 +25,10 @@ typedef enum {
 	leds_charge_bat_3,
 	leds_charge_bat_4,
 	leds_charge_bat_5,
-	leds_erreur
+	leds_erreur,
+	cmd_rcv_ok,
+	cmd_rcv_err,
+	cmd_rcv_unknown
 } LEDS_State;
 
 void LEDS_Init(void);

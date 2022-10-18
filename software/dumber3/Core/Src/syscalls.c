@@ -31,6 +31,7 @@
 #include <sys/time.h>
 #include <sys/times.h>
 
+#include "cmsis_os.h"
 
 /* Variables */
 extern int __io_putchar(int ch) __attribute__((weak));
@@ -42,6 +43,28 @@ char **environ = __env;
 
 
 /* Functions */
+void* malloc(size_t size)
+{
+    void* ptr = NULL;
+
+    if(size > 0)
+    {
+        // We simply wrap the FreeRTOS call into a standard form
+        ptr = pvPortMalloc(size);
+    } // else NULL if there was an error
+
+    return ptr;
+}
+
+void free(void* ptr)
+{
+    if(ptr)
+    {
+        // We simply wrap the FreeRTOS call into a standard form
+        vPortFree(ptr);
+    }
+}
+
 void initialise_monitor_handles()
 {
 }

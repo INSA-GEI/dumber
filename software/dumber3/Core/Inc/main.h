@@ -42,6 +42,7 @@ extern "C" {
 #include "batterie.h"
 #include "sequenceur.h"
 #include "xbee.h"
+#include "cmd.h"
 
 /* USER CODE END Includes */
 
@@ -72,16 +73,18 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define BATTERY_SENSE_Pin GPIO_PIN_0
 #define BATTERY_SENSE_GPIO_Port GPIOA
-#define PWM_B_GAUCHE_Pin GPIO_PIN_1
-#define PWM_B_GAUCHE_GPIO_Port GPIOA
+#define ENC_PHA_GAUCHE_Pin GPIO_PIN_1
+#define ENC_PHA_GAUCHE_GPIO_Port GPIOA
 #define ENC_PHA_DROIT_Pin GPIO_PIN_2
 #define ENC_PHA_DROIT_GPIO_Port GPIOA
 #define ENC_PHB_DROIT_Pin GPIO_PIN_3
 #define ENC_PHB_DROIT_GPIO_Port GPIOA
-#define ENC_PHB_GAUCHE_Pin GPIO_PIN_6
+#define ENC_PHB_GAUCHE_Pin GPIO_PIN_5
 #define ENC_PHB_GAUCHE_GPIO_Port GPIOA
-#define ENC_PHA_GAUCHE_Pin GPIO_PIN_7
-#define ENC_PHA_GAUCHE_GPIO_Port GPIOA
+#define PWM_B_GAUCHE_Pin GPIO_PIN_6
+#define PWM_B_GAUCHE_GPIO_Port GPIOA
+#define PWM_A_GAUCHE_Pin GPIO_PIN_7
+#define PWM_A_GAUCHE_GPIO_Port GPIOA
 #define PWM_A_DROIT_Pin GPIO_PIN_0
 #define PWM_A_DROIT_GPIO_Port GPIOB
 #define PWM_B_DROIT_Pin GPIO_PIN_1
@@ -100,8 +103,6 @@ void Error_Handler(void);
 #define SHUTDOWN_ENCODERS_GPIO_Port GPIOB
 #define XBEE_RESET_Pin GPIO_PIN_10
 #define XBEE_RESET_GPIO_Port GPIOA
-#define PWM_A_GAUCHE_Pin GPIO_PIN_15
-#define PWM_A_GAUCHE_GPIO_Port GPIOA
 #define BUTTON_SENSE_Pin GPIO_PIN_3
 #define BUTTON_SENSE_GPIO_Port GPIOB
 #define BUTTON_SENSE_EXTI_IRQn EXTI2_3_IRQn

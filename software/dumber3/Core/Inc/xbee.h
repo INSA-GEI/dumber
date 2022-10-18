@@ -11,5 +11,6 @@
 #include "main.h"
 
 void XBEE_Init(void);
+int XBEE_SendData(char* data, int length);
 
 #endif /* INC_XBEE_H_ */

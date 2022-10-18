@@ -20,8 +20,6 @@ typedef struct {
 extern QueueHandle_t LEDS_Mailbox;
 extern QueueHandle_t MOTEURS_Mailbox;
 extern QueueHandle_t SEQUENCEUR_Mailbox;
-extern QueueHandle_t BATTERIE_Mailbox;
-extern QueueHandle_t XBEE_Mailbox;
 
 #define MSG_ID_NO_MESSAGE			0x00
 
@@ -39,9 +37,7 @@ extern QueueHandle_t XBEE_Mailbox;
 #define MSG_ID_MOTEURS_MARCHE		0x40
 #define MSG_ID_MOTEURS_ARRET		0x41
 
-#define MSG_ID_XBEE_CMD_VALIDE		0x50
-#define MSG_ID_XBEE_CMD_INVALIDE	0x51
-#define MSG_ID_XBEE_REPONSE			0x52
+#define MSG_ID_XBEE_CMD				0x50
 
 void MESSAGE_Init(void);
 MESSAGE_Typedef MESSAGE_ReadMailbox(QueueHandle_t mbx);

@@ -10,5 +10,4 @@
 
 void BATTERIE_Init(void);
 
-
 #endif /* INC_BATTERIE_H_ */

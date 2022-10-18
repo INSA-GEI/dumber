@@ -49,19 +49,18 @@ void LEDS_Init(void) {
 	vTaskResume(xHandleLeds);
 }
 
-
 void LEDS_AnimationThread(void* params) {
 	MESSAGE_Typedef msg;
 	uint8_t cnt=0;
+	static int oneShot=1;
 
 	while (1) {
 		vTaskDelay(pdMS_TO_TICKS(100));
 
 		msg = MESSAGE_ReadMailboxNoDelay(LEDS_Mailbox);
-
 		cnt++;
 
-		if (msg.id == MSG_ID_LED_ETAT) { // Si c'est bien un message de changemnet d'etat LEDS
+		if (msg.id == MSG_ID_LED_ETAT) { // Si c'est bien un message de changement d'etat LEDS
 			LEDS_Animation = *((LEDS_State*)msg.data);
 
 			if (LEDS_Animation != LEDS_AnimationAncien) { 	// si le nouvel etat est different de l'ancien
@@ -71,6 +70,12 @@ void LEDS_AnimationThread(void* params) {
 				LEDS_EteintVerte();
 				LEDS_EteintJaune();
 				LEDS_EteintRouge();
+				cnt=0;
+			}
+
+			if ((LEDS_Animation == cmd_rcv_ok) || (LEDS_Animation == cmd_rcv_err) || (LEDS_Animation == cmd_rcv_unknown))
+			{
+				oneShot =1;
 				cnt=0;
 			}
 		}
@@ -192,6 +197,42 @@ void LEDS_AnimationThread(void* params) {
 			}
 			else
 				cnt=0;
+			break;
+		case cmd_rcv_ok:
+			if (oneShot) {
+				if (cnt<3)
+					LEDS_AllumeVerte();
+				else if (cnt<10)
+					LEDS_EteintVerte();
+				else {
+					cnt=0;
+					oneShot=0;
+				}
+			}
+			break;
+		case cmd_rcv_err:
+			if (oneShot) {
+				if (cnt<3)
+					LEDS_AllumeRouge();
+				else if (cnt<10)
+					LEDS_EteintRouge();
+				else {
+					cnt=0;
+					oneShot=0;
+				}
+			}
+			break;
+		case cmd_rcv_unknown:
+			if (oneShot) {
+				if (cnt<3)
+					LEDS_AllumeJaune();
+				else if (cnt<10)
+					LEDS_EteintJaune();
+				else {
+					cnt=0;
+					oneShot=0;
+				}
+			}
 			break;
 		default:
 			break;

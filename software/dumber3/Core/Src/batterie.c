@@ -69,9 +69,12 @@ void BATTERIE_VoltageThread(void* params) {
 
 	while (1) {
 		if (BATTERIE_LireTension(&tension) ==0) {
-			MESSAGE_SendMailbox(SEQUENCEUR_Mailbox, MSG_ID_BAT_CHARGE, BATTERIE_Mailbox, (void*)&tension);
+			if (HAL_GPIO_ReadPin(GPIOB, USB_SENSE_Pin)==GPIO_PIN_SET) // le chargeur est branché
+				MESSAGE_SendMailbox(SEQUENCEUR_Mailbox, MSG_ID_BAT_CHARGE, (QueueHandle_t)0x0, (void*)&tension);
+			else
+				MESSAGE_SendMailbox(SEQUENCEUR_Mailbox, MSG_ID_BAT_NIVEAU, (QueueHandle_t)0x0, (void*)&tension);
 		} else {
-			MESSAGE_SendMailbox(SEQUENCEUR_Mailbox, MSG_ID_BAT_ADC_ERR, BATTERIE_Mailbox, (void*)0x0);
+			MESSAGE_SendMailbox(SEQUENCEUR_Mailbox, MSG_ID_BAT_ADC_ERR, (QueueHandle_t)0x0, (void*)0x0);
 		}
 
 		vTaskDelay(pdMS_TO_TICKS(BATTERIE_PERIODE_SCRUTATION));
@@ -106,13 +109,13 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
 	if (GPIO_Pin == USB_SENSE_Pin) { // Le chargeur vient d'etre branché ou debranché
 		if (HAL_GPIO_ReadPin(GPIOB, GPIO_Pin)==GPIO_PIN_SET) // le chargeur est branché
-			MESSAGE_SendMailboxFromISR(SEQUENCEUR_Mailbox, MSG_ID_BAT_CHARGEUR_ON, BATTERIE_Mailbox, 0x0, &xHigherPriorityTaskWoken);
+			MESSAGE_SendMailboxFromISR(SEQUENCEUR_Mailbox, MSG_ID_BAT_CHARGEUR_ON, (QueueHandle_t)0x0, 0x0, &xHigherPriorityTaskWoken);
 		else
-			MESSAGE_SendMailboxFromISR(SEQUENCEUR_Mailbox, MSG_ID_BAT_CHARGEUR_OFF, BATTERIE_Mailbox, 0x0, &xHigherPriorityTaskWoken);
+			MESSAGE_SendMailboxFromISR(SEQUENCEUR_Mailbox, MSG_ID_BAT_CHARGEUR_OFF, (QueueHandle_t)0x0, 0x0, &xHigherPriorityTaskWoken);
 	}
 	else if (GPIO_Pin == BUTTON_SENSE_Pin) { // on vient d'appuyer sur le bouton on/off
 		if (HAL_GPIO_ReadPin(GPIOB, GPIO_Pin)==GPIO_PIN_SET)  // le chargeur est branché
-			MESSAGE_SendMailboxFromISR(SEQUENCEUR_Mailbox, MSG_ID_BUTTON_PRESSED, BATTERIE_Mailbox, 0x0, &xHigherPriorityTaskWoken);
+			MESSAGE_SendMailboxFromISR(SEQUENCEUR_Mailbox, MSG_ID_BUTTON_PRESSED, (QueueHandle_t)0x0, 0x0, &xHigherPriorityTaskWoken);
 	}
 
 	if (xHigherPriorityTaskWoken) {

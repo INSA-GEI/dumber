@@ -7,6 +7,8 @@
 #include "stm32l0xx_hal.h"
 #include "cmsis_os.h"
 
+#define SYSTEM_VERSION_STR			"version 2.0\r"
+
 #define STACK_SIZE 					0x100
 
 #define PriorityMoteurs        		(configMAX_PRIORITIES -1)
@@ -18,5 +20,7 @@
 #define PriorityLeds    			(configMAX_PRIORITIES -7)
 
 #define BATTERIE_PERIODE_SCRUTATION	1000
+#define XBEE_TX_SEMAPHORE_WAIT		500
+#define XBEE_RX_BUFFER_MAX_LENGTH	50
 
 TickType_t msToTicks(TickType_t ms);
