@@ -22,19 +22,13 @@
 using namespace cv;
 
 /**
- * Create an object for accessing camera with default values (size = sm and 
- * fps = 10)
- */
-Camera::Camera():Camera(sm, 10){
-}
-
-/**
  * Create an object for accessing camera
  * @param size Size of picture to grab (@see captureSize)
  * @param fps speed of sampling
  */
 Camera::Camera(int size, int fps) {
     this->SetSize(size);
+    this->fps = fps;
 #ifndef __FOR_PC__
     this->cap.set(CV_CAP_PROP_FORMAT, CV_8UC3);
     this->cap.set(CV_CAP_PROP_FRAME_WIDTH, width);
@@ -87,20 +81,20 @@ void Camera::SetSize(int size) {
 
     switch (size) {
         case xs:
-            this->width = 480;
-            this->height = 360;
+            this->width = 320;
+            this->height = 240;
             break;
         case sm:
             this->width = 640;
             this->height = 480;
             break;
         case md:
-            this->width = 1024;
-            this->height = 768;
+            this->width = 800;
+            this->height = 600;
             break;
         case lg:
-            this->width = 1280;
-            this->height = 960;
+            this->width = 1024;
+            this->height = 768;
             break;
         default:
             this->width = 480;
@@ -156,3 +150,10 @@ int Camera::GetHeight() const {
     return height;
 }
 
+/**
+ * Get fps of sampled image
+ * @return fps of sampled picture
+ */
+int Camera::GetFPS() const {
+    return fps;
+}
