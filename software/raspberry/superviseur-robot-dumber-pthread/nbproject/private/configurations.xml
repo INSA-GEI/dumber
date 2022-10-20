@@ -74,7 +74,7 @@
     </conf>
     <conf name="JPO2019_RPI_" type="1">
       <toolsSet>
-        <developmentServer>xenomai@192.168.1.141:22</developmentServer>
+        <developmentServer>xenomai@10.105.1.7:22</developmentServer>
         <platform>2</platform>
       </toolsSet>
       <dbx_gdbdebugger version="1">

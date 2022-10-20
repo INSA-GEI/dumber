@@ -242,43 +242,44 @@ void Tasks::TimerTask(void* arg) {
         //cntFrame++;
         //cout << "cnt: " << to_string(cntFrame) << endl << flush;
         
+        image.dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME(3));
+
+        std::list<Position> poses = image.SearchRobot(arena);
+        if (poses.size() > 0) {
+            Position firstPos = poses.front();
+
+            pos.angle = firstPos.angle;
+            pos.robotId = firstPos.robotId;
+            pos.center = firstPos.center;
+            pos.direction = firstPos.direction;
+        } else {
+            // Nothing found
+            pos.angle = 0.0;
+            pos.robotId = -1;
+            pos.center = cv::Point2f(0, 0);
+            pos.direction = cv::Point2f(0, 0);
+        }
+        
         if (sendPosition == true) {
             counter++;
 
-            if (counter >= 5) { // div =15
+            if (counter >= 15) { // div =15/15 => 1 update per second
                 counter = 0;
                 
                 //if (!arena.IsEmpty()) {
-                image.dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME(3));
-
-                std::list<Position> poses = image.SearchRobot(arena);
+                
                 cout << "Nbr of pos detected: " << to_string(poses.size()) << endl << flush;
-
-                if (poses.size() > 0) {
-                    Position firstPos = poses.front();
-
-                    pos.angle = firstPos.angle;
-                    pos.robotId = firstPos.robotId;
-                    pos.center = firstPos.center;
-                    pos.direction = firstPos.direction;
-                } else {
-                    // Nothing found
-                    pos.angle = 0.0;
-                    pos.robotId = -1;
-                    pos.center = cv::Point2f(0, 0);
-                    pos.direction = cv::Point2f(0, 0);
-                }
 
                 MessagePosition *msgp = new MessagePosition(MESSAGE_CAM_POSITION, pos);
                 monitor.Write(msgp);
-                cout << "Position sent" << endl << flush;
+                //cout << "Position sent" << endl << flush;
             }
         }
 
         if (sendImage == true) {
             counter_img++;
 
-            if (counter_img >= 1) {
+            if (counter_img >= 1) { // Div = 15/1 => 15 images per sec
                 counter_img = 0;
 
                 if (showArena) {

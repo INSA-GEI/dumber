@@ -7,13 +7,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/dimercur/Travail/dumber/raspberry/superviseur-robot-dumber-pthread/lib/img.h</file>
-            <file>file:/home/dimercur/Travail/dumber/raspberry/superviseur-robot-dumber-pthread/lib/img.cpp</file>
-            <file>file:/home/dimercur/Travail/dumber/raspberry/superviseur-robot-dumber-pthread/lib/messages.cpp</file>
-            <file>file:/home/dimercur/Travail/dumber/raspberry/superviseur-robot-dumber-pthread/tasks_pthread.cpp</file>
-            <file>file:/home/dimercur/Travail/dumber/raspberry/superviseur-robot-dumber-pthread/lib/commonitor.cpp</file>
-            <file>file:/home/dimercur/Travail/dumber/raspberry/superviseur-robot-dumber-pthread/lib/camera.cpp</file>
-            <file>file:/home/dimercur/Travail/dumber/raspberry/superviseur-robot-dumber-pthread/lib/camera.h</file>
+            <file>file:/home/dimercur/Travail/git/dumber/software/raspberry/superviseur-robot-dumber-pthread/lib/img.h</file>
+            <file>file:/home/dimercur/Travail/git/dumber/software/raspberry/superviseur-robot-dumber-pthread/lib/camera.cpp</file>
+            <file>file:/home/dimercur/Travail/git/dumber/software/raspberry/superviseur-robot-dumber-pthread/lib/img.cpp</file>
+            <file>file:/home/dimercur/Travail/git/dumber/software/raspberry/superviseur-robot-dumber-pthread/lib/camera.h</file>
         </group>
     </open-files>
 </project-private>

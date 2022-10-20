@@ -131,7 +131,7 @@
             <pElem>/usr/xenomai/include</pElem>
             <pElem>/usr/xenomai/include/mercury</pElem>
           </incDir>
-          <commandLine>-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__MERCURY__ -I/usr/xenomai/include/alchemy</commandLine>
+          <commandLine>-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__COBALT__ -I/usr/xenomai/include/alchemy</commandLine>
         </cTool>
         <ccTool>
           <incDir>
@@ -143,7 +143,6 @@
           <commandLine>-D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__COBALT__ -I/usr/xenomai/include/alchemy -Wno-pmf-conversions -std=gnu++11</commandLine>
           <preprocessorList>
             <Elem>_WITH_TRACE_</Elem>
-            <Elem>__FOR_PC__</Elem>
             <Elem>__WITH_ARUCO__</Elem>
           </preprocessorList>
         </ccTool>

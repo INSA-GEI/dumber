@@ -181,7 +181,8 @@ public:
      * @return list of position, empty if no robot found
      */
     std::list<Position> SearchRobot(Arena arena);
-        
+       
+    Img Resize();
 #ifdef __WITH_ARUCO__    
     /**
      * Dictionary to be used for aruco recognition

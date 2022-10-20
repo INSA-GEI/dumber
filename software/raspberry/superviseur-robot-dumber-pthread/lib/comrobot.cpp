@@ -26,12 +26,9 @@
 #include <string>
 #include <stdexcept>
 
-#ifdef __FOR_PC__
-// #define USART_FILENAME "/dev/ttyUSB0"
 #define USART_FILENAME "/dev/ttyS0"
-#else
-#define USART_FILENAME "/dev/ttyS0"
-#endif /* __FOR_PC__ */
+// Uncomment the following line when used on PC
+//#define USART_FILENAME "/dev/ttyUSB0"
 
 /*
  * Constants to be used for communicating with robot. Contains command tag

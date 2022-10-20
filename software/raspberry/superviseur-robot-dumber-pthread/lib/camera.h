@@ -22,9 +22,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/videoio/legacy/constants_c.h>
 
-#ifndef __FOR_PC__
-#include "raspicam/raspicam_cv.h"
-#endif /* __FOR_PC__ */
 #include "img.h"
 
 /**
@@ -94,14 +91,8 @@ public:
     Img Grab();
     
 private:
-#ifdef __FOR_PC__
-    /**
-     * Camera descriptor
-     */
-    cv::VideoCapture cap;
-#else
-    raspicam::RaspiCam_Cv cap;
-#endif /*  __FOR_PC__ */   
+
+    cv::VideoCapture cap;  
    
     /**
      * Size for image (default= small)

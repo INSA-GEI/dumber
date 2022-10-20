@@ -264,10 +264,50 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
             
             self.label_Image.setPixmap(im_pixmap)
             self.label_Image.setScaledContents(True)
-            self.label_Image.setSizePolicy(QtWidgets.QSizePolicy.Ignored,QtWidgets.QSizePolicy.Ignored)
-        elif Network.CAMERA_POSITION in s:
-            print ("position received")
-            print (s)
+            self.label_Image.setSizePolicy(QtWidgets.QSizePolicy.Fixed,QtWidgets.QSizePolicy.Fixed)
+        elif Network.CAMERA_POSITION in s:          
+            #CPOS:-1;0.000000;0.000000;0.000000;0.000000;0.000000
+            str_split = s.split(':')
+            values_split = str_split[1].split(';')
+            
+            try: 
+                robot_ID = int(values_split[0]) # Id of robot
+            except:
+                robot_ID = -1
+            
+            try:
+                robot_Angle = float(values_split[1]) # angle of robot
+            except:
+                robot_Angle = 0.0
+                
+            try:
+                robot_Coord_X = float(values_split[2]) # X coord of robot
+            except:
+                robot_Coord_X = 0.0
+                
+            try:
+                robot_Coord_Y = float(values_split[3]) # Y coord of robot
+            except:
+                robot_Coord_Y = 0.0
+                
+            try:
+                robot_Cap_X = float(values_split[4]) # X cap of robot
+            except:
+                robot_Cap_X = 0.0
+                
+            try:
+                robot_Cap_Y = float(values_split[5]) # Y cap of robot
+            except:
+                robot_Cap_Y = 0.0
+            
+            if robot_ID == -1:
+                self.label_RobotID.setText("No robot (-1)")
+            else:
+                self.label_RobotID.setText(values_split[0])
+            
+            self.label_RobotAngle.setText("%.2f°" % (robot_Angle))
+            self.label_RobotPos.setText("(%.2f, %.2f)" % (robot_Coord_X, robot_Coord_Y))
+            self.label_RobotDirection.setText("(%.2f, %.2f)" % (robot_Cap_X, robot_Cap_Y))
               
     # Callback for battery timeout
     @QtCore.pyqtSlot() 
