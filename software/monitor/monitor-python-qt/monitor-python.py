@@ -256,15 +256,19 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
             
             self.fps=self.fps+1
             str_split = s.split(':')
-            image_jpg= base64.b64decode(str_split[1])
-            img = QtGui.QImage.fromData(image_jpg, "jpg")
-            im_pixmap = QtGui.QPixmap(QtGui.QPixmap.fromImage(img))
+            try:
+                image_jpg= base64.b64decode(str_split[1])
+                img = QtGui.QImage.fromData(image_jpg, "jpg")
+                im_pixmap = QtGui.QPixmap(QtGui.QPixmap.fromImage(img))
             
-            #print ("Image size: " + str(im_pixmap.width()) + "x" + str(im_pixmap.height()))
+                #print ("Image size: " + str(im_pixmap.width()) + "x" + str(im_pixmap.height()))
             
-            self.label_Image.setPixmap(im_pixmap)
-            self.label_Image.setScaledContents(True)
-            self.label_Image.setSizePolicy(QtWidgets.QSizePolicy.Fixed,QtWidgets.QSizePolicy.Fixed)
+                self.label_Image.setPixmap(im_pixmap)
+                self.label_Image.setScaledContents(True)
+                self.label_Image.setSizePolicy(QtWidgets.QSizePolicy.Fixed,QtWidgets.QSizePolicy.Fixed)
+            except:
+                pass
+                #print ("Invalid image received")
         elif Network.CAMERA_POSITION in s:          
             #CPOS:-1;0.000000;0.000000;0.000000;0.000000;0.000000
             str_split = s.split(':')
