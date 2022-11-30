@@ -33,9 +33,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 0.762,
-          "height": 1.524,
-          "width": 1.524
+          "drill": 3.2,
+          "height": 3.2,
+          "width": 3.2
         },
         "silk_line_width": 0.15,
         "silk_text_italic": false,
@@ -55,7 +55,27 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [],
+      "drc_exclusions": [
+        "courtyards_overlap|111835001|103702574|92f75f95-0429-4a85-ac21-8c447f352dd4|db4ee546-6d29-47b9-bb6f-353d7d0a02ef",
+        "courtyards_overlap|188550001|90290001|8b41067e-6e69-443e-93db-d62bc8903b11|c88eab93-e18b-41a9-9bf6-cbddcd03fc65",
+        "courtyards_overlap|189990001|104250001|8b41067e-6e69-443e-93db-d62bc8903b11|92f34b9f-484e-4999-844c-119a3f71fcf7",
+        "silk_over_copper|167283000|126483000|a75b0930-793d-4d59-b45e-5044097fffcc|c3fd6543-b5ec-436a-92ec-8853e39e681a",
+        "silk_over_copper|167283000|128483000|a75b0930-793d-4d59-b45e-5044097fffcc|fb41dceb-8f0e-45bd-8dab-d4a07bec4136",
+        "silk_over_copper|167283000|130483000|a75b0930-793d-4d59-b45e-5044097fffcc|c73a8131-a59d-44c8-9404-fe174a487d29",
+        "silk_over_copper|167283000|132483000|a75b0930-793d-4d59-b45e-5044097fffcc|34a9cb77-cdc0-406d-99fb-34892a138839",
+        "silk_over_copper|167283000|134483000|a75b0930-793d-4d59-b45e-5044097fffcc|8229df43-141f-485c-bacc-4cec92feb530",
+        "silk_over_copper|170283000|127483000|cc6d7b4a-6075-4b64-8b10-546ebb85839f|2dd5af49-9983-48e7-b68e-c02c8fbc583f",
+        "silk_over_copper|170283000|129483000|cc6d7b4a-6075-4b64-8b10-546ebb85839f|13de2f6b-7f53-49bf-a84b-d36165a4ec14",
+        "silk_over_copper|170283000|131483000|cc6d7b4a-6075-4b64-8b10-546ebb85839f|700a340c-ba41-4b10-8071-a4692c8235d7",
+        "silk_over_copper|170283000|133483000|cc6d7b4a-6075-4b64-8b10-546ebb85839f|76729a86-5c0e-4b68-aae6-3ff603aacebc",
+        "silk_over_copper|170283000|135483000|cc6d7b4a-6075-4b64-8b10-546ebb85839f|3597c464-771d-49dd-bf65-73f272614ba2",
+        "silk_over_copper|189200000|91800000|6aec16d3-205f-412c-9d8c-457312466c25|c70b8833-fa6f-49b4-8b7c-949003a034d2",
+        "silk_over_copper|190300000|105210000|1992a7c6-c4b5-4e9a-ada0-bd5d4f8b1635|2922f406-8a01-4b6f-9ffd-33d2b73cda99",
+        "silk_over_copper|190300000|113850000|1992a7c6-c4b5-4e9a-ada0-bd5d4f8b1635|de5d949f-b87e-4069-9f2b-fe65df0a3162",
+        "silk_overlap|190300000|112500000|1992a7c6-c4b5-4e9a-ada0-bd5d4f8b1635|5162590d-5b34-444a-bf6f-4a7b61c57378",
+        "silk_overlap|190370000|112500000|5162590d-5b34-444a-bf6f-4a7b61c57378|1992a7c6-c4b5-4e9a-ada0-bd5d4f8b1635",
+        "track_dangling|158115000|109220000|d2605567-b159-4345-9b48-36b64b7f2d59|00000000-0000-0000-0000-000000000000"
+      ],
       "meta": {
         "version": 2
       },
@@ -416,7 +436,7 @@
       "idf": "",
       "netlist": "",
       "specctra_dsn": "",
-      "step": "dumber-v3.step",
+      "step": "../../../meca/Dumber_2022/Pieces/dumber-v3.3.step",
       "vrml": ""
     },
     "page_layout_descr_file": ""
