@@ -1,6 +1,6 @@
 {
   "board": {
-    "active_layer": 0,
+    "active_layer": 31,
     "active_layer_preset": "",
     "auto_track_width": true,
     "hidden_nets": [],
@@ -62,11 +62,11 @@
       35,
       36
     ],
-    "visible_layers": "ff87d55_80000001",
+    "visible_layers": "ffcffff_ffffffff",
     "zone_display_mode": 0
   },
   "meta": {
-    "filename": "dumber-v3.kicad_prl",
+    "filename": "ecran.kicad_prl",
     "version": 3
   },
   "project": {
