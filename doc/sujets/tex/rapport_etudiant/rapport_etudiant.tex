@@ -94,7 +94,7 @@ Pour faciliter la lecture des schémas, vous allez présenter votre conception e
 
 Si vous le souhaitez, au lieu de dessiner vos diagrammes sous un éditeur, vous pouvez joindre un scan de vos schémas — ils doivent être lisibles et propres.}
 
-% VUE GENERAL DU SYSTEME
+% VUE GÉNÉRAL DU SYSTÈME
 \subsection{Diagramme fonctionnel général}
 
 {\color{red} Mettez ici un diagramme fonctionnel qui présente les principaux blocs de votre conception. Pour cela, inspirez vous du diagramme ci-dessous (fig.~\ref{fig:diag_fonc_gen}) en indiquant pour chaque groupe de threads les données et ports partagés. La figure~\ref{fig:diag_fonc_gen} a été réalisée à partir du document de conception. {\bf Vous devez absolument conserver le découpage en trois groupes de threads ({\tt th\_group\_gestion\_moniteur}, {\tt th\_group\_vision}, {\tt th\_group\_gestion\_robot}).}}
@@ -172,7 +172,7 @@ Décrivez tous les éléments (paramètres, variables, etc.) qui vous semblent p
 
 
 \begin{figure}[htbp]
-\label{fig:act_envoyer}
+\label{fig:act_envoyerSendToMon}
 \begin{center}
 {\includegraphics[scale=.3]{./figures-pdf/th_sendToMon}}
 {\caption{Diagramme d'activité du thread {\tt th\_sendToMon}}}
@@ -181,7 +181,7 @@ Décrivez tous les éléments (paramètres, variables, etc.) qui vous semblent p
 
 
 \begin{figure}[htbp]
-\label{fig:act_envoyer}
+\label{fig:act_envoyerServer}
 \begin{center}
 {\includegraphics[scale=.3]{./figures-pdf/th_server}}
 {\caption{Diagramme d'activité du thread {\tt th\_server}}}
@@ -214,7 +214,7 @@ Décrivez tous les éléments (paramètres, variables, etc.) qui vous semblent p
 \hline
 \end{tabular}
 \end{center}
-\label{tab:gt_moniteur}
+\label{tab:gt_vision}
 \end{table}%
 \FloatBarrier
 
@@ -247,7 +247,7 @@ Décrivez tous les éléments (paramètres, variables, etc.) qui vous semblent p
 \hline
 \end{tabular}
 \end{center}
-\label{tab:gt_moniteur}
+\label{tab:gt_robot}
 \end{table}%
 \FloatBarrier
 
@@ -268,7 +268,7 @@ Décrivez tous les éléments (paramètres, variables, etc.) qui vous semblent p
 
 \paragraph{Description :} Le lancement du serveur doit être réalisé au démarrage du superviseur. En cas d'échec du démarrage du serveur, un message textuel doit être  affiché sur la console de lancement de l'application. Ce message doit signaler le problème et le superviseur doit s'arrêter.
 
-\paragraph{\color{black}Réalisation :}  {\color{blue} Fait en partie. La fonctionnalité est impléméntée sauf pour l'arrêt suite à l'échec de démarrage du serveur. L'implémentation actuelle stoppe la tâche en charge du démarrage du serveur, mais pas l'ensemble de l'application. Après discussion avec le client, la version actuelle est suffisante.}
+\paragraph{\color{black}Réalisation :}  {\color{blue} Fait en partie. La fonctionnalité est implémentée sauf pour l'arrêt suite à l'échec de démarrage du serveur. L'implémentation actuelle stoppe la tâche en charge du démarrage du serveur, mais pas l'ensemble de l'application. Après discussion avec le client, la version actuelle est suffisante.}
 }
 %%%
 {\color{gray}
@@ -459,41 +459,41 @@ et son démarrage ligne 146 avec
 \subsubsection{Activation périodique}
  {\color{blue} Expliquer comment vous rendez périodique l'activation d'un thread AADL sous Xenomai.}
 
-% THREAD EVENEMENTIEL
+% THREAD ÉVÈNEMENTIEL
 \subsubsection{Activation événementielle}
  {\color{blue} Expliquer les moyens mis en {\oe}uvre dans l'implémentation sous Xenomai pour gérer les activations événementielles d'un thread AADL.}
 
  
- % PORT D'EVENEMENT
+ % PORT D'ÉVÈNEMENT
 \subsection{Port d’événement}
 
-% INSTANCIATION PORT D'EVENEMENT
+% L'INSTANCIATION PORT D'ÉVÈNEMENT
 \subsubsection{Instanciation}
  {\color{blue} Comment avez-vous instancié un port d'événement ?}\\
  
- % ENVOI PORT D'EVENEMENT
+ % ENVOI PORT D'ÉVÈNEMENT
 \subsubsection{Envoi d’un événement}
  {\color{blue} Quels services ont été employés pour signaler un événement ?}
 
-% RECEPTION PORT D'EVENEMENT
+% RÉCEPTION PORT D'ÉVÈNEMENT
 \subsubsection{Réception d’un événement}
  {\color{blue} Comment se fait l'attente d'un événement ?}
 
-% DONNEE PARTAGEE
+% DONNÉE PARTAGÉE
 \subsection{Donnée partagée}
 
-% INSTANCIATION DONNEE PARTAGEE
+% L'INSTANCIATION DONNÉE PARTAGÉE
 \subsubsection{Instanciation}
  {\color{blue} Quelle structure instancie une donnée partagée ?}
 
-% LECTURE/ECRITURE DONNEE PARTAGEE
+% LECTURE/ÉCRITURE DONNÉE PARTAGÉE
 \subsubsection{Accès en lecture et écriture}
  {\color{blue} Comment garantissez-vous sous Xenomai l'accès à une donnée partagée ?}
 
-% PORT D'EVENEMENT-DONNEES
-\subsection{Ports d’événement-données}
+% PORT D'ÉVÈNEMENT DONNÉES
+\subsection{Ports d’événement données}
 
-% INSTANCIATION PORT D'EVENEMENT-DONNEES
+% L'INSTANCIATION PORT D'ÉVÈNEMENT-DONNÉES
 \subsubsection{Instanciation}
  {\color{blue} Donnez la solution retenue pour implémenter un port d'événement-données avec Xenomai.}
 
@@ -501,7 +501,7 @@ et son démarrage ligne 146 avec
 \subsubsection{Envoi d’une donnée}
  {\color{blue} Quels services avez-vous employés pour envoyer des données ?}
 
-% RECEPTION PORT D'EVENEMENT-DONNEES
+% RÉCEPTION PORT D'EVENEMENT-DONNEES
 \subsubsection{Réception d’une donnée}
  {\color{blue} Quels services avez-vous employés pour recevoir des données ?}
  

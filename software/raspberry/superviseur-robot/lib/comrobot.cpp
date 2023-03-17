@@ -101,7 +101,6 @@ int ComRobot::Close() {
 /**
  * Send a message to robot
  * @param msg Message to send to robot
- * @return 1 if success, 0 otherwise
  * @attention Message is destroyed (delete) after being sent. You do not need to delete it yourself
  * @attention Write is blocking until message is written into buffer (linux side)
  * @warning Write is not thread save : check that multiple tasks can't access this method simultaneously  

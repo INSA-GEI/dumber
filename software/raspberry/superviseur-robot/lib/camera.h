@@ -38,6 +38,7 @@ enum captureSize {xs, sm, md, lg};
  * How to grab an image and send it to the monitor:
  *  1. Grab an image, for example:
  *          Img * img = new Img(cam->Grab());
+ *          Img * img = cam->Grab().Copy();
  *  2. Instanciate the message to send the image:
  *          MessageImg *msgImg = new MessageImg(MESSAGE_CAM_IMAGE, img);
  */
