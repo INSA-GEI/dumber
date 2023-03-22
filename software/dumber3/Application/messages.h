@@ -8,7 +8,7 @@
 #ifndef INC_MESSAGES_H_
 #define INC_MESSAGES_H_
 
-#include "main.h"
+#include "application.h"
 #include "queue.h"
 
 typedef struct {
@@ -19,7 +19,7 @@ typedef struct {
 
 extern QueueHandle_t LEDS_Mailbox;
 extern QueueHandle_t MOTEURS_Mailbox;
-extern QueueHandle_t SEQUENCEUR_Mailbox;
+extern QueueHandle_t APPLICATION_Mailbox;
 
 #define MSG_ID_NO_MESSAGE			0x00
 

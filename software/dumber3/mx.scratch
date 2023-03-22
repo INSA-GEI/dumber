@@ -6,7 +6,7 @@
     <WorkspacePath>/home/dimercur/Travail/git/dumber/software/dumber3/</WorkspacePath>
     <underRoot>true</underRoot>
     <TrustZone>0</TrustZone>
-    <HAL_Driver>/home/dimercur/STM32Cube/Repository//STM32Cube_FW_L0_V1.12.1</HAL_Driver>
+    <HAL_Driver>/home/dimercur/STM32Cube/Repository//STM32Cube_FW_L0_V1.12.2</HAL_Driver>
     <CMSIS>Drivers/CMSIS</CMSIS>
     <Toolchain>STM32CubeIDE</Toolchain>
     <IocFile>Dumber3.ioc</IocFile>
@@ -30,12 +30,13 @@
             <memory access="xrw" name="RAM" size="20" start="0x20000000" />
             <memory access="rx" name="FLASH" size="128" start="0x8000000" />
           </memories>
-          <startup>/home/dimercur/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.1/Drivers/CMSIS/Device\ST\STM32L0xx\Source\Templates\gcc\startup_stm32l071xx.s</startup>
+          <startup>/home/dimercur/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/CMSIS/Device\ST\STM32L0xx\Source\Templates\gcc\startup_stm32l071xx.s</startup>
           <LinkSettings>
             <LinkAdditionalLibs />
           </LinkSettings>
           <heapSize>0x0</heapSize>
           <stackSize>0x200</stackSize>
+          <cpuclock>6</cpuclock>
           <board>custom</board>
           <debugprobe>swd</debugprobe>
           <optimization />

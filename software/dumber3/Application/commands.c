@@ -5,7 +5,7 @@
  *      Author: dimercur
  */
 
-#include "cmd.h"
+#include "commands.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

@@ -8,6 +8,8 @@
 #ifndef INC_MOTEURS_H_
 #define INC_MOTEURS_H_
 
+#include "application.h"
+
 void MOTEURS_Init(void);
 //void MOTEURS_Set(uint8_t mot, int16_t val);
 void MOTEURS_Test (void);

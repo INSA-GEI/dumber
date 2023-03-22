@@ -8,7 +8,7 @@
 #ifndef INC_CMD_H_
 #define INC_CMD_H_
 
-#include "main.h"
+#include "application.h"
 
 typedef enum {
 	pingCMD 				= 'p',

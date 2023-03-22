@@ -15,7 +15,7 @@
 #define PriorityXbeeRX 				(configMAX_PRIORITIES -2)
 #define PriorityXbeeTX 				(configMAX_PRIORITIES -3)
 #define PriorityBatterie			(configMAX_PRIORITIES -4)
-#define PrioritySequenceurMain		(configMAX_PRIORITIES -5)
+#define PriorityApplicationMain		(configMAX_PRIORITIES -5)
 #define PrioritySequenceurTimeout	(configMAX_PRIORITIES -6)
 #define PriorityLeds    			(configMAX_PRIORITIES -7)
 

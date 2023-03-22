@@ -5,31 +5,39 @@
  *      Author: dimercur
  */
 
-#include "sequenceur.h"
+#include "application.h"
 #include "timers.h"
 #include "string.h"
 #include <stdlib.h>
 
-StaticTask_t xTaskSequenceurMain;
+#include "moteurs.h"
+#include "leds.h"
+#include "xbee.h"
+#include "batterie.h"
+#include "messages.h"
+
+void LEDS_Tests();
+
+StaticTask_t xTaskApplicationMain;
 
 /* Buffer that the task being created will use as its stack.  Note this is
     an array of StackType_t variables.  The size of StackType_t is dependent on
     the RTOS port. */
-StackType_t xStackSequenceurMain[ STACK_SIZE ];
-TaskHandle_t xHandleSequenceurMain = NULL;
+StackType_t xStackApplicationMain[ STACK_SIZE ];
+TaskHandle_t xHandleApplicationMain = NULL;
 
 StaticTimer_t xBufferTimerTimeout;
 TimerHandle_t xHandleTimerTimeout = NULL;
 void vTimerTimeoutCallback( TimerHandle_t xTimer );
 
-void SEQUENCEUR_MainThread(void* params);
-void SEQUENCEUR_TimeoutThread(void* params);
-void SEQUENCEUR_StateMachine();
-LEDS_State SEQUENCEUR_BatteryLevel(uint16_t voltage, char inCharge);
-void SEQUENCEUR_PowerOff();
+void APPLICATION_MainThread(void* params);
+void APPLICATION_TimeoutThread(void* params);
+void APPLICATION_StateMachine();
+LEDS_State APPLICATION_BatteryLevel(uint16_t voltage, char inCharge);
+void APPLICATION_PowerOff();
 
-uint16_t SEQUENCEUR_CntTimeout;
-uint16_t SEQUENCEUR_CntPowerOff;
+uint16_t  APPLICATION_CntTimeout;
+uint16_t  APPLICATION_CntPowerOff;
 
 typedef enum {
 	stateStartup=0,
@@ -39,10 +47,10 @@ typedef enum {
 	stateInMouvement,
 	stateWatchdogDisable,
 	stateLowBatDisable
-} SEQUENCEUR_State;
+}  APPLICATION_State;
 
 typedef struct {
-	SEQUENCEUR_State state;
+	APPLICATION_State state;
 	CMD_Type cmd;
 	uint16_t batteryVoltage;
 	char batteryUpdate;
@@ -53,21 +61,35 @@ typedef struct {
 	int32_t motor_right;
 	char endOfMouvement;
 	char powerOffRequired;
-} SEQUENCEUR_Infos;
+}  APPLICATION_Infos;
 
-SEQUENCEUR_Infos systemInfos = {0};
+ APPLICATION_Infos systemInfos = {0};
 
-void SEQUENCEUR_Init(void) {
+void APPLICATION_Init(void) {
+	/* Init des messages box */
+		MESSAGE_Init();
+
+		LEDS_Init();
+		//LEDS_Tests();
+
+		//XBEE_Init();
+		//BATTERIE_Init();
+		//MOTEURS_Init();
+		//SEQUENCEUR_Init();
+
+		/*MOTEURS_Init();
+	      MOTEURS_Test();*/
+
 	/* Create the task without using any dynamic memory allocation. */
-	xHandleSequenceurMain = xTaskCreateStatic(
-			SEQUENCEUR_MainThread,       /* Function that implements the task. */
-			"SEQUENCEUR Main",          /* Text name for the task. */
+	xHandleApplicationMain = xTaskCreateStatic(
+			APPLICATION_MainThread,       /* Function that implements the task. */
+			"APPLICATION Main",          /* Text name for the task. */
 			STACK_SIZE,      /* Number of indexes in the xStack array. */
 			NULL,    /* Parameter passed into the task. */
-			PrioritySequenceurMain,/* Priority at which the task is created. */
-			xStackSequenceurMain,          /* Array to use as the task's stack. */
-			&xTaskSequenceurMain);  /* Variable to hold the task's data structure. */
-	vTaskResume(xHandleSequenceurMain);
+			PriorityApplicationMain,/* Priority at which the task is created. */
+			xStackApplicationMain,          /* Array to use as the task's stack. */
+			&xTaskApplicationMain);  /* Variable to hold the task's data structure. */
+	vTaskResume(xHandleApplicationMain);
 
 	/* Create the task without using any dynamic memory allocation. */
 
@@ -81,18 +103,18 @@ void SEQUENCEUR_Init(void) {
 			&xBufferTimerTimeout);
 	xTimerStart(xHandleTimerTimeout,0 );
 
-	SEQUENCEUR_CntTimeout =0;
-	SEQUENCEUR_CntPowerOff=0;
+	 APPLICATION_CntTimeout =0;
+	 APPLICATION_CntPowerOff=0;
 }
 
-void SEQUENCEUR_MainThread(void* params) {
+void APPLICATION_MainThread(void* params) {
 	MESSAGE_Typedef msg;
 
 	char *cmd;
 	CMD_Generic* decodedCmd;
 
 	while (1) {
-		msg = MESSAGE_ReadMailbox(SEQUENCEUR_Mailbox);
+		msg = MESSAGE_ReadMailbox(APPLICATION_Mailbox);
 
 		switch (msg.id) {
 		case MSG_ID_XBEE_CMD:
@@ -154,17 +176,17 @@ void SEQUENCEUR_MainThread(void* params) {
 			break;
 		}
 
-		SEQUENCEUR_StateMachine();
+		APPLICATION_StateMachine();
 	}
 }
 
-void SEQUENCEUR_StateMachine() {
+void APPLICATION_StateMachine() {
 	LEDS_State ledState = leds_off;
 
 	if (systemInfos.inCharge) {
 		systemInfos.state = stateInCharge;
 	} else if (systemInfos.batteryUpdate) {
-		ledState = SEQUENCEUR_BatteryLevel(systemInfos.batteryVoltage, systemInfos.inCharge);
+		ledState = APPLICATION_BatteryLevel(systemInfos.batteryVoltage, systemInfos.inCharge);
 
 		if (ledState == leds_niveau_bat_0)
 			systemInfos.state= stateLowBatDisable;
@@ -194,49 +216,49 @@ void SEQUENCEUR_StateMachine() {
 	switch (systemInfos.state) {
 	case stateStartup:
 		if (systemInfos.batteryUpdate) {
-			ledState = SEQUENCEUR_BatteryLevel(systemInfos.batteryVoltage, systemInfos.inCharge);
-			MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, SEQUENCEUR_Mailbox, (void*)&ledState);
+			ledState = APPLICATION_BatteryLevel(systemInfos.batteryVoltage, systemInfos.inCharge);
+			MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
 
 			vTaskDelay(pdMS_TO_TICKS(2000)); // wait 2s
 
 			systemInfos.state= stateIdle;
 			ledState = leds_idle;
-			MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, SEQUENCEUR_Mailbox, (void*)&ledState);
+			MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
 		}
 		break;
 	case stateIdle:
 		if (systemInfos.powerOffRequired)
-			SEQUENCEUR_PowerOff();
+			APPLICATION_PowerOff();
 		break;
 	case stateRun:
 		if (systemInfos.powerOffRequired)
-			SEQUENCEUR_PowerOff();
+			APPLICATION_PowerOff();
 		break;
 	case stateInCharge:
 		if (!systemInfos.inCharge) {
 			systemInfos.state = stateIdle;
 			ledState = leds_idle;
-			MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, SEQUENCEUR_Mailbox, (void*)&ledState);
+			MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
 		} else if (systemInfos.batteryUpdate) {
-			ledState = SEQUENCEUR_BatteryLevel(systemInfos.batteryVoltage, systemInfos.inCharge);
-			MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, SEQUENCEUR_Mailbox, (void*)&ledState);
+			ledState = APPLICATION_BatteryLevel(systemInfos.batteryVoltage, systemInfos.inCharge);
+			MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
 		}
 		break;
 	case stateInMouvement:
 		if (systemInfos.powerOffRequired)
-			SEQUENCEUR_PowerOff();
+			APPLICATION_PowerOff();
 		break;
 	case stateWatchdogDisable:
 		if (systemInfos.powerOffRequired)
-			SEQUENCEUR_PowerOff();
+			APPLICATION_PowerOff();
 		break;
 	case stateLowBatDisable:
 		ledState = leds_charge_bat_0;
-		MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, SEQUENCEUR_Mailbox, (void*)&ledState);
+		MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
 
 		vTaskDelay(pdMS_TO_TICKS(2000)); // wait 2s
 
-		SEQUENCEUR_PowerOff();
+		APPLICATION_PowerOff();
 		break;
 	}
 
@@ -246,13 +268,13 @@ void SEQUENCEUR_StateMachine() {
 	systemInfos.powerOffRequired=0;
 }
 
-LEDS_State SEQUENCEUR_BatteryLevel(uint16_t voltage, char inCharge) {
+LEDS_State APPLICATION_BatteryLevel(uint16_t voltage, char inCharge) {
 	LEDS_State ledState=leds_niveau_bat_0;
 
 	return ledState;
 }
 
-void SEQUENCEUR_PowerOff() {
+void APPLICATION_PowerOff() {
 
 }
 

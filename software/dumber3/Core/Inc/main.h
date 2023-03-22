@@ -32,17 +32,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "cmsis_os.h"
 
-#include "config.h"
-
-#include "messages.h"
-#include "leds.h"
-#include "moteurs.h"
-#include "batterie.h"
-#include "sequenceur.h"
-#include "xbee.h"
-#include "cmd.h"
 
 /* USER CODE END Includes */
 
@@ -93,16 +83,26 @@ void Error_Handler(void);
 #define USART_TX_GPIO_Port GPIOB
 #define USART_RX_Pin GPIO_PIN_11
 #define USART_RX_GPIO_Port GPIOB
-#define LED_ROUGE_Pin GPIO_PIN_12
-#define LED_ROUGE_GPIO_Port GPIOB
-#define LED_ORANGE_Pin GPIO_PIN_13
-#define LED_ORANGE_GPIO_Port GPIOB
-#define LED_VERTE_Pin GPIO_PIN_14
-#define LED_VERTE_GPIO_Port GPIOB
+#define LED_SEG_A_Pin GPIO_PIN_12
+#define LED_SEG_A_GPIO_Port GPIOB
+#define LED_SEG_B_Pin GPIO_PIN_13
+#define LED_SEG_B_GPIO_Port GPIOB
+#define LED_SEG_C_Pin GPIO_PIN_14
+#define LED_SEG_C_GPIO_Port GPIOB
 #define SHUTDOWN_ENCODERS_Pin GPIO_PIN_15
 #define SHUTDOWN_ENCODERS_GPIO_Port GPIOB
+#define LED_SEG_D_Pin GPIO_PIN_8
+#define LED_SEG_D_GPIO_Port GPIOA
+#define LED_SEG_E_Pin GPIO_PIN_9
+#define LED_SEG_E_GPIO_Port GPIOA
 #define XBEE_RESET_Pin GPIO_PIN_10
 #define XBEE_RESET_GPIO_Port GPIOA
+#define LED_SEG_F_Pin GPIO_PIN_11
+#define LED_SEG_F_GPIO_Port GPIOA
+#define LED_SEG_G_Pin GPIO_PIN_12
+#define LED_SEG_G_GPIO_Port GPIOA
+#define LED_SEG_DP_Pin GPIO_PIN_15
+#define LED_SEG_DP_GPIO_Port GPIOA
 #define BUTTON_SENSE_Pin GPIO_PIN_3
 #define BUTTON_SENSE_GPIO_Port GPIOB
 #define BUTTON_SENSE_EXTI_IRQn EXTI2_3_IRQn
@@ -117,6 +117,7 @@ void Error_Handler(void);
 #define SHUTDOWN_5V_GPIO_Port GPIOB
 #define SHUTDOWN_Pin GPIO_PIN_9
 #define SHUTDOWN_GPIO_Port GPIOB
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
@@ -126,5 +127,3 @@ void Error_Handler(void);
 #endif
 
 #endif /* __MAIN_H */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

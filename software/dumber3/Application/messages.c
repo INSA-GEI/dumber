@@ -12,14 +12,14 @@
 
 QueueHandle_t LEDS_Mailbox;
 QueueHandle_t MOTEURS_Mailbox;
-QueueHandle_t SEQUENCEUR_Mailbox;
+QueueHandle_t APPLICATION_Mailbox;
 QueueHandle_t BATTERIE_Mailbox;
 QueueHandle_t XBEE_Mailbox;
 
 void  MESSAGE_Init(void) {
 	LEDS_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
 	MOTEURS_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
-	SEQUENCEUR_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
+	APPLICATION_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
 }
 
 MESSAGE_Typedef MESSAGE_ReadMailbox(QueueHandle_t mbx) {

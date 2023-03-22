@@ -70,4 +70,3 @@ __weak void PostSleepProcessing(uint32_t *ulExpectedIdleTime)
 
 /* USER CODE END Application */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
