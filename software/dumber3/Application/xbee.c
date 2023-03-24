@@ -34,7 +34,11 @@ SemaphoreHandle_t xHandleSemaphoreRX = NULL;
 StaticSemaphore_t xSemaphoreRx;
 
 uint8_t* rxBuffer;
-uint32_t rxBufferIndex;
+uint8_t rxWaitForACK;
+uint8_t rxPhase;
+
+#define XBEE_RX_PHASE_HEADER 	1
+#define XBEE_RX_PHASE_BODY		2
 
 /****** TX part ******/
 SemaphoreHandle_t xHandleSemaphoreTX = NULL;
@@ -50,11 +54,7 @@ void XBEE_Init(void) {
 	xSemaphoreGive(xHandleSemaphoreTX);
 
 	rxBuffer=(uint8_t*)malloc(XBEE_RX_BUFFER_MAX_LENGTH);
-	rxBufferIndex=0;
-
-	if(HAL_UART_Receive_IT(&hlpuart1, rxBuffer, 1)!= HAL_OK) {
-		while(1);
-	}
+	rxWaitForACK = 0;
 }
 
 /**** Support functions ****/
@@ -98,7 +98,7 @@ char* XBEE_EncodeWithEscapeChar(char* data, int length, int *encodedLength) {
 
 	for (char* p=encodedData; p< (encodedData + *encodedLength); p++) {
 		if ((*data == (char)XBEE_API_ESCAPE_CHAR) || (*data == (char)XBEE_API_START_OF_FRAME) ||
-						(*data == (char)XBEE_API_XOFF) ||(*data == (char)XBEE_API_XON)) {
+				(*data == (char)XBEE_API_XOFF) ||(*data == (char)XBEE_API_XON)) {
 			*p = (char) XBEE_API_ESCAPE_CHAR;
 			p++;
 		}
@@ -119,10 +119,10 @@ char* XBEE_EncodeWithEscapeChar(char* data, int length, int *encodedLength) {
  * \return new buffer allocated without escaped char
  */
 char* XBEE_DecodeWithoutEscapeChar(char* encodedData, int encodedLength, int *length) {
-	char* data = (char*)malloc(encodedLength); 	// on prevoit un buffer aussi grand que celui avec caractere d'echappement,
-												// au cas où aucun caractere d'echappement ne serait present
-	*length = encodedLength; 					// par defaut, on considére que les données brutes ont la même taille que
-												// celles avec caractéres d'echappement.
+	char* data = (char*)malloc(encodedLength); 	// on prévoit un buffer aussi grand que celui avec caractère d'echappement,
+	// au cas où aucun caractère d'echappement ne serait present
+	*length = encodedLength; 					// par défaut, on considère que les données brutes ont la même taille que
+	// celles avec caractères d'echappement.
 
 	for (char* p=data; p< (data + encodedLength); p++) {
 		if (*encodedData == (char)XBEE_API_ESCAPE_CHAR) {
@@ -186,94 +186,93 @@ char* XBEE_EncodeTransmissionFrame(char* data, int length, uint16_t destination,
 }
 
 /**
+ * Get frame length
+ *
+ * \param frame pointer on frame header
+ * \return length of incoming frame
+ */
+uint16_t XBEE_GetFrameLength(uint8_t *frame) {
+	return (((uint16_t)frame[1])<<8) + (uint16_t)frame[2];
+}
+
+/**
  * Get a complete frame, check if frame is correct and extract raw data
  *
- * \param frame pointer on complete frame
- * \param data pointer to raw data, with escape char removed
- * \param sender address of the sender
- * \return status of decoding: XBEE_OK if decoding is successfull, XBEE_INVALID_FRAME otherwise
+ * \param raw_frame pointer on complete frame
+ * \param incomingFrame pointer to processed frame, with escape char removed
+ * \return status of decoding: XBEE_OK if decoding is successful, XBEE_INVALID_FRAME otherwise
  */
-XBEE_Status XBEE_DecodeFrame(char* frame, char** data, uint16_t *sender) {
-	uint8_t frame_type = (uint8_t)frame[3];
-	uint16_t frame_length;
+XBEE_Status XBEE_DecodeFrame(char* rawFrame, XBEE_INCOMING_FRAME** incomingFrame) {
+	uint8_t frame_type = (uint8_t)rawFrame[3];
+	uint16_t rawFrameLength;
 	uint8_t checksum;
+	XBEE_Status status = XBEE_OK;
+	int incomingDataLength = 0;
+
 	int i;
 
-	frame_length = (((uint16_t)frame[1])<<8) + (uint16_t)frame[2];
+	if (rawFrame[0] == '~') {
+		rawFrameLength = (((uint16_t)rawFrame[1])<<8) + (uint16_t)rawFrame[2];
 
-	/* verification du checksum */
-	checksum =0;
-	for (i=3; i<3+frame_length+1; i++) {
-		checksum += (uint8_t)frame[i];
-	}
-
-	if (checksum != 0xFF)
-		return XBEE_INVALID_FRAME;
-
-	switch (frame_type) {
-	case XBEE_RX_PACKET_TYPE:
-		*data = (XBEE_GENERIC_FRAME*)malloc(sizeof(XBEE_RX_PACKET_FRAME)+(frame_length-12)+1); // +1 for 0 ending in data frame
-		memset((void*)*data, 0, sizeof(XBEE_RX_PACKET_FRAME)+(frame_length-12)+1);
-		((XBEE_RX_PACKET_FRAME*)(*data))->type = frame_type;
-		((XBEE_RX_PACKET_FRAME*)(*data))->data_length = frame_length-12;
-		((XBEE_RX_PACKET_FRAME*)(*data))->options = frame[14];
-
-		((XBEE_RX_PACKET_FRAME*)(*data))->source_addr =0;
-		for (i=0; i<8; i++) {
-			((XBEE_RX_PACKET_FRAME*)(*data))->source_addr = ((XBEE_RX_PACKET_FRAME*)(*data))->source_addr<<8;
-			((XBEE_RX_PACKET_FRAME*)(*data))->source_addr +=(uint64_t)frame[4+i];
+		/* verification du checksum */
+		checksum =0;
+		for (i=3; i<3+rawFrameLength+1; i++) {
+			checksum += (uint8_t)rawFrame[i];
 		}
 
-		for (i=0; i<((XBEE_RX_PACKET_FRAME*)(*data))->data_length; i++) {
-			((XBEE_RX_PACKET_FRAME*)(*data))->data[i] =(char)frame[15+i];
-		}
+		if (checksum != 0xFF)
+			return XBEE_INVALID_FRAME;
 
-		((XBEE_RX_PACKET_FRAME*)(*data))->data[((XBEE_RX_PACKET_FRAME*)(*data))->data_length]=0x0; // 0 ending frame
+		*incomingFrame = (XBEE_INCOMING_FRAME*) malloc(sizeof(XBEE_INCOMING_FRAME)); /* Allocate a generic frame struct */
+		(*incomingFrame)->type = frame_type;
 
-		break;
-	case XBEE_MODEM_STATUS_TYPE:
-		*data = (XBEE_GENERIC_FRAME*)malloc(sizeof(XBEE_MODEM_STATUS_FRAME));
-		((XBEE_MODEM_STATUS_FRAME*)(*data))->type = frame_type;
-		((XBEE_MODEM_STATUS_FRAME*)(*data))->status = frame[4];
+		switch (frame_type) {
+		case XBEE_RX_16BIT_PACKET_TYPE:
+			/* Get source address */
+			(*incomingFrame)->source_addr = (((uint16_t)rawFrame[4])<<8) + (uint16_t)rawFrame[5];
+			(*incomingFrame)->data = XBEE_DecodeWithoutEscapeChar(&rawFrame[8], rawFrameLength-6, &incomingDataLength);
+			(*incomingFrame)->ack = 0;
+			break;
 
-		break;
-	case XBEE_TX_STATUS_TYPE:
-	case XBEE_EXTENDED_TX_STATUS_TYPE:
-		*data = (XBEE_GENERIC_FRAME*)malloc(sizeof(XBEE_TX_STATUS_FRAME));
-		((XBEE_TX_STATUS_FRAME*)(*data))->type = frame_type;
-		((XBEE_TX_STATUS_FRAME*)(*data))->frame_id = frame[4];
-		if (frame_type == XBEE_TX_STATUS_TYPE) {
-			((XBEE_TX_STATUS_FRAME*)(*data))->status = frame[5];
-			((XBEE_TX_STATUS_FRAME*)(*data))->retry_count = 0;
-		} else {
-			((XBEE_TX_STATUS_FRAME*)(*data))->status = frame[8];
-			((XBEE_TX_STATUS_FRAME*)(*data))->retry_count = frame[7];
-		}
+		case XBEE_MODEM_STATUS_TYPE:
+			(*incomingFrame)->modem_status = rawFrame[4];
+			(*incomingFrame)->data=0x0;
+			break;
 
-		break;
-	case XBEE_AT_CMD_RESPONSE_TYPE:
-		*data = (XBEE_GENERIC_FRAME*)malloc(sizeof(XBEE_AT_CMD_RESPONSE_FRAME)+(frame_length-5));
-		((XBEE_AT_CMD_RESPONSE_FRAME*)(*data))->type = frame_type;
-		((XBEE_AT_CMD_RESPONSE_FRAME*)(*data))->data_length = frame_length-5;
-		((XBEE_AT_CMD_RESPONSE_FRAME*)(*data))->status = frame[7];
+		case XBEE_TX_STATUS_TYPE:
+			(*incomingFrame)->ack = rawFrame[5];
+			(*incomingFrame)->data=0x0;
+			break;
 
-		for (i=0; i<((XBEE_AT_CMD_RESPONSE_FRAME*)(*data))->data_length; i++) {
-			((XBEE_AT_CMD_RESPONSE_FRAME*)(*data))->data[i] =(uint8_t)frame[8+i];
-		}
-		break;
-	default:
-		*data = (XBEE_GENERIC_FRAME*)malloc(sizeof(XBEE_GENERIC_FRAME));
-		((XBEE_GENERIC_FRAME*)(*data))->type = frame_type;
-		return XBEE_INVALID_FRAME;
-	};
+		case XBEE_EXTENDED_TX_STATUS_TYPE:
+			(*incomingFrame)->ack = rawFrame[8];
+			(*incomingFrame)->data=0x0;
+			break;
 
-	return XBEE_OK;
+		default:
+			free (*incomingFrame);
+			return XBEE_INVALID_FRAME;
+		};
+	} else status = XBEE_INVALID_FRAME;
+
+	return status;
 }
 
 /**** TX Part *****/
+
+/**
+ * Send data. Create a transmission frame, add escape char to data and send it over UART
+ *
+ * \param data raw data to send
+ * \param length length of data to send
+ * \return status of decoding: XBEE_OK if decoding is successful,
+ *                             XBEE_TX_ERROR in case of sending error,
+ *                             XBEE_TX_ACK_ERROR in case frame was not acknowledge by detination part
+ */
 int XBEE_SendData(char* data, int length) {
 	int data_length;
 	BaseType_t state;
+	XBEE_INCOMING_FRAME* incomingFrame;
 
 	// Prevents successive calls to overlap
 	state = xSemaphoreTake(xHandleSemaphoreTX, pdMS_TO_TICKS(XBEE_TX_SEMAPHORE_WAIT)); // wait max 500 ms (to avoid interlocking)
@@ -283,24 +282,44 @@ int XBEE_SendData(char* data, int length) {
 	                           We should probably reset something in "else" branch */
 
 		/* TODO: stuff to do here for converting data into API frame */
-		data_length = length;
-		if ((txBuffer = (uint8_t*)malloc(length))!=NULL) {
-			memcpy((void*)txBuffer, (void*) data, length);
+		txBuffer = (uint8_t*)XBEE_EncodeWithEscapeChar(data, length, &data_length);
 
-			if(HAL_UART_Transmit_IT(&hlpuart1, txBuffer, data_length)!= HAL_OK)
-				return -3;
-		} else return -2;
-	} else return -1;
+		if (txBuffer!=NULL) {
+			if (HAL_UART_Transmit_DMA(&hlpuart1, txBuffer, data_length)!= HAL_OK)
+				return XBEE_TX_ERROR;
+			else {
+				rxWaitForACK = 1; /* wait for TX ack */
+				// Wait for ACK frame after TX
+				state = xSemaphoreTake(xHandleSemaphoreTX_ACK, pdMS_TO_TICKS(XBEE_TX_SEMAPHORE_WAIT)); // wait max 500 ms (to avoid interlocking)
+				if (XBEE_DecodeFrame((char*) rxBuffer, &incomingFrame)!=XBEE_OK)
+					return XBEE_TX_ACK_ERROR;
+				else {
+					if (incomingFrame == 0x0)
+						return XBEE_TX_ACK_ERROR;
+					else if ((incomingFrame->type != XBEE_TX_STATUS_TYPE) || (incomingFrame->ack != XBEE_TX_STATUS_SUCCESS)) {
+						free ((XBEE_INCOMING_FRAME*) incomingFrame);
+						return XBEE_TX_ACK_ERROR;
+					}
+				}
+			}
+		} else return XBEE_TX_ERROR;
+	} else return XBEE_TX_ERROR;
 
 	return length;
 }
 
+/**
+ * DMA Interrupt request for transmission. Call when transmission is finished
+ *
+ * \param UartHandle not used
+ */
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle) {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-	/* Do stuff here */
+	/* Free transmit buffer */
 	free (txBuffer);
 
-	xSemaphoreGiveFromISR( xHandleSemaphoreTX, &xHigherPriorityTaskWoken );
+	if (rxWaitForACK != 1) /* we are waiting for an acknowledge frame, so do not give semaphore yet */
+		xSemaphoreGiveFromISR( xHandleSemaphoreTX, &xHigherPriorityTaskWoken );
 
 	/* If xHigherPriorityTaskWoken was set to true you
 	    we should yield.  The actual macro used here is
@@ -309,30 +328,60 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle) {
 }
 
 /***** Rx Part *****/
+
+/**
+ * Reception thread. Wait for incoming frame, process it and send message to application
+ *
+ * \param params not used
+ */
 void XBEE_RxThread(void* params) {
+	BaseType_t state;
+	XBEE_INCOMING_FRAME* incomingFrame;
+
+	rxPhase= XBEE_RX_PHASE_HEADER;
+	while (HAL_UART_Receive_DMA(&hlpuart1, rxBuffer, 3)== HAL_OK); // start reception of frame
 
 	// endless task
 	while (1) {
+		while ((state = xSemaphoreTake(xHandleSemaphoreRX, portMAX_DELAY))==pdTRUE); // wait forever
 
+		/* Process frame */
+		if (XBEE_DecodeFrame((char*) rxBuffer, &incomingFrame)==XBEE_OK) // frame is valid
+			if (incomingFrame != 0x0)  // frame is valid
+				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_XBEE_CMD, (QueueHandle_t)0x0, (void*)incomingFrame);
 	}
 }
 
+/**
+ * DMA IRQ handler for reception. Receive a complete frame send send event to sending frame in case of acknowledge frame or to receive task otherwise
+ *
+ * \param UartHandle not used
+ */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle) {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+	uint16_t frameLength;
 
-	if (rxBuffer[rxBufferIndex] == '\r') {
-		rxBuffer[rxBufferIndex+1]=0; // add end of string
-		MESSAGE_SendMailboxFromISR(APPLICATION_Mailbox, MSG_ID_XBEE_CMD, (QueueHandle_t)0x0, (void*)rxBuffer, &xHigherPriorityTaskWoken);
+	if (rxPhase == XBEE_RX_PHASE_HEADER) { // we just received header part
+		frameLength=XBEE_GetFrameLength(rxBuffer); /* Compute body part of the frame + checksum */
 
-		rxBuffer = malloc(XBEE_RX_BUFFER_MAX_LENGTH);
-		rxBufferIndex=0;
-	} else if (rxBufferIndex>=XBEE_RX_BUFFER_MAX_LENGTH-2) // prevent buffer overflow
-		rxBufferIndex=0;
-	else
-		rxBufferIndex++;
+		if (HAL_UART_Receive_DMA(&hlpuart1, rxBuffer+3, frameLength+1)== HAL_OK) {
+			/* Reception of body part started successfully */
+			rxPhase = XBEE_RX_PHASE_BODY;
+		} else {
+			/* Failed to start reception of body
+			 * Restart reception of header */
+			while (HAL_UART_Receive_DMA(&hlpuart1, rxBuffer, 3)!= HAL_OK); // try to receive header
+		}
+	} else { // we just received body part. Frame is complete
+		if (rxWaitForACK) {
+			xSemaphoreGiveFromISR( xHandleSemaphoreTX_ACK, &xHigherPriorityTaskWoken); /* Send event to sending function */
+			xSemaphoreGiveFromISR( xHandleSemaphoreTX, &xHigherPriorityTaskWoken ); /* Allow new sending data */
+		} else {
+			xSemaphoreGiveFromISR( xHandleSemaphoreRX, &xHigherPriorityTaskWoken ); /* send event to receive task to process received task */
+		}
 
-	if(HAL_UART_Receive_IT(&hlpuart1, &rxBuffer[rxBufferIndex], 1)!= HAL_OK) {
-		while(1);
+		rxPhase = XBEE_RX_PHASE_HEADER;
+		while (HAL_UART_Receive_DMA(&hlpuart1, rxBuffer, 3)!= HAL_OK); // try to receive header
 	}
 
 	if (xHigherPriorityTaskWoken) {

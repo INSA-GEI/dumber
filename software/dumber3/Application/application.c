@@ -63,21 +63,23 @@ typedef struct {
 	char powerOffRequired;
 }  APPLICATION_Infos;
 
- APPLICATION_Infos systemInfos = {0};
+APPLICATION_Infos systemInfos = {0};
 
 void APPLICATION_Init(void) {
 	/* Init des messages box */
-		MESSAGE_Init();
+	MESSAGE_Init();
 
-		LEDS_Init();
-		//LEDS_Tests();
+	/* Init de l'afficheur */
+	LEDS_Init();
+	//LEDS_Tests();
 
-		//XBEE_Init();
-		//BATTERIE_Init();
-		//MOTEURS_Init();
-		//SEQUENCEUR_Init();
+	/* Init de la partie RF / reception des messages */
+	XBEE_Init();
+	//BATTERIE_Init();
+	//MOTEURS_Init();
+	//SEQUENCEUR_Init();
 
-		/*MOTEURS_Init();
+	/*MOTEURS_Init();
 	      MOTEURS_Test();*/
 
 	/* Create the task without using any dynamic memory allocation. */
@@ -91,8 +93,7 @@ void APPLICATION_Init(void) {
 			&xTaskApplicationMain);  /* Variable to hold the task's data structure. */
 	vTaskResume(xHandleApplicationMain);
 
-	/* Create the task without using any dynamic memory allocation. */
-
+	/* Create a periodic task without using any dynamic memory allocation. */
 	xHandleTimerTimeout = xTimerCreateStatic(
 			"Seq Timer",
 			//pdMS_TO_TICKS(100),
@@ -103,8 +104,8 @@ void APPLICATION_Init(void) {
 			&xBufferTimerTimeout);
 	xTimerStart(xHandleTimerTimeout,0 );
 
-	 APPLICATION_CntTimeout =0;
-	 APPLICATION_CntPowerOff=0;
+	APPLICATION_CntTimeout =0;
+	APPLICATION_CntPowerOff=0;
 }
 
 void APPLICATION_MainThread(void* params) {

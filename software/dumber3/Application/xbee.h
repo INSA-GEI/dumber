@@ -12,12 +12,12 @@
 
 typedef enum {
 	XBEE_OK=0,
-	XBEE_CONFIG_ERROR,
-	XBEE_AT_CMD_ERROR,
-	XBEE_RX_TIMEOUT,
-	XBEE_RX_ERROR,
-	XBEE_TX_ERROR,
-	XBEE_INVALID_FRAME
+	XBEE_CONFIG_ERROR=-1,
+	XBEE_TX_ACK_ERROR=-2,
+	XBEE_RX_TIMEOUT=-3,
+	XBEE_RX_ERROR=-4,
+	XBEE_TX_ERROR=-5,
+	XBEE_INVALID_FRAME=-6
 } XBEE_Status;
 
 #define XBEE_RX_PACKET_TYPE			0x90
@@ -50,37 +50,12 @@ typedef enum {
 #define XBEE_RX_OPTIONS_PAN_BROADCASTED		0x04
 
 typedef struct {
-	uint8_t type;
-} XBEE_GENERIC_FRAME;
-
-typedef struct {
-	uint8_t type;
-	uint64_t source_addr;
-	uint8_t options;
-	uint8_t data_length;
-	char data[];
-} XBEE_RX_PACKET_FRAME;
-
-typedef struct {
-	uint8_t type;
-	uint8_t frame_id;
-	uint16_t at_cmd;
-	uint8_t status;
-	uint8_t data_length;
-	char data[];
-} XBEE_AT_CMD_RESPONSE_FRAME;
-
-typedef struct {
-	uint8_t type;
-	uint8_t frame_id;
-	uint8_t status;
-	uint8_t retry_count;
-} XBEE_TX_STATUS_FRAME;
-
-typedef struct {
-	uint8_t type;
-	uint8_t status;
-} XBEE_MODEM_STATUS_FRAME;
+	uint8_t  	type;
+	uint16_t 	source_addr;
+	char* 		data;
+	char  		ack;
+	char		modem_status;
+} XBEE_INCOMING_FRAME;
 
 void XBEE_Init(void);
 int XBEE_SendData(char* data, int length);
