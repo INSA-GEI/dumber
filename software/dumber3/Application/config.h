@@ -12,16 +12,29 @@
 
 #define STACK_SIZE 					0x100
 
-#define PriorityMoteurs        		(configMAX_PRIORITIES -1)
+#define PriorityMoteursAsservissement	(configMAX_PRIORITIES -1)
 #define PriorityXbeeRX 				(configMAX_PRIORITIES -2)
 #define PriorityXbeeTX 				(configMAX_PRIORITIES -3)
-#define PriorityBatterie			(configMAX_PRIORITIES -4)
-#define PriorityApplicationMain		(configMAX_PRIORITIES -5)
-#define PrioritySequenceurTimeout	(configMAX_PRIORITIES -6)
-#define PriorityLeds    			(configMAX_PRIORITIES -7)
+#define PriorityMoteurs				(configMAX_PRIORITIES -4)
+#define PriorityBatterie			(configMAX_PRIORITIES -5)
+#define PriorityApplicationMain		(configMAX_PRIORITIES -6)
+#define PrioritySequenceurTimeout	(configMAX_PRIORITIES -7)
+#define PriorityLeds    			(configMAX_PRIORITIES -8)
 
-#define BATTERIE_PERIODE_SCRUTATION	1000
+/* Periodes des taches periodiques (en ms */
+#define MOTEURS_PERIODE_ASSERVISSEMENT	(5)
+#define APPLICATION_PERIODE				(100)
+#define BATTERIE_PERIODE_SCRUTATION		(1000)
+#define LEDS_PERIODE					(100)
+
+
 #define XBEE_TX_SEMAPHORE_WAIT		500
 #define XBEE_RX_BUFFER_MAX_LENGTH	50
+
+#define APPLICATION_INACTIVITY_TIMEOUT	(2*60*1000) // 2 minutes, expressed in ms
+#define APPLICATION_WATCHDOG_MIN		(900)    	// minimum time to wait before resetting watchdog, expressed in ms
+#define APPLICATION_WATCHDOG_MAX		(1100)    	// maximum time to wait before resetting watchdog, expressed in ms
+#define APPLICATION_WATCHDOG_MISSED_MAX (3)			// Maximum missed timeout reset before entering watchdog disabled state
+#define APPLICATION_STARTUP_DELAY		(3*1000)	// Startup delay, expressed in ms
 
 TickType_t msToTicks(TickType_t ms);

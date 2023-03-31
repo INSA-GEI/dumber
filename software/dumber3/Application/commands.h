@@ -10,6 +10,7 @@
 
 #include "application.h"
 
+#define CMD_NONE 					0x0
 #define CMD_PING 					0x1
 #define CMD_RESET 					0x2
 #define CMD_START_WITH_WATCHDOG 	0x3
@@ -75,6 +76,6 @@ CMD_Generic* cmdDecode(char* cmd);
 void cmdSendAnswer(uint8_t ans);
 void cmdSendBatteryLevel(char level);
 void cmdSendVersion();
-void cmdBusyState(uint8_t state);
+void cmdSendBusyState(uint8_t state);
 
 #endif /* INC_CMD_H_ */

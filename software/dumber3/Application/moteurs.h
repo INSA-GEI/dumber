@@ -12,6 +12,11 @@
 
 void MOTEURS_Init(void);
 //void MOTEURS_Set(uint8_t mot, int16_t val);
-void MOTEURS_Test (void);
+//void MOTEURS_Test (void);
+void MOTEURS_Avance(uint32_t distance);
+void MOTEURS_Tourne(uint32_t tours);
+void MOTEURS_Stop(void);
+
+void MOTEURS_TimerEncodeurUpdate (TIM_HandleTypeDef *htim);
 
 #endif /* INC_MOTEURS_H_ */

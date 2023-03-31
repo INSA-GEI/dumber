@@ -169,9 +169,14 @@ void LEDS_Tests(void* params) {
 void LEDS_AnimationThread(void* params) {
 	MESSAGE_Typedef msg;
 	uint8_t cnt=0;
+	TickType_t xLastWakeTime;
+
+	// Initialise the xLastWakeTime variable with the current time.
+	xLastWakeTime = xTaskGetTickCount();
 
 	while (1) {
-		vTaskDelay(pdMS_TO_TICKS(100));
+		// Wait for the next cycle.
+		vTaskDelayUntil( &xLastWakeTime, pdMS_TO_TICKS(LEDS_PERIODE));
 
 		msg = MESSAGE_ReadMailboxNoDelay(LEDS_Mailbox);
 		cnt++;

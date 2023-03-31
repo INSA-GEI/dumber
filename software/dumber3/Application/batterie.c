@@ -66,6 +66,10 @@ int BATTERIE_LireTension(uint16_t *val) {
 
 void BATTERIE_VoltageThread(void* params) {
 	static uint16_t tension;
+	TickType_t xLastWakeTime;
+
+	// Initialise the xLastWakeTime variable with the current time.
+	xLastWakeTime = xTaskGetTickCount();
 
 	while (1) {
 		if (BATTERIE_LireTension(&tension) ==0) {
@@ -77,7 +81,8 @@ void BATTERIE_VoltageThread(void* params) {
 			MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_ADC_ERR, (QueueHandle_t)0x0, (void*)0x0);
 		}
 
-		vTaskDelay(pdMS_TO_TICKS(BATTERIE_PERIODE_SCRUTATION));
+		// Wait for the next cycle.
+		vTaskDelayUntil( &xLastWakeTime, pdMS_TO_TICKS(BATTERIE_PERIODE_SCRUTATION));
 	}
 }
 

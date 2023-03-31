@@ -6,19 +6,41 @@
  */
 
 #include "moteurs.h"
+#include "timers.h"
 
-//extern LPTIM_HandleTypeDef hlptim1;
+/*
+ * Global informations
+ * Main clock: 6 Mhz
+ * Tim2 PWM Input (CH1): Encodeur droit PHB : 0 -> 65535
+ * TIM21 PWM Input (CH1): Encodeur Gauche PHA: 0 -> 65535
+ * TIM3: PWM Output moteur (0->200) (~30 Khz)
+ */
 
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim21;
+extern TIM_HandleTypeDef htim3;
 
-int16_t MOTEUR_CmdMoteurG;
-int16_t MOTEUR_CmdMoteurD;
-int16_t MOTEUR_ConsigneMoteurG;
-int16_t MOTEUR_ConsigneMoteurD;
+#define MOTEURS_MAX_COMMANDE	200
+#define MOTEURS_MAX_CONSIGNE	100
+#define MOTEURS_MAX_ENCODEUR	65535
 
-int16_t MOTEUR_NBImpulsionsG;
-int16_t MOTEUR_NBImpulsionsD;
+typedef struct {
+	int16_t commande;
+	int16_t consigne;
+	uint16_t encodeur;
+	uint8_t moteurLent;
+} MOTEURS_EtatMoteur;
+
+typedef struct {
+	uint8_t type;
+	int16_t commande;
+	int16_t consigne;
+	uint32_t distance;
+	uint32_t tours;
+} MOTEURS_EtatDiff;
+
+MOTEURS_EtatMoteur MOTEURS_EtatMoteurGauche, MOTEURS_EtatMoteurDroit = {0};
+MOTEURS_EtatDiff MOTEURS_EtatDifferentiel;
 
 uint16_t MOTEUR_DerniereValEncodeursG;
 uint16_t MOTEUR_DerniereValEncodeursD;
@@ -29,13 +51,164 @@ uint16_t MOTEUR_DerniereValEncodeursD;
 #define MOTEUR_Kp 		15
 #define MOTEUR_DELAY	3
 
-/*
- * Global informations
- * Main clock: 6 Mhz
- * Tim2 PWM range: 0 - 255 (freq: 23437,5 Mhz)
- * TIM21: encodeur gauche (0 - 65535)
- * LPTIM: encodeur droit (0 - 65535)
+/***** Tasks part *****/
+
+/* Tache moteurs (gestion des messages) */
+StaticTask_t xTaskMoteurs;
+StackType_t xStackMoteurs[ STACK_SIZE ];
+TaskHandle_t xHandleMoteurs = NULL;
+void MOTEURS_TachePrincipale(void* params);
+
+/* Tache moteurs périodique (asservissement) */
+StaticTask_t xTaskMoteursAsservissement;
+StackType_t xStackMoteursAsservissement[ STACK_SIZE ];
+TaskHandle_t xHandleMoteursAsservissement = NULL;
+void MOTEURS_TacheAsservissement( void* params ) ;
+
+/* Fonctions diverses */
+void MOTEURS_Set(int16_t cmdGauche, int16_t cmdDroit);
+void MOTEURS_DesactiveAlim(void);
+void MOTEURS_ActiveAlim(void);
+GPIO_PinState MOTEURS_EtatAlim(void);
+uint16_t MOTEURS_CorrectionEncodeur(uint16_t encodeur);
+
+/**
+ * @brief Fonction d'initialisation des moteurs
+ *
  */
+void MOTEURS_Init(void) {
+	/* Désactive les alimentations des moteurs */
+	MOTEURS_DesactiveAlim();
+
+	/* Create the task without using any dynamic memory allocation. */
+	xHandleMoteurs = xTaskCreateStatic(
+			MOTEURS_TachePrincipale,       /* Function that implements the task. */
+			"MOTEURS Principale",          /* Text name for the task. */
+			STACK_SIZE,      /* Number of indexes in the xStack array. */
+			NULL,    /* Parameter passed into the task. */
+			PriorityMoteurs,/* Priority at which the task is created. */
+			xStackMoteurs,          /* Array to use as the task's stack. */
+			&xTaskMoteurs);  /* Variable to hold the task's data structure. */
+	vTaskResume(xHandleMoteurs);
+
+	/* Create the task without using any dynamic memory allocation. */
+	xHandleMoteursAsservissement = xTaskCreateStatic(
+			MOTEURS_TacheAsservissement,       /* Function that implements the task. */
+			"MOTEURS Asservissement",          /* Text name for the task. */
+			STACK_SIZE,      /* Number of indexes in the xStack array. */
+			NULL,    /* Parameter passed into the task. */
+			PriorityMoteursAsservissement,/* Priority at which the task is created. */
+			xStackMoteursAsservissement,          /* Array to use as the task's stack. */
+			&xTaskMoteursAsservissement);  /* Variable to hold the task's data structure. */
+	vTaskSuspend(xHandleMoteursAsservissement); // On ne lance la tache d'asservissement que lorsque'une commande moteur arrive
+}
+
+void MOTEURS_Avance(uint32_t distance) {
+	static uint32_t dist;
+
+	dist = distance;
+	MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_MOVE, APPLICATION_Mailbox, (void*)dist);
+}
+
+void MOTEURS_Tourne(uint32_t tours) {
+	static uint32_t turns;
+
+	turns = tours;
+	MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_TURN, APPLICATION_Mailbox, (void*)turns);
+}
+
+void MOTEURS_Stop(void) {
+	MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_STOP, APPLICATION_Mailbox, (void*)NULL);
+}
+
+/*
+ * @brief Tache de supervision des moteurs
+ * 		  Gestion de la boite aux lettres moteurs, et supervision generale
+ * @params params non utilisé
+ */
+void MOTEURS_TachePrincipale(void* params) {
+	MESSAGE_Typedef msg;
+	uint32_t distance, tours;
+
+	while (1) {
+		msg = MESSAGE_ReadMailbox(MOTEURS_Mailbox);
+
+		switch (msg.id) {
+		case MSG_ID_MOTEURS_MOVE:
+			distance = *((uint32_t*)msg.data);
+
+			// TODO: trucs a faire ici
+			vTaskResume(xHandleMoteursAsservissement);
+			break;
+		case MSG_ID_MOTEURS_TURN:
+			tours = *((uint32_t*)msg.data);
+
+			// TODO: trucs a faire ici
+			vTaskResume(xHandleMoteursAsservissement);
+			break;
+		case MSG_ID_MOTEURS_STOP:
+			// TODO: trucs a faire ici
+			vTaskSuspend(xHandleMoteursAsservissement);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+/*
+ * @brief Tache d'asservissement, periodique (10ms)
+ *
+ * @params params non utilisé
+ */
+void MOTEURS_TacheAsservissement( void* params ) {
+	TickType_t xLastWakeTime;
+	int16_t deltaG, deltaD =0;
+
+	uint16_t encodeurGauche, encodeurDroit;
+
+	// Initialise the xLastWakeTime variable with the current time.
+	xLastWakeTime = xTaskGetTickCount();
+
+	for (;;) {
+		// Wait for the next cycle.
+		vTaskDelayUntil( &xLastWakeTime, pdMS_TO_TICKS(MOTEURS_PERIODE_ASSERVISSEMENT));
+
+		encodeurGauche = MOTEURS_CorrectionEncodeur(MOTEURS_EtatMoteurGauche.encodeur);
+		encodeurDroit = MOTEURS_CorrectionEncodeur(MOTEURS_EtatMoteurDroit.encodeur);
+
+		deltaG = MOTEURS_EtatMoteurGauche.consigne - encodeurGauche;
+		deltaD = MOTEURS_EtatMoteurDroit.consigne - encodeurDroit;
+
+		if (((MOTEURS_EtatMoteurDroit.consigne ==0) && (MOTEURS_EtatMoteurGauche.consigne ==0)) &&
+				((deltaD==0) && (deltaG==0))) MOTEURS_DesactiveAlim();
+		else MOTEURS_ActiveAlim();
+
+		if (deltaG !=0) {
+			MOTEURS_EtatMoteurGauche.commande = MOTEURS_EtatMoteurGauche.commande + MOTEUR_Kp*deltaG;
+			if (MOTEURS_EtatMoteurGauche.consigne>=0) {
+				if (MOTEURS_EtatMoteurGauche.commande>255) MOTEURS_EtatMoteurGauche.commande=255;
+				if (MOTEURS_EtatMoteurGauche.commande<0) MOTEURS_EtatMoteurGauche.commande=0;
+			} else {
+				if (MOTEURS_EtatMoteurGauche.commande>0) MOTEURS_EtatMoteurGauche.commande=0;
+				if (MOTEURS_EtatMoteurGauche.commande<-255) MOTEURS_EtatMoteurGauche.commande=-255;
+			}
+		}
+
+		if (deltaD !=0) {
+			MOTEURS_EtatMoteurDroit.commande = MOTEURS_EtatMoteurDroit.commande + MOTEUR_Kp*deltaD;
+			if (MOTEURS_EtatMoteurDroit.consigne>=0) {
+				if (MOTEURS_EtatMoteurDroit.commande>255) MOTEURS_EtatMoteurDroit.commande=255;
+				if (MOTEURS_EtatMoteurDroit.commande<0) MOTEURS_EtatMoteurDroit.commande=0;
+			} else {
+				if (MOTEURS_EtatMoteurDroit.commande>0) MOTEURS_EtatMoteurDroit.commande=0;
+				if (MOTEURS_EtatMoteurDroit.commande<-255) MOTEURS_EtatMoteurDroit.commande=-255;
+			}
+		}
+
+		MOTEURS_Set(MOTEURS_EtatMoteurGauche.commande, MOTEURS_EtatMoteurDroit.commande);
+	}
+}
 
 /**
  *
@@ -60,157 +233,143 @@ GPIO_PinState MOTEURS_EtatAlim(void) {
 	return HAL_GPIO_ReadPin(GPIOB, SHUTDOWN_5V_Pin);
 }
 
-int16_t MOTEUR_LireEncodeursGauche(void) {
-	uint16_t loc_val= htim21.Instance->CNT;
-	uint16_t overflow = htim21.Instance->SR;
-	int16_t val_end;
+/**
+ * @brief Active les encodeurs et le régulateur des moteur si nécessaire et
+ *        règle la commande du moteur (entre -MOTEURS_MAX_CONSIGNE et +MOTEURS_MAX_CONSIGNE)
+ */
+void MOTEURS_Set(int16_t cmdGauche, int16_t cmdDroit) {
+	uint8_t locValGauche, locValDroit;
 
-	htim21.Instance->SR = htim21.Instance->SR & ~(TIM_SR_UIF);
-
-	if (overflow & TIM_SR_UIF) {
-		val_end = 0xFFFF-loc_val + MOTEUR_DerniereValEncodeursG;
+	if (cmdGauche>=0) {
+		if (cmdGauche>MOTEURS_MAX_CONSIGNE)
+			locValGauche = MOTEURS_MAX_CONSIGNE;
+		else
+			locValGauche =(uint8_t)cmdGauche;
 	} else {
-		val_end = MOTEUR_DerniereValEncodeursG-loc_val;
+		if (cmdGauche < -MOTEURS_MAX_CONSIGNE)
+			locValGauche = MOTEURS_MAX_CONSIGNE;
+		else
+			locValGauche =(uint8_t)(-cmdGauche);
 	}
 
-	MOTEUR_DerniereValEncodeursG = loc_val;
-	return val_end;
-}
-
-int16_t MOTEUR_LireEncodeursDroit(void) {
-//	uint16_t loc_val= hlptim1.Instance->CNT;
-//	uint32_t status = hlptim1.Instance->ISR;
-//	int16_t val_end;
-//
-//	hlptim1.Instance->ICR=0xFF; // refait descendre les flags ISR
-//
-//	if (status & LPTIM_ISR_ARRM) {
-//		val_end = 0xFFFF-loc_val + MOTEUR_DerniereValEncodeursD;
-//	} else {
-//		val_end = MOTEUR_DerniereValEncodeursD-loc_val;
-//	}
-//
-//	val_end= -val_end;
-//
-//	MOTEUR_DerniereValEncodeursD = loc_val;
-//	return val_end;
-	return 0;
-}
-
-/**
- *
- */
-void MOTEURS_Init(void) {
-	/* Desactive les alimentations des moteurs */
-	MOTEURS_DesactiveAlim();
-
-//	/* Lance les timers (timers PWM + timers encodeurs) et regle tout à zero*/
-//	hlptim1.Instance->CR = LPTIM_CR_ENABLE;
-//	hlptim1.Instance->CR =  LPTIM_CR_ENABLE | LPTIM_CR_CNTSTRT;
-//	hlptim1.Instance->ARR = 65535;
-//	hlptim1.Instance->CFGR = LPTIM_CFGR_ENC;
-//
-//	hlptim1.Instance->CNT = 0;
-
-	htim21.Instance->ARR = 65535;
-	htim21.Instance->CR1 = htim21.Instance->CR1 | TIM_CR1_CEN| TIM_CR1_URS;
-	htim21.Instance->CNT = 0;
-
-	htim2.Instance->ARR = 255;
-	htim2.Instance->CNT = 0;
-	htim2.Instance->CCR1 = 0;
-	htim2.Instance->CCR2 = 0;
-	htim2.Instance->CCR3 = 0;
-	htim2.Instance->CCR4 = 0;
-	htim2.Instance->CR1 = htim2.Instance->CR1 | TIM_CR1_CEN;
-	htim2.Instance->CCER = TIM_CCER_CC1E | TIM_CCER_CC2E | TIM_CCER_CC3E | TIM_CCER_CC4E;
-
-	MOTEUR_CmdMoteurG =0;
-	MOTEUR_CmdMoteurD =0;
-	MOTEUR_ConsigneMoteurG =0;
-	MOTEUR_ConsigneMoteurD =0;
-}
-
-/**
- * @brief Active les encodeurs et le regulateur des moteur si necessaire et
- *        regle la commande du moteur (entre -255 et +255)
- */
-void MOTEURS_Set(uint8_t mot, int16_t val) {
-	uint8_t loc_val;
-
-	if (val>=0) {
-		if (val>255) loc_val = 255;
-		else  loc_val =(uint8_t)val;
+	if (cmdDroit>=0) {
+		if (cmdDroit>MOTEURS_MAX_CONSIGNE)
+			locValDroit = MOTEURS_MAX_CONSIGNE;
+		else
+			locValDroit =(uint8_t)cmdDroit;
 	} else {
-		if (val < -255) loc_val = 255;
-		else loc_val =(uint8_t)(-val);
+		if (cmdDroit < -MOTEURS_MAX_CONSIGNE)
+			locValDroit = MOTEURS_MAX_CONSIGNE;
+		else
+			locValDroit =(uint8_t)(-cmdDroit);
 	}
 
 	if (MOTEURS_EtatAlim()==GPIO_PIN_RESET)
 		MOTEURS_ActiveAlim();
 
-	if (mot == MOTEUR_DROIT) {
-		if (val >=0) {
-			htim2.Instance->CCR1 = (uint16_t)loc_val;
-			htim2.Instance->CCR2 = 0;
-		} else {
-			htim2.Instance->CCR2 = (uint16_t)loc_val;
-			htim2.Instance->CCR1 = 0;
-		}
+	// Moteur droit
+	if (cmdDroit >=0) {
+		htim2.Instance->CCR1 = (uint16_t)locValDroit;
+		htim2.Instance->CCR2 = 0;
 	} else {
-		if (val >=0) {
-			htim2.Instance->CCR4 = (uint16_t)loc_val;
-			htim2.Instance->CCR3 = 0;
-		} else {
-			htim2.Instance->CCR3 = (uint16_t)loc_val;
-			htim2.Instance->CCR4 = 0;
-		}
+		htim2.Instance->CCR2 = (uint16_t)locValDroit;
+		htim2.Instance->CCR1 = 0;
+	}
+
+	// Moteur gauche
+	if (cmdGauche >=0) {
+		htim2.Instance->CCR4 = (uint16_t)locValGauche;
+		htim2.Instance->CCR3 = 0;
+	} else {
+		htim2.Instance->CCR3 = (uint16_t)locValGauche;
+		htim2.Instance->CCR4 = 0;
 	}
 }
 
-void MOTEURS_Test (void) {
-	int16_t deltaG, deltaD =0;
+/*
+ * @brief Recupere les mesures brutes des encodeurs et les enregistre dans la structure moteur correspondante
+ *
+ * @param htim pointeur sur la reference du timer qui generé l'interruption
+ */
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
+	if (htim->Instance==TIM2) { /* moteur gauche */
+		MOTEURS_EtatMoteurGauche.encodeur = (uint16_t)TIM2->CCR1;
+		MOTEURS_EtatMoteurGauche.moteurLent = 0;
+	} else { /* moteur droit */
+		MOTEURS_EtatMoteurDroit.encodeur = (uint16_t)TIM21->CCR1;
+		MOTEURS_EtatMoteurDroit.moteurLent = 0;
+	}
+}
 
-	MOTEUR_LireEncodeursGauche();
-	MOTEUR_LireEncodeursDroit();
-
-	while (1) {
-		HAL_Delay(MOTEUR_DELAY);
-
-		MOTEUR_NBImpulsionsG = MOTEUR_LireEncodeursGauche();
-		MOTEUR_NBImpulsionsD = MOTEUR_LireEncodeursDroit();
-
-		deltaG = MOTEUR_ConsigneMoteurG - MOTEUR_NBImpulsionsG;
-		deltaD = MOTEUR_ConsigneMoteurD - MOTEUR_NBImpulsionsD;
-
-		if (((MOTEUR_ConsigneMoteurD ==0) && (MOTEUR_ConsigneMoteurG ==0)) &&
-				((deltaD==0) && (deltaG==0))) MOTEURS_DesactiveAlim();
-		else MOTEURS_ActiveAlim();
-
-		if (deltaG !=0) {
-			MOTEUR_CmdMoteurG = MOTEUR_CmdMoteurG + MOTEUR_Kp*deltaG;
-			if (MOTEUR_ConsigneMoteurG>=0) {
-				if (MOTEUR_CmdMoteurG>255) MOTEUR_CmdMoteurG=255;
-				if (MOTEUR_CmdMoteurG<0) MOTEUR_CmdMoteurG=0;
-			} else {
-				if (MOTEUR_CmdMoteurG>0) MOTEUR_CmdMoteurG=0;
-				if (MOTEUR_CmdMoteurG<-255) MOTEUR_CmdMoteurG=-255;
-			}
-
-			MOTEURS_Set(MOTEUR_GAUCHE, MOTEUR_CmdMoteurG);
+/*
+ * @brief Gestionnaire d'interruption "overflow"
+ * 		  Lorsque deux interruptions "overflow" sont arrivées sans que l'interruption capture n'arrive,
+ * 		  cela signifie que le moteur est à l'arret.
+ * 		  On met la valeur de l'encodeur à MOTEURS_MAX_ENCODEUR
+ *
+ * @param htim pointeur sur la reference du timer qui generé l'interruption
+ */
+void MOTEURS_TimerEncodeurUpdate (TIM_HandleTypeDef *htim) {
+	if (htim->Instance==TIM2) { /* moteur gauche */
+		if ((MOTEURS_EtatMoteurGauche.moteurLent++) >=2) {
+			MOTEURS_EtatMoteurGauche.encodeur = MOTEURS_MAX_ENCODEUR;
+			MOTEURS_EtatMoteurGauche.moteurLent = 0;
 		}
-
-		if (deltaD !=0) {
-			MOTEUR_CmdMoteurD = MOTEUR_CmdMoteurD + MOTEUR_Kp*deltaD;
-			if (MOTEUR_ConsigneMoteurD>=0) {
-				if (MOTEUR_CmdMoteurD>255) MOTEUR_CmdMoteurD=255;
-				if (MOTEUR_CmdMoteurD<0) MOTEUR_CmdMoteurD=0;
-			} else {
-				if (MOTEUR_CmdMoteurD>0) MOTEUR_CmdMoteurD=0;
-				if (MOTEUR_CmdMoteurD<-255) MOTEUR_CmdMoteurD=-255;
-			}
-
-			MOTEURS_Set(MOTEUR_DROIT, MOTEUR_CmdMoteurD);
+	} else { /* moteur droit */
+		if ((MOTEURS_EtatMoteurDroit.moteurLent++) >=2) {
+			MOTEURS_EtatMoteurDroit.encodeur = MOTEURS_MAX_ENCODEUR;
+			MOTEURS_EtatMoteurDroit.moteurLent = 0;
 		}
 	}
+
+}
+
+typedef struct {
+	uint16_t encodeur;
+	uint16_t correction;
+} MOTEURS_CorrectionPoint;
+
+#define MOTEURS_MAX_CORRECTION_POINTS 8
+
+const MOTEURS_CorrectionPoint MOTEURS_CorrectionPoints[MOTEURS_MAX_CORRECTION_POINTS]=
+{
+		{MOTEURS_MAX_ENCODEUR-1, 1},
+		{4000, 50},
+		{1000, 80},
+		{500, 200},
+		{400, 400},
+		{300, 1000},
+		{200,3000},
+		{0,MOTEURS_MAX_ENCODEUR}
+};
+
+/*
+ * @brief Fonction de conversion des valeurs brutes de l'encodeur en valeur linearisées
+ *
+ * @param encodeur valeur brute de l'encodeur
+ * @return valeur linearisée
+ */
+uint16_t MOTEURS_CorrectionEncodeur(uint16_t encodeur) {
+	uint16_t correction=0;
+	uint8_t index=0;
+	int32_t pente, origine;
+
+	if (encodeur ==MOTEURS_MAX_ENCODEUR)
+		correction =0;
+	else { // recherche par dichotomie de l'intervale
+		while (index <MOTEURS_MAX_CORRECTION_POINTS) {
+			if ((MOTEURS_CorrectionPoints[index].encodeur>=encodeur) && (MOTEURS_CorrectionPoints[index+1].encodeur<encodeur)) {
+				// valeur trouvée, on sort
+				break;
+			} else
+				index++;
+		}
+
+		pente = 1000*(MOTEURS_CorrectionPoints[index].encodeur-MOTEURS_CorrectionPoints[index+1].encodeur)/(MOTEURS_CorrectionPoints[index].correction - MOTEURS_CorrectionPoints[index+1].correction);
+		origine = MOTEURS_CorrectionPoints[index].correction-((pente*MOTEURS_CorrectionPoints[index].encodeur)/1000);
+
+		correction = origine - ((pente*encodeur)/1000);
+	}
+
+	return correction;
 }

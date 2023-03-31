@@ -80,7 +80,7 @@ void cmdSendVersion() {
 	XBEE_SendData((char*)&answer, sizeof (answer));
 }
 
-void cmdBusyState(uint8_t state) {
+void cmdSendBusyState(uint8_t state) {
 	ANS_Busy_State answer;
 
 	answer.ans = ANS_OK;

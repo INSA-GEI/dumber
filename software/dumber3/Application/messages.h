@@ -34,8 +34,9 @@ extern QueueHandle_t APPLICATION_Mailbox;
 
 #define MSG_ID_BUTTON_PRESSED		0x30
 
-#define MSG_ID_MOTEURS_MARCHE		0x40
-#define MSG_ID_MOTEURS_ARRET		0x41
+#define MSG_ID_MOTEURS_STOP			0x40
+#define MSG_ID_MOTEURS_MOVE			0x41
+#define MSG_ID_MOTEURS_TURN			0x42
 
 #define MSG_ID_XBEE_CMD				0x50
 
