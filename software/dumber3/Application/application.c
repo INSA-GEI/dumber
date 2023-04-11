@@ -38,6 +38,8 @@ typedef struct {
 	int32_t motor_right;
 	char endOfMouvement;
 	char powerOffRequired;
+	uint16_t senderAddress;
+	uint8_t rfProblem;
 
 } APPLICATION_Infos;
 
@@ -83,8 +85,8 @@ void APPLICATION_Init(void) {
 
 	/* Init de la partie RF / reception des messages */
 	XBEE_Init();
-	BATTERIE_Init();
-	MOTEURS_Init();
+	//BATTERIE_Init();
+	//MOTEURS_Init();
 
 	/* Create the task without using any dynamic memory allocation. */
 	xHandleApplicationMain = xTaskCreateStatic(
@@ -112,8 +114,8 @@ void APPLICATION_Init(void) {
 
 void APPLICATION_MainThread(void* params) {
 	MESSAGE_Typedef msg;
+	XBEE_INCOMING_FRAME *xbeeFrame;
 
-	char *cmd;
 	CMD_Generic* decodedCmd;
 
 	while (1) {
@@ -121,54 +123,84 @@ void APPLICATION_MainThread(void* params) {
 
 		switch (msg.id) {
 		case MSG_ID_XBEE_CMD:
-			cmd = (char*)msg.data;
-			decodedCmd = cmdDecode(cmd);
+//			systemInfos.senderAddress = 0x81;
+//			systemInfos.cmd = 0;
+//			cmdSendAnswer(systemInfos.senderAddress, ANS_OK);
+//
+//			if (msg.data != NULL)
+//				free (msg.data);
 
-			if (decodedCmd==CMD_DECODE_UNKNOWN)
-				cmdSendAnswer(ANS_UNKNOWN);
-			else {
-				systemInfos.cmd = decodedCmd->type;
-				systemTimeout.inactivityCnt = 0;
+			xbeeFrame = (XBEE_INCOMING_FRAME*)msg.data;
 
-				/* Manage answer to command, when possible
-				 * (further treatment of the command will be done in APPLICATION_StateMachine) */
-				switch (decodedCmd->type) {
-				case CMD_PING:
-				case CMD_TEST:
-				case CMD_DEBUG:
-				case CMD_POWER_OFF:
-					cmdSendAnswer(ANS_OK);
+			if (xbeeFrame != NULL) {
+				systemInfos.senderAddress = xbeeFrame->source_addr;
+
+				switch (xbeeFrame->type) {
+				case XBEE_RX_16BIT_PACKET_TYPE:
+					decodedCmd = cmdDecode(xbeeFrame->data,xbeeFrame->length);
+
+					if (decodedCmd==CMD_DECODE_UNKNOWN)
+						cmdSendAnswer(systemInfos.senderAddress, ANS_UNKNOWN);
+					else {
+						systemInfos.cmd = decodedCmd->type;
+						systemTimeout.inactivityCnt = 0;
+
+						/* Manage answer to command, when possible
+						 * (further treatment of the command will be done in APPLICATION_StateMachine) */
+						switch (decodedCmd->type) {
+						case CMD_PING:
+						case CMD_TEST:
+						case CMD_DEBUG:
+						case CMD_POWER_OFF:
+							cmdSendAnswer(systemInfos.senderAddress, ANS_OK);
+							break;
+						case CMD_GET_BATTERY:
+							cmdSendBatteryLevel(systemInfos.senderAddress, systemInfos.batteryVoltage);
+							break;
+						case CMD_GET_VERSION:
+							cmdSendVersion(SYSTEM_VERSION);
+							break;
+						case CMD_GET_BUSY_STATE:
+							if (systemInfos.state == stateInMouvement)
+								cmdSendBusyState(systemInfos.senderAddress, 0x1);
+							else
+								cmdSendBusyState(systemInfos.senderAddress, 0x0);
+							break;
+						case CMD_MOVE:
+							systemInfos.distance = ((CMD_Move*)decodedCmd)->distance;
+							break;
+						case CMD_TURN:
+							systemInfos.turns = ((CMD_Turn*)decodedCmd)->turns;
+							break;
+						default:
+							/* All others commands must be processed in state machine
+							 * in order to find what action to do and what answer to give
+							 */
+							break;
+						}
+						free(decodedCmd);
+					}
 					break;
-				case CMD_GET_BATTERY:
-					cmdSendBatteryLevel(systemInfos.batteryVoltage);
+
+				case XBEE_TX_STATUS_TYPE:
+					if (xbeeFrame->ack == 0) {
+						if (systemInfos.rfProblem !=0)
+							systemInfos.rfProblem--;
+					} else {
+						if (systemInfos.rfProblem !=255)
+							systemInfos.rfProblem++;
+					}
 					break;
-				case CMD_GET_VERSION:
-					cmdSendVersion(SYSTEM_VERSION);
-					break;
-				case CMD_GET_BUSY_STATE:
-					if (systemInfos.state == stateInMouvement)
-						cmdSendBusyState(0x1);
-					else
-						cmdSendBusyState(0x0);
-					break;
-				case CMD_MOVE:
-					systemInfos.distance = ((CMD_Move*)decodedCmd)->distance;
-					break;
-				case CMD_TURN:
-					systemInfos.turns = ((CMD_Turn*)decodedCmd)->turns;
-					break;
+
 				default:
-					/* All others commands must be processed in state machine
-					 * in order to find what action to do and what answer to give
-					 */
 					break;
 				}
 
-				free(decodedCmd);
+//				if (xbeeFrame->data != NULL)
+//					free(xbeeFrame->data);
+
+				free(xbeeFrame);
 			}
-
-			free(cmd);
-
 			break;
 
 		case MSG_ID_BAT_NIVEAU:
@@ -232,16 +264,16 @@ void APPLICATION_StateMachine() {
 					(systemInfos.state == stateRun) ||
 					(systemInfos.state == stateInMouvement)) {
 				/* command RESET is only applicable in those 3 states, otherwise it is rejected */
-				cmdSendAnswer(ANS_OK);
+				cmdSendAnswer(systemInfos.senderAddress, ANS_OK);
 				APPLICATION_TransitionToNewState(stateIdle);
 			} else
-				cmdSendAnswer(ANS_ERR);
+				cmdSendAnswer(systemInfos.senderAddress, ANS_ERR);
 			break;
 		case CMD_START_WITH_WATCHDOG:
 		case CMD_START_WITHOUT_WATCHDOG:
 			if (systemInfos.state == stateIdle) {
 				/* only state where START cmd is accepted */
-				cmdSendAnswer(ANS_OK);
+				cmdSendAnswer(systemInfos.senderAddress, ANS_OK);
 
 				APPLICATION_TransitionToNewState(stateRun);
 
@@ -251,15 +283,15 @@ void APPLICATION_StateMachine() {
 					systemTimeout.watchdogMissedCnt=0;
 				}
 			} else
-				cmdSendAnswer(ANS_ERR);
+				cmdSendAnswer(systemInfos.senderAddress, ANS_ERR);
 			break;
 		case CMD_RESET_WATCHDOG:
 			if ((systemInfos.state == stateRun) || (systemInfos.state == stateInMouvement)) {
 				if ((systemTimeout.watchdogEnabled ==0 ) ||
 						((systemTimeout.watchdogCnt>=APPLICATION_WATCHDOG_MIN) && (systemTimeout.watchdogCnt<=APPLICATION_WATCHDOG_MAX)))
-					cmdSendAnswer(ANS_OK);
+					cmdSendAnswer(systemInfos.senderAddress, ANS_OK);
 				else
-					cmdSendAnswer(ANS_ERR);
+					cmdSendAnswer(systemInfos.senderAddress, ANS_ERR);
 
 				systemTimeout.watchdogCnt =0;
 			}
@@ -271,17 +303,17 @@ void APPLICATION_StateMachine() {
 				if (((systemInfos.cmd == CMD_MOVE) && (systemInfos.distance !=0)) ||
 						((systemInfos.cmd == CMD_TURN) && (systemInfos.turns !=0))) {
 					systemInfos.endOfMouvement = 0;
-					cmdSendAnswer(ANS_OK);
+					cmdSendAnswer(systemInfos.senderAddress, ANS_OK);
 					APPLICATION_TransitionToNewState(stateInMouvement);
 				} // if TURN and MOVE are sent without parameter, do nothing: we are still in run state
 			} else if (systemInfos.state == stateInMouvement) { // in this state, MOVE and TURN cmds are accepted only if they come with no parameter
 				if (((systemInfos.cmd == CMD_MOVE) && (systemInfos.distance ==0)) ||
 						((systemInfos.cmd == CMD_TURN) && (systemInfos.turns ==0))) {
 					systemInfos.endOfMouvement = 1;
-					cmdSendAnswer(ANS_OK);
+					cmdSendAnswer(systemInfos.senderAddress, ANS_OK);
 				}
 			} else
-				cmdSendAnswer(ANS_ERR);
+				cmdSendAnswer(systemInfos.senderAddress, ANS_ERR);
 			break;
 		default: // commands no common for every states
 			break;

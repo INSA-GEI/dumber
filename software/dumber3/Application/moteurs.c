@@ -42,12 +42,6 @@ typedef struct {
 MOTEURS_EtatMoteur MOTEURS_EtatMoteurGauche, MOTEURS_EtatMoteurDroit = {0};
 MOTEURS_EtatDiff MOTEURS_EtatDifferentiel;
 
-uint16_t MOTEUR_DerniereValEncodeursG;
-uint16_t MOTEUR_DerniereValEncodeursD;
-
-#define MOTEUR_GAUCHE	0
-#define MOTEUR_DROIT	1
-
 #define MOTEUR_Kp 		15
 #define MOTEUR_DELAY	3
 
@@ -101,6 +95,8 @@ void MOTEURS_Init(void) {
 			xStackMoteursAsservissement,          /* Array to use as the task's stack. */
 			&xTaskMoteursAsservissement);  /* Variable to hold the task's data structure. */
 	vTaskSuspend(xHandleMoteursAsservissement); // On ne lance la tache d'asservissement que lorsque'une commande moteur arrive
+
+	MOTEURS_DesactiveAlim();
 }
 
 void MOTEURS_Avance(uint32_t distance) {
@@ -136,19 +132,37 @@ void MOTEURS_TachePrincipale(void* params) {
 		switch (msg.id) {
 		case MSG_ID_MOTEURS_MOVE:
 			distance = *((uint32_t*)msg.data);
+			MOTEURS_EtatDifferentiel.distance = distance;
+			MOTEURS_EtatDifferentiel.tours = 0;
 
-			// TODO: trucs a faire ici
+			MOTEURS_EtatMoteurGauche.consigne=50;
+			MOTEURS_EtatMoteurDroit.consigne=50;
+
 			vTaskResume(xHandleMoteursAsservissement);
 			break;
 		case MSG_ID_MOTEURS_TURN:
 			tours = *((uint32_t*)msg.data);
+			MOTEURS_EtatDifferentiel.distance = 0;
+			MOTEURS_EtatDifferentiel.tours = tours;
 
-			// TODO: trucs a faire ici
+			MOTEURS_EtatMoteurGauche.consigne=50;
+			MOTEURS_EtatMoteurDroit.consigne=50;
+
 			vTaskResume(xHandleMoteursAsservissement);
 			break;
 		case MSG_ID_MOTEURS_STOP:
-			// TODO: trucs a faire ici
-			vTaskSuspend(xHandleMoteursAsservissement);
+			MOTEURS_EtatDifferentiel.distance = 0;
+			MOTEURS_EtatDifferentiel.tours = 0;
+
+			MOTEURS_EtatMoteurGauche.consigne=0;
+			MOTEURS_EtatMoteurDroit.consigne=0;
+			if ((MOTEURS_CorrectionEncodeur(MOTEURS_EtatMoteurGauche.encodeur) ==0) &&
+					(MOTEURS_CorrectionEncodeur(MOTEURS_EtatMoteurDroit.encodeur) ==0))
+				// Les moteurs sont déjà arretés
+				vTaskSuspend(xHandleMoteursAsservissement);
+			else
+				// Les moteurs tournent encore
+				vTaskResume(xHandleMoteursAsservissement);
 			break;
 		default:
 			break;
@@ -181,8 +195,14 @@ void MOTEURS_TacheAsservissement( void* params ) {
 		deltaD = MOTEURS_EtatMoteurDroit.consigne - encodeurDroit;
 
 		if (((MOTEURS_EtatMoteurDroit.consigne ==0) && (MOTEURS_EtatMoteurGauche.consigne ==0)) &&
-				((deltaD==0) && (deltaG==0))) MOTEURS_DesactiveAlim();
-		else MOTEURS_ActiveAlim();
+				((deltaD==0) && (deltaG==0))) {
+			MOTEURS_DesactiveAlim();
+
+			vTaskSuspend(xHandleMoteursAsservissement);
+		}
+		else if (MOTEURS_EtatAlim() == GPIO_PIN_RESET) {
+			MOTEURS_ActiveAlim();
+		}
 
 		if (deltaG !=0) {
 			MOTEURS_EtatMoteurGauche.commande = MOTEURS_EtatMoteurGauche.commande + MOTEUR_Kp*deltaG;

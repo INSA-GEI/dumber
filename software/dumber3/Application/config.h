@@ -7,7 +7,7 @@
 #include "stm32l0xx_hal.h"
 #include "cmsis_os.h"
 
-#define SYSTEM_VERSION_STR			"version 2.0\r"
+#define SYSTEM_VERSION_STR			"2.0"
 #define SYSTEM_VERSION				0x20
 
 #define STACK_SIZE 					0x100

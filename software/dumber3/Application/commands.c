@@ -12,22 +12,44 @@
 
 /* Definition des commandes */
 
-CMD_Generic* cmdDecode(char* cmd) {
+CMD_Generic* cmdDecode(char* cmd, uint8_t length) {
 	CMD_Generic* decodedCmd;
+	char cmd_type = cmd[0];
+	int val;
+	uint32_t startTime, endTime;
+	volatile uint32_t duration;
 
-	switch (cmd[0])
+	startTime = SysTick->VAL;
+
+	switch (cmd_type)
 	{
 	case CMD_MOVE:
 		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Move));
-		((CMD_Move*)decodedCmd)->distance = ((uint16_t)cmd[1]<<8) + (uint16_t)cmd[2];
+		decodedCmd->type = cmd[0];
+		{
+			char rawCmd[length+1];
+			memcpy((void*)rawCmd, (void*)cmd, length);
+			rawCmd[length] = (char)0; /* 0 ending string */
+
+			sscanf (&rawCmd[1], "%d", &val);
+
+			((CMD_Move*)decodedCmd)->distance= (int16_t) val;
+		}
 		break;
 
 	case CMD_TURN:
 		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Turn));
+		decodedCmd->type = cmd[0];
+		{
+			char rawCmd[length+1];
+			memcpy((void*)rawCmd, (void*)cmd, length);
+			rawCmd[length] = (char)0; /* 0 ending string */
 
-		((CMD_Turn*)decodedCmd)->turns = ((uint16_t)cmd[1]<<8) + (uint16_t)cmd[2];
-		((CMD_Turn*)decodedCmd)->turns = ((CMD_Turn*)decodedCmd)->turns * 1.4;
+			sscanf (&rawCmd[1], "%d", &val);
 
+			((CMD_Turn*)decodedCmd)->turns = (int16_t) val;
+			((CMD_Turn*)decodedCmd)->turns = ((CMD_Turn*)decodedCmd)->turns * 1.4;
+		}
 		break;
 
 	case CMD_PING:
@@ -43,22 +65,29 @@ CMD_Generic* cmdDecode(char* cmd) {
 	case CMD_POWER_OFF:
 		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
 		decodedCmd->type = cmd[0];
-
+		break;
 	default:
 		decodedCmd = CMD_DECODE_UNKNOWN;
 	}
 
+	endTime=SysTick->VAL;
+
+	if (endTime>startTime)
+		duration = (uint32_t)(SysTick->LOAD+1)-endTime+startTime;
+	else
+		duration = startTime-endTime;
+
 	return decodedCmd;
 }
 
-void cmdSendAnswer(uint8_t ans) {
+void cmdSendAnswer(uint16_t address, uint8_t ans) {
 	ANS_Generic answer;
 
 	answer.ans = ans;
-	XBEE_SendData((char*)&answer, sizeof (answer));
+	XBEE_SendData(address, (char*)&answer, sizeof (answer));
 }
 
-void cmdSendBatteryLevel(char level) {
+void cmdSendBatteryLevel(uint16_t address, char level) {
 	ANS_Battery answer;
 	char localLevel=level;
 
@@ -68,19 +97,19 @@ void cmdSendBatteryLevel(char level) {
 	answer.ans = ANS_OK;
 	answer.bat_level = localLevel;
 
-	XBEE_SendData((char*)&answer, sizeof (answer));
+	XBEE_SendData(address, (char*)&answer, sizeof (answer));
 }
 
-void cmdSendVersion() {
+void cmdSendVersion(uint16_t address) {
 	ANS_Version answer;
 
 	answer.ans = ANS_OK;
-	answer.version = SYSTEM_VERSION;
+	strcpy (answer.version, SYSTEM_VERSION_STR);
 
-	XBEE_SendData((char*)&answer, sizeof (answer));
+	XBEE_SendData(address, (char*)&answer, sizeof (answer));
 }
 
-void cmdSendBusyState(uint8_t state) {
+void cmdSendBusyState(uint16_t address, uint8_t state) {
 	ANS_Busy_State answer;
 
 	answer.ans = ANS_OK;
@@ -88,5 +117,5 @@ void cmdSendBusyState(uint8_t state) {
 
 	if (answer.state >1) answer.state=0;
 
-	XBEE_SendData((char*)&answer, sizeof (answer));
+	XBEE_SendData(address, (char*)&answer, sizeof (answer));
 }

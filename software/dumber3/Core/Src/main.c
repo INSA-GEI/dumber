@@ -46,7 +46,6 @@ ADC_HandleTypeDef hadc;
 
 UART_HandleTypeDef hlpuart1;
 DMA_HandleTypeDef hdma_lpuart1_tx;
-DMA_HandleTypeDef hdma_lpuart1_rx;
 
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
@@ -300,7 +299,8 @@ static void MX_LPUART1_UART_Init(void)
   hlpuart1.Init.Mode = UART_MODE_TX_RX;
   hlpuart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   hlpuart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  hlpuart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  hlpuart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_DMADISABLEONERROR_INIT;
+  hlpuart1.AdvancedInit.DMADisableonRxError = UART_ADVFEATURE_DMA_DISABLEONRXERROR;
   if (HAL_UART_Init(&hlpuart1) != HAL_OK)
   {
     Error_Handler();
@@ -738,8 +738,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-  if ((htim->Instance == TIM2) || (htim->Instance == TIM21)) /* Timers des encodeurs */
-	  MOTEURS_TimerEncodeurUpdate(htim);
+
   /* USER CODE END Callback 1 */
 }
 

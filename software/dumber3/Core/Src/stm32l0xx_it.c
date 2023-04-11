@@ -58,7 +58,6 @@
 /* External variables --------------------------------------------------------*/
 extern ADC_HandleTypeDef hadc;
 extern DMA_HandleTypeDef hdma_lpuart1_tx;
-extern DMA_HandleTypeDef hdma_lpuart1_rx;
 extern UART_HandleTypeDef hlpuart1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim21;
@@ -139,17 +138,16 @@ void EXTI4_15_IRQHandler(void)
 /**
   * @brief This function handles DMA1 channel 2 and channel 3 interrupts.
   */
-void DMA1_Channel2_3_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Channel2_3_IRQn 0 */
-
-  /* USER CODE END DMA1_Channel2_3_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_lpuart1_tx);
-  HAL_DMA_IRQHandler(&hdma_lpuart1_rx);
-  /* USER CODE BEGIN DMA1_Channel2_3_IRQn 1 */
-
-  /* USER CODE END DMA1_Channel2_3_IRQn 1 */
-}
+//void DMA1_Channel2_3_IRQHandler(void)
+//{
+//  /* USER CODE BEGIN DMA1_Channel2_3_IRQn 0 */
+//
+//  /* USER CODE END DMA1_Channel2_3_IRQn 0 */
+//  HAL_DMA_IRQHandler(&hdma_lpuart1_tx);
+//  /* USER CODE BEGIN DMA1_Channel2_3_IRQn 1 */
+//
+//  /* USER CODE END DMA1_Channel2_3_IRQn 1 */
+//}
 
 /**
   * @brief This function handles ADC, COMP1 and COMP2 interrupts (COMP interrupts through EXTI lines 21 and 22).
@@ -210,16 +208,16 @@ void TIM21_IRQHandler(void)
 /**
   * @brief This function handles LPUART1 global interrupt / LPUART1 wake-up interrupt through EXTI line 28.
   */
-void LPUART1_IRQHandler(void)
-{
-  /* USER CODE BEGIN LPUART1_IRQn 0 */
-
-  /* USER CODE END LPUART1_IRQn 0 */
-  HAL_UART_IRQHandler(&hlpuart1);
-  /* USER CODE BEGIN LPUART1_IRQn 1 */
-
-  /* USER CODE END LPUART1_IRQn 1 */
-}
+//void LPUART1_IRQHandler(void)
+//{
+//  /* USER CODE BEGIN LPUART1_IRQn 0 */
+//
+//  /* USER CODE END LPUART1_IRQn 0 */
+//  HAL_UART_IRQHandler(&hlpuart1);
+//  /* USER CODE BEGIN LPUART1_IRQn 1 */
+//
+//  /* USER CODE END LPUART1_IRQn 1 */
+//}
 
 /* USER CODE BEGIN 1 */
 
