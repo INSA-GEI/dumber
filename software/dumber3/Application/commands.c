@@ -7,49 +7,25 @@
 
 #include "commands.h"
 #include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
 
 /* Definition des commandes */
 
 CMD_Generic* cmdDecode(char* cmd, uint8_t length) {
 	CMD_Generic* decodedCmd;
 	char cmd_type = cmd[0];
-	int val;
-	uint32_t startTime, endTime;
-	volatile uint32_t duration;
-
-	startTime = SysTick->VAL;
 
 	switch (cmd_type)
 	{
 	case CMD_MOVE:
 		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Move));
-		decodedCmd->type = cmd[0];
-		{
-			char rawCmd[length+1];
-			memcpy((void*)rawCmd, (void*)cmd, length);
-			rawCmd[length] = (char)0; /* 0 ending string */
-
-			sscanf (&rawCmd[1], "%d", &val);
-
-			((CMD_Move*)decodedCmd)->distance= (int16_t) val;
-		}
+		decodedCmd->type = CMD_MOVE;
+		((CMD_Move*)decodedCmd)->distance = ((int16_t)cmd[1]<<8) + (int16_t)cmd[2];
 		break;
 
 	case CMD_TURN:
 		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Turn));
-		decodedCmd->type = cmd[0];
-		{
-			char rawCmd[length+1];
-			memcpy((void*)rawCmd, (void*)cmd, length);
-			rawCmd[length] = (char)0; /* 0 ending string */
-
-			sscanf (&rawCmd[1], "%d", &val);
-
-			((CMD_Turn*)decodedCmd)->turns = (int16_t) val;
-			((CMD_Turn*)decodedCmd)->turns = ((CMD_Turn*)decodedCmd)->turns * 1.4;
-		}
+		decodedCmd->type = CMD_TURN;
+		((CMD_Turn*)decodedCmd)->turns = ((int16_t)cmd[1]<<8) + (int16_t)cmd[2];
 		break;
 
 	case CMD_PING:
@@ -64,18 +40,12 @@ CMD_Generic* cmdDecode(char* cmd, uint8_t length) {
 	case CMD_DEBUG:
 	case CMD_POWER_OFF:
 		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
-		decodedCmd->type = cmd[0];
+		decodedCmd->type = cmd_type;
 		break;
+
 	default:
 		decodedCmd = CMD_DECODE_UNKNOWN;
 	}
-
-	endTime=SysTick->VAL;
-
-	if (endTime>startTime)
-		duration = (uint32_t)(SysTick->LOAD+1)-endTime+startTime;
-	else
-		duration = startTime-endTime;
 
 	return decodedCmd;
 }
@@ -104,7 +74,7 @@ void cmdSendVersion(uint16_t address) {
 	ANS_Version answer;
 
 	answer.ans = ANS_OK;
-	strcpy (answer.version, SYSTEM_VERSION_STR);
+	answer.version=SYSTEM_VERSION;
 
 	XBEE_SendData(address, (char*)&answer, sizeof (answer));
 }

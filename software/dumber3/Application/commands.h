@@ -64,7 +64,7 @@ typedef struct  __attribute__((packed)) {
 
 typedef struct  __attribute__((packed)) {
 	uint8_t ans;
-	char version[6];
+	uint16_t version;
 } ANS_Version;
 
 typedef struct  __attribute__((packed)) {

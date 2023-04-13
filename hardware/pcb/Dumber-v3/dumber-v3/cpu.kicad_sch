@@ -6,8 +6,8 @@
 
   (title_block
     (title "CPU + Com + Motors")
-    (date "2022-06-08")
-    (rev "1.0")
+    (date "2023-03-29")
+    (rev "2.1")
     (company "INSA - GEI")
   )
 
@@ -1221,7 +1221,7 @@
   )
 
   (no_connect (at 116.84 66.04) (uuid 3e049e38-2c02-4d68-adb2-295069211b5c))
-  (no_connect (at 149.86 81.28) (uuid 3e049e38-2c02-4d68-adb2-295069211b5d))
+  (no_connect (at 149.86 78.74) (uuid 3e049e38-2c02-4d68-adb2-295069211b5d))
   (no_connect (at 116.84 83.82) (uuid 3e049e38-2c02-4d68-adb2-295069211b5e))
   (no_connect (at 116.84 76.2) (uuid 3e049e38-2c02-4d68-adb2-295069211b5f))
   (no_connect (at 116.84 60.96) (uuid 3e049e38-2c02-4d68-adb2-295069211b60))
@@ -1353,10 +1353,6 @@
     (stroke (width 0) (type default) (color 0 0 0 0))
     (uuid 25ab8ac8-4632-4332-ad11-eb21df540869)
   )
-  (wire (pts (xy 149.86 78.74) (xy 172.72 78.74))
-    (stroke (width 0) (type default) (color 0 0 0 0))
-    (uuid 26cb4be2-0d3e-4bbc-9131-33df76a0e6ce)
-  )
   (wire (pts (xy 64.77 138.43) (xy 82.55 138.43))
     (stroke (width 0) (type default) (color 0 0 0 0))
     (uuid 275abccc-9bc6-4fce-a082-4b6d12de4c9f)
@@ -1428,6 +1424,10 @@
   (wire (pts (xy 110.49 91.44) (xy 116.84 91.44))
     (stroke (width 0) (type default) (color 0 0 0 0))
     (uuid 44bac1b6-94df-45ae-8ad7-2e2594d65e67)
+  )
+  (wire (pts (xy 149.86 81.28) (xy 172.72 81.28))
+    (stroke (width 0) (type default) (color 0 0 0 0))
+    (uuid 45110900-553e-4a3a-a526-77642fdab0b7)
   )
   (wire (pts (xy 129.54 33.02) (xy 129.54 38.1))
     (stroke (width 0) (type default) (color 0 0 0 0))
@@ -1891,7 +1891,7 @@
     (uuid fe739cda-c9e2-42cb-8c61-96240769247f)
   )
 
-  (label "ENCDROIT_B" (at 172.72 78.74 180)
+  (label "ENCDROIT_B" (at 172.72 81.28 180)
     (effects (font (size 1.27 1.27)) (justify right bottom))
     (uuid 03db0c05-d37c-4aaa-9c85-1f194b1c4382)
   )

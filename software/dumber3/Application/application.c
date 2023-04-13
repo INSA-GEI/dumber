@@ -86,7 +86,7 @@ void APPLICATION_Init(void) {
 	/* Init de la partie RF / reception des messages */
 	XBEE_Init();
 	//BATTERIE_Init();
-	//MOTEURS_Init();
+	MOTEURS_Init();
 
 	/* Create the task without using any dynamic memory allocation. */
 	xHandleApplicationMain = xTaskCreateStatic(
@@ -123,13 +123,6 @@ void APPLICATION_MainThread(void* params) {
 
 		switch (msg.id) {
 		case MSG_ID_XBEE_CMD:
-//			systemInfos.senderAddress = 0x81;
-//			systemInfos.cmd = 0;
-//			cmdSendAnswer(systemInfos.senderAddress, ANS_OK);
-//
-//			if (msg.data != NULL)
-//				free (msg.data);
-
 			xbeeFrame = (XBEE_INCOMING_FRAME*)msg.data;
 
 			if (xbeeFrame != NULL) {
@@ -195,9 +188,6 @@ void APPLICATION_MainThread(void* params) {
 				default:
 					break;
 				}
-
-//				if (xbeeFrame->data != NULL)
-//					free(xbeeFrame->data);
 
 				free(xbeeFrame);
 			}
@@ -412,27 +402,30 @@ void APPLICATION_PowerOff() {
 	}
 }
 
-/* This task is called every 100 ms */
+/*
+ * This task is called every 100 ms
+ * RQ: les constante de temps sont exprimé en ms, d'où la division par 100
+ */
 void vTimerTimeoutCallback( TimerHandle_t xTimer ) {
 	if (systemInfos.state == stateStartup) {
 		systemTimeout.startupCnt++;
-		if (systemTimeout.startupCnt++>=APPLICATION_STARTUP_DELAY)
+		if (systemTimeout.startupCnt++>=(APPLICATION_STARTUP_DELAY/100))
 			APPLICATION_TransitionToNewState(stateIdle);
 	}
 
 	systemTimeout.inactivityCnt++;
-	if (systemTimeout.inactivityCnt>=APPLICATION_INACTIVITY_TIMEOUT)
+	if (systemTimeout.inactivityCnt>=(APPLICATION_INACTIVITY_TIMEOUT/100))
 		/* send a message Button_Pressed to enable power off */
 		MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BUTTON_PRESSED, APPLICATION_Mailbox, (void*)NULL);
 
 	if (systemTimeout.watchdogEnabled) {
 		systemTimeout.watchdogCnt++;
 
-		if (systemTimeout.watchdogCnt>APPLICATION_WATCHDOG_MAX) {
+		if (systemTimeout.watchdogCnt>(APPLICATION_WATCHDOG_MAX/100)) {
 			systemTimeout.watchdogCnt=0;
 			systemTimeout.watchdogMissedCnt++;
 
-			if (systemTimeout.watchdogMissedCnt>=APPLICATION_WATCHDOG_MISSED_MAX)
+			if (systemTimeout.watchdogMissedCnt>=(APPLICATION_WATCHDOG_MISSED_MAX/100))
 				APPLICATION_TransitionToNewState(stateWatchdogDisable);
 		}
 	}

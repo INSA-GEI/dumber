@@ -6,6 +6,7 @@
 
   (title_block
     (date "2022-06-08")
+    (rev "1.0")
     (company "INSA - GEI")
   )
 
