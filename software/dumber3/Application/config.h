@@ -31,6 +31,9 @@
 #define XBEE_TX_SEMAPHORE_WAIT		500
 #define XBEE_RX_BUFFER_MAX_LENGTH	50
 
+#define BATTERY_EMPTY_LEVEL			128
+#define BATTERY_LOW_LEVEL			140
+
 /*
  * Revoir les délais : c'est en 100 ms, pas ms
  */

@@ -69,7 +69,7 @@ void LEDS_Tests();
 void APPLICATION_MainThread(void* params);
 void APPLICATION_TimeoutThread(void* params);
 void APPLICATION_StateMachine();
-LEDS_State APPLICATION_BatteryLevel(uint16_t voltage, char inCharge);
+LEDS_State APPLICATION_BatteryLevel(uint8_t voltage, APPLICATION_State state);
 void APPLICATION_PowerOff();
 void APPLICATION_TransitionToNewState(APPLICATION_State new_state);
 
@@ -85,7 +85,7 @@ void APPLICATION_Init(void) {
 
 	/* Init de la partie RF / reception des messages */
 	XBEE_Init();
-	//BATTERIE_Init();
+	BATTERIE_Init();
 	MOTEURS_Init();
 
 	/* Create the task without using any dynamic memory allocation. */
@@ -231,15 +231,16 @@ void APPLICATION_StateMachine() {
 	if (systemInfos.powerOffRequired)
 		APPLICATION_PowerOff(); // system will halt here
 
-	if (systemInfos.inCharge) {
+	if ((systemInfos.inCharge) && (systemInfos.state != stateInCharge)) {
 		APPLICATION_TransitionToNewState(stateInCharge);
 	}
 
 	if (systemInfos.batteryUpdate) {
+		ledState = APPLICATION_BatteryLevel(systemInfos.batteryVoltage, systemInfos.state);
+
 		if (ledState == leds_niveau_bat_0)
 			APPLICATION_TransitionToNewState(stateLowBatDisable);
 		else if (systemInfos.state==stateStartup) {
-			ledState = APPLICATION_BatteryLevel(systemInfos.batteryVoltage, systemInfos.inCharge);
 			MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
 		}
 	}
@@ -388,14 +389,29 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 	systemInfos.state = new_state;
 }
 
-LEDS_State APPLICATION_BatteryLevel(uint16_t voltage, char inCharge) {
+const uint8_t APPLICATION_NiveauBatteryNormal[5] = {
+	0
+};
+
+const uint8_t APPLICATION_NiveauBatteryCharge[5] = {
+	0
+};
+
+LEDS_State APPLICATION_BatteryLevel(uint8_t voltage,  APPLICATION_State state) {
 	LEDS_State ledState=leds_niveau_bat_0;
 
+	/* TODO: A faire
+	 * Pour l'instant, testons les niveaux de batterie
+	 */
+	ledState = leds_niveau_bat_5;
 	return ledState;
 }
 
 void APPLICATION_PowerOff() {
-	HAL_GPIO_WritePin(SHUTDOWN_GPIO_Port, SHUTDOWN_Pin, GPIO_PIN_RESET);
+	/*
+	 * TODO: a decommenter quand le code sera debuggé
+	 */
+	//HAL_GPIO_WritePin(SHUTDOWN_GPIO_Port, SHUTDOWN_Pin, GPIO_PIN_RESET);
 
 	while (1){
 		__WFE(); // Attente infinie que le regulateur se coupe.
