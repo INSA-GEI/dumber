@@ -94,7 +94,7 @@ void APPLICATION_Init(void) {
 			"APPLICATION Main",          /* Text name for the task. */
 			STACK_SIZE,      /* Number of indexes in the xStack array. */
 			NULL,    /* Parameter passed into the task. */
-			PriorityApplicationMain,/* Priority at which the task is created. */
+			PriorityApplicationHandler,/* Priority at which the task is created. */
 			xStackApplicationMain,          /* Array to use as the task's stack. */
 			&xTaskApplicationMain);  /* Variable to hold the task's data structure. */
 	vTaskResume(xHandleApplicationMain);
@@ -108,14 +108,11 @@ void APPLICATION_Init(void) {
 			vTimerTimeoutCallback,
 			&xBufferTimerTimeout);
 	xTimerStart(xHandleTimerTimeout,0 );
-
-	APPLICATION_TransitionToNewState(stateStartup);
 }
 
 void APPLICATION_MainThread(void* params) {
 	MESSAGE_Typedef msg;
-	XBEE_INCOMING_FRAME *xbeeFrame;
-
+	char* receivedCMD;
 	CMD_Generic* decodedCmd;
 
 	while (1) {
@@ -123,93 +120,73 @@ void APPLICATION_MainThread(void* params) {
 
 		switch (msg.id) {
 		case MSG_ID_XBEE_CMD:
-			xbeeFrame = (XBEE_INCOMING_FRAME*)msg.data;
+			receivedCMD = (char*)msg.data;
 
-			if (xbeeFrame != NULL) {
-				systemInfos.senderAddress = xbeeFrame->source_addr;
+			if (receivedCMD != NULL) {
+				decodedCmd = cmdDecode(receivedCMD,strlen(receivedCMD));
 
-				switch (xbeeFrame->type) {
-				case XBEE_RX_16BIT_PACKET_TYPE:
-					decodedCmd = cmdDecode(xbeeFrame->data,xbeeFrame->length);
+				if (decodedCmd==CMD_DECODE_UNKNOWN)
+					cmdSendAnswer(ANS_UNKNOWN);
+				else {
+					systemInfos.cmd = decodedCmd->type;
+					systemTimeout.inactivityCnt = 0;
 
-					if (decodedCmd==CMD_DECODE_UNKNOWN)
-						cmdSendAnswer(systemInfos.senderAddress, ANS_UNKNOWN);
-					else {
-						systemInfos.cmd = decodedCmd->type;
-						systemTimeout.inactivityCnt = 0;
-
-						/* Manage answer to command, when possible
-						 * (further treatment of the command will be done in APPLICATION_StateMachine) */
-						switch (decodedCmd->type) {
-						case CMD_PING:
-						case CMD_TEST:
-						case CMD_DEBUG:
-						case CMD_POWER_OFF:
-							cmdSendAnswer(systemInfos.senderAddress, ANS_OK);
-							break;
-						case CMD_GET_BATTERY:
-							cmdSendBatteryLevel(systemInfos.senderAddress, systemInfos.batteryVoltage);
-							break;
-						case CMD_GET_VERSION:
-							cmdSendVersion(SYSTEM_VERSION);
-							break;
-						case CMD_GET_BUSY_STATE:
-							if (systemInfos.state == stateInMouvement)
-								cmdSendBusyState(systemInfos.senderAddress, 0x1);
-							else
-								cmdSendBusyState(systemInfos.senderAddress, 0x0);
-							break;
-						case CMD_MOVE:
-							systemInfos.distance = ((CMD_Move*)decodedCmd)->distance;
-							break;
-						case CMD_TURN:
-							systemInfos.turns = ((CMD_Turn*)decodedCmd)->turns;
-							break;
-						default:
-							/* All others commands must be processed in state machine
-							 * in order to find what action to do and what answer to give
-							 */
-							break;
-						}
-						free(decodedCmd);
+					/* Manage answer to command, when possible
+					 * (further treatment of the command will be done in APPLICATION_StateMachine) */
+					switch (decodedCmd->type) {
+					case CMD_PING:
+					case CMD_TEST:
+					case CMD_DEBUG:
+					case CMD_POWER_OFF:
+						cmdSendAnswer(ANS_OK);
+						break;
+					case CMD_GET_BATTERY:
+						cmdSendBatteryLevel(systemInfos.batteryVoltage);
+						break;
+					case CMD_GET_VERSION:
+						cmdSendVersion();
+						break;
+					case CMD_GET_BUSY_STATE:
+						if (systemInfos.state == stateInMouvement)
+							cmdSendBusyState(0x1);
+						else
+							cmdSendBusyState(0x0);
+						break;
+					case CMD_MOVE:
+						systemInfos.distance = ((CMD_Move*)decodedCmd)->distance;
+						break;
+					case CMD_TURN:
+						systemInfos.turns = ((CMD_Turn*)decodedCmd)->turns;
+						break;
+					default:
+						/* All others commands must be processed in state machine
+						 * in order to find what action to do and what answer to give
+						 */
+						break;
 					}
-					break;
-
-				case XBEE_TX_STATUS_TYPE:
-					if (xbeeFrame->ack == 0) {
-						if (systemInfos.rfProblem !=0)
-							systemInfos.rfProblem--;
-					} else {
-						if (systemInfos.rfProblem !=255)
-							systemInfos.rfProblem++;
-					}
-					break;
-
-				default:
-					break;
+					free(decodedCmd);
 				}
+				break;
 
-				free(xbeeFrame);
+		default:
+			break;
 			}
+
 			break;
 
-		case MSG_ID_BAT_NIVEAU:
-		case MSG_ID_BAT_CHARGE:
+		case MSG_ID_BAT_CHARGE_OFF:
+		case MSG_ID_BAT_CHARGE_COMPLETE:
 			systemInfos.batteryVoltage = *((uint16_t*)msg.data);
 			systemInfos.batteryUpdate = 1;
 
-			if (msg.id == MSG_ID_BAT_CHARGE)
+			if (msg.id == MSG_ID_BAT_CHARGE_COMPLETE)
 				systemInfos.inCharge =1;
 			else
 				systemInfos.inCharge =0;
 			break;
 
-		case MSG_ID_BAT_CHARGEUR_ON:
-		case MSG_ID_BAT_CHARGEUR_OFF:
-			if (msg.id == MSG_ID_BAT_CHARGEUR_ON)
+		case MSG_ID_BAT_CHARGE_ON:
 				systemInfos.inCharge =1;
-			else
-				systemInfos.inCharge =0;
 			break;
 
 		case MSG_ID_MOTEURS_STOP:
@@ -255,16 +232,16 @@ void APPLICATION_StateMachine() {
 					(systemInfos.state == stateRun) ||
 					(systemInfos.state == stateInMouvement)) {
 				/* command RESET is only applicable in those 3 states, otherwise it is rejected */
-				cmdSendAnswer(systemInfos.senderAddress, ANS_OK);
+				cmdSendAnswer(ANS_OK);
 				APPLICATION_TransitionToNewState(stateIdle);
 			} else
-				cmdSendAnswer(systemInfos.senderAddress, ANS_ERR);
+				cmdSendAnswer(ANS_ERR);
 			break;
 		case CMD_START_WITH_WATCHDOG:
 		case CMD_START_WITHOUT_WATCHDOG:
 			if (systemInfos.state == stateIdle) {
 				/* only state where START cmd is accepted */
-				cmdSendAnswer(systemInfos.senderAddress, ANS_OK);
+				cmdSendAnswer(ANS_OK);
 
 				APPLICATION_TransitionToNewState(stateRun);
 
@@ -274,15 +251,15 @@ void APPLICATION_StateMachine() {
 					systemTimeout.watchdogMissedCnt=0;
 				}
 			} else
-				cmdSendAnswer(systemInfos.senderAddress, ANS_ERR);
+				cmdSendAnswer(ANS_ERR);
 			break;
 		case CMD_RESET_WATCHDOG:
 			if ((systemInfos.state == stateRun) || (systemInfos.state == stateInMouvement)) {
 				if ((systemTimeout.watchdogEnabled ==0 ) ||
 						((systemTimeout.watchdogCnt>=APPLICATION_WATCHDOG_MIN) && (systemTimeout.watchdogCnt<=APPLICATION_WATCHDOG_MAX)))
-					cmdSendAnswer(systemInfos.senderAddress, ANS_OK);
+					cmdSendAnswer(ANS_OK);
 				else
-					cmdSendAnswer(systemInfos.senderAddress, ANS_ERR);
+					cmdSendAnswer(ANS_ERR);
 
 				systemTimeout.watchdogCnt =0;
 			}
@@ -294,17 +271,17 @@ void APPLICATION_StateMachine() {
 				if (((systemInfos.cmd == CMD_MOVE) && (systemInfos.distance !=0)) ||
 						((systemInfos.cmd == CMD_TURN) && (systemInfos.turns !=0))) {
 					systemInfos.endOfMouvement = 0;
-					cmdSendAnswer(systemInfos.senderAddress, ANS_OK);
+					cmdSendAnswer(ANS_OK);
 					APPLICATION_TransitionToNewState(stateInMouvement);
 				} // if TURN and MOVE are sent without parameter, do nothing: we are still in run state
 			} else if (systemInfos.state == stateInMouvement) { // in this state, MOVE and TURN cmds are accepted only if they come with no parameter
 				if (((systemInfos.cmd == CMD_MOVE) && (systemInfos.distance ==0)) ||
 						((systemInfos.cmd == CMD_TURN) && (systemInfos.turns ==0))) {
 					systemInfos.endOfMouvement = 1;
-					cmdSendAnswer(systemInfos.senderAddress, ANS_OK);
+					cmdSendAnswer(ANS_OK);
 				}
 			} else
-				cmdSendAnswer(systemInfos.senderAddress, ANS_ERR);
+				cmdSendAnswer(ANS_ERR);
 			break;
 		default: // commands no common for every states
 			break;
@@ -390,11 +367,11 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 }
 
 const uint8_t APPLICATION_NiveauBatteryNormal[5] = {
-	0
+		0
 };
 
 const uint8_t APPLICATION_NiveauBatteryCharge[5] = {
-	0
+		0
 };
 
 LEDS_State APPLICATION_BatteryLevel(uint8_t voltage,  APPLICATION_State state) {

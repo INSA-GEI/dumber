@@ -81,9 +81,10 @@ typedef struct __attribute__((packed)) {
 #define CMD_DECODE_UNKNOWN		((CMD_Generic*)UINT32_MAX)
 
 CMD_Generic* cmdDecode(char* cmd, uint8_t length);
-void cmdSendAnswer(uint16_t address, uint8_t ans);
-void cmdSendBatteryLevel(uint16_t address, char level);
-void cmdSendVersion(uint16_t address);
-void cmdSendBusyState(uint16_t address, uint8_t state);
+void cmdSendAnswer(uint8_t ans);
+void cmdSendString(char* str);
+void cmdSendBatteryLevel(char level);
+void cmdSendVersion(void);
+void cmdSendBusyState(uint8_t state);
 
 #endif /* INC_CMD_H_ */

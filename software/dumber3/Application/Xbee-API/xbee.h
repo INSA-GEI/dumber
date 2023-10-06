@@ -62,5 +62,6 @@ typedef struct {
 } XBEE_INCOMING_FRAME;
 
 void XBEE_Init(void);
+int XBEE_SendData(uint16_t address, char* data, int length);
 
 #endif /* INC_XBEE_H_ */

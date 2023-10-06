@@ -27,8 +27,8 @@
           <cpucore>Arm Cortex-M0+</cpucore>
           <fpu>None</fpu>
           <memories>
-            <memory access="xrw" name="RAM" size="20" start="0x20000000" />
-            <memory access="rx" name="FLASH" size="128" start="0x8000000" />
+            <memory access="xrw" name="RAM" size="20480" start="0x20000000" />
+            <memory access="rx" name="FLASH" size="131072" start="0x8000000" />
           </memories>
           <startup>/home/dimercur/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/CMSIS/Device\ST\STM32L0xx\Source\Templates\gcc\startup_stm32l071xx.s</startup>
           <LinkSettings>
@@ -63,7 +63,6 @@
             <Adefines />
             <Cdefines>
               <define>USE_FULL_LL_DRIVER</define>
-              <define>MBEDTLS_CONFIG_FILE="mbedtls_config.h"</define>
               <define>USE_FULL_ASSERT=1U</define>
             </Cdefines>
             <Ldefines />

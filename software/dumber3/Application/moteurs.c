@@ -83,7 +83,7 @@ void MOTEURS_Init(void) {
 			"MOTEURS Principale",          /* Text name for the task. */
 			STACK_SIZE,      /* Number of indexes in the xStack array. */
 			NULL,    /* Parameter passed into the task. */
-			PriorityMoteurs,/* Priority at which the task is created. */
+			PriorityMoteursHandler,/* Priority at which the task is created. */
 			xStackMoteurs,          /* Array to use as the task's stack. */
 			&xTaskMoteurs);  /* Variable to hold the task's data structure. */
 	vTaskResume(xHandleMoteurs);

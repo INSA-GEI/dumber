@@ -20,17 +20,17 @@ typedef struct {
 extern QueueHandle_t LEDS_Mailbox;
 extern QueueHandle_t MOTEURS_Mailbox;
 extern QueueHandle_t APPLICATION_Mailbox;
+extern QueueHandle_t XBEE_Mailbox;
 
 #define MSG_ID_NO_MESSAGE			0x00
 
 #define MSG_ID_LED_ETAT				0x10
 
-#define MSG_ID_BAT_NIVEAU			0x20
-#define MSG_ID_BAT_CHARGE			0x21
-#define MSG_ID_BAT_CHARGEUR_ON		0x22
-#define MSG_ID_BAT_CHARGEUR_OFF		0x23
-#define MSG_ID_BAT_CHARGEUR_ERR		0x24
-#define MSG_ID_BAT_ADC_ERR			0x25
+#define MSG_ID_BAT_CHARGE_COMPLETE	0x20
+#define MSG_ID_BAT_CHARGE_ON		0x21
+#define MSG_ID_BAT_CHARGE_OFF		0x22
+#define MSG_ID_BAT_CHARGE_ERR		0x23
+#define MSG_ID_BAT_ADC_ERR			0x24
 
 #define MSG_ID_BUTTON_PRESSED		0x30
 
@@ -39,6 +39,7 @@ extern QueueHandle_t APPLICATION_Mailbox;
 #define MSG_ID_MOTEURS_TURN			0x42
 
 #define MSG_ID_XBEE_CMD				0x50
+#define MSG_ID_XBEE_ANS				0x51
 
 void MESSAGE_Init(void);
 MESSAGE_Typedef MESSAGE_ReadMailbox(QueueHandle_t mbx);

@@ -21,10 +21,10 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
-extern DMA_HandleTypeDef hdma_lpuart1_tx;
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
@@ -177,29 +177,11 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     GPIO_InitStruct.Alternate = GPIO_AF4_LPUART1;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    /* LPUART1 DMA Init */
-    /* LPUART1_TX Init */
-    hdma_lpuart1_tx.Instance = DMA1_Channel2;
-    hdma_lpuart1_tx.Init.Request = DMA_REQUEST_5;
-    hdma_lpuart1_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
-    hdma_lpuart1_tx.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_lpuart1_tx.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_lpuart1_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    hdma_lpuart1_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_lpuart1_tx.Init.Mode = DMA_NORMAL;
-    hdma_lpuart1_tx.Init.Priority = DMA_PRIORITY_HIGH;
-    if (HAL_DMA_Init(&hdma_lpuart1_tx) != HAL_OK)
-    {
-      Error_Handler();
-    }
-
-    __HAL_LINKDMA(huart,hdmatx,hdma_lpuart1_tx);
-
     /* LPUART1 interrupt Init */
-    HAL_NVIC_SetPriority(LPUART1_IRQn, 3, 0);
+    HAL_NVIC_SetPriority(LPUART1_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(LPUART1_IRQn);
   /* USER CODE BEGIN LPUART1_MspInit 1 */
-    HAL_NVIC_SetPriority(LPUART1_IRQn, 2, 0);
+    //HAL_NVIC_SetPriority(LPUART1_IRQn, 3, 0);
   /* USER CODE END LPUART1_MspInit 1 */
   }
 
@@ -226,9 +208,6 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
     PB11     ------> LPUART1_RX
     */
     HAL_GPIO_DeInit(GPIOB, USART_TX_Pin|USART_RX_Pin);
-
-    /* LPUART1 DMA DeInit */
-    HAL_DMA_DeInit(huart->hdmatx);
 
     /* LPUART1 interrupt DeInit */
     HAL_NVIC_DisableIRQ(LPUART1_IRQn);
@@ -310,29 +289,6 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
   /* USER CODE BEGIN TIM21_MspInit 1 */
 
   /* USER CODE END TIM21_MspInit 1 */
-  }
-  else if(htim_base->Instance==TIM22)
-  {
-  /* USER CODE BEGIN TIM22_MspInit 0 */
-
-  /* USER CODE END TIM22_MspInit 0 */
-    /* Peripheral clock enable */
-    __HAL_RCC_TIM22_CLK_ENABLE();
-
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    /**TIM22 GPIO Configuration
-    PA4     ------> TIM22_ETR
-    */
-    GPIO_InitStruct.Pin = ENC_PHB_DROIT_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF5_TIM22;
-    HAL_GPIO_Init(ENC_PHB_DROIT_GPIO_Port, &GPIO_InitStruct);
-
-  /* USER CODE BEGIN TIM22_MspInit 1 */
-
-  /* USER CODE END TIM22_MspInit 1 */
   }
 
 }
@@ -430,23 +386,6 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
   /* USER CODE BEGIN TIM21_MspDeInit 1 */
 
   /* USER CODE END TIM21_MspDeInit 1 */
-  }
-  else if(htim_base->Instance==TIM22)
-  {
-  /* USER CODE BEGIN TIM22_MspDeInit 0 */
-
-  /* USER CODE END TIM22_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_TIM22_CLK_DISABLE();
-
-    /**TIM22 GPIO Configuration
-    PA4     ------> TIM22_ETR
-    */
-    HAL_GPIO_DeInit(ENC_PHB_DROIT_GPIO_Port, ENC_PHB_DROIT_Pin);
-
-  /* USER CODE BEGIN TIM22_MspDeInit 1 */
-
-  /* USER CODE END TIM22_MspDeInit 1 */
   }
 
 }

@@ -67,8 +67,6 @@ void Error_Handler(void);
 #define ENC_PHA_GAUCHE_GPIO_Port GPIOA
 #define ENC_PHA_DROIT_Pin GPIO_PIN_2
 #define ENC_PHA_DROIT_GPIO_Port GPIOA
-#define ENC_PHB_DROIT_Pin GPIO_PIN_4
-#define ENC_PHB_DROIT_GPIO_Port GPIOA
 #define ENC_PHB_GAUCHE_Pin GPIO_PIN_5
 #define ENC_PHB_GAUCHE_GPIO_Port GPIOA
 #define PWM_B_GAUCHE_Pin GPIO_PIN_6

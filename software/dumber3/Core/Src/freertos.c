@@ -57,6 +57,7 @@
 __weak void PreSleepProcessing(uint32_t *ulExpectedIdleTime)
 {
 /* place for user code */
+	*ulExpectedIdleTime=0;
 }
 
 __weak void PostSleepProcessing(uint32_t *ulExpectedIdleTime)

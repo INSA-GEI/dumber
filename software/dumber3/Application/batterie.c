@@ -6,6 +6,16 @@
  */
 
 #include "batterie.h"
+#include "stm32l0xx.h"
+#include "stm32l0xx_ll_gpio.h"
+#include "timers.h"
+
+typedef enum {
+	CHARGEUR_NOT_PLUGGED,
+	CHARGEUR_IN_CHARGE,
+	CHARGEUR_CHARGE_COMPLETE,
+	CHARGEUR_ERROR
+} BATTERIE_StatusChargerTypedef;
 
 extern ADC_HandleTypeDef hadc;
 uint8_t conversion_complete;
@@ -21,6 +31,17 @@ TaskHandle_t xHandleBatterie = NULL;
 TaskHandle_t task_handler;
 TaskHandle_t charger_thread_handler;
 
+/* TimerButton sert à attendre ~ 3secondes avant de prendre en compte les IT bouton
+ * En effet, au demarrage, le bouton est appuyé pour lancer le systeme. ceci genere alors une IT bouton,
+ * ammenant à envoyer le message MSG_ID_BUTTON_PRESSED, demandant l'arret du systeme
+ *
+ * De ce fait, avec cette tempo, on s'assure de ne pas prendre en compte les IT dans les 3 premieres secondes.
+ */
+StaticTimer_t xBufferTimerButton;
+TimerHandle_t xHandleTimerButton = NULL;
+void vTimerButtonCallback( TimerHandle_t xTimer );
+uint8_t BUTTON_Inactivity=1; //start with button on/off inactive
+
 void BATTERIE_VoltageThread(void* params);
 
 void BATTERIE_Init(void) {
@@ -33,10 +54,42 @@ void BATTERIE_Init(void) {
 			"BATTERIE Voltage",          /* Text name for the task. */
 			STACK_SIZE,      /* Number of indexes in the xStack array. */
 			NULL,    /* Parameter passed into the task. */
-			PriorityLeds,/* Priority at which the task is created. */
+			PriorityBatterieHandler,/* Priority at which the task is created. */
 			xStackBatterie,          /* Array to use as the task's stack. */
 			&xTaskBatterie);  /* Variable to hold the task's data structure. */
+
+	/* Create a periodic task without using any dynamic memory allocation. */
+	xHandleTimerButton = xTimerCreateStatic(
+			"Inactivity Button Timer",
+			pdMS_TO_TICKS(BUTTON_INACTIVITY_PERIODE),
+			pdTRUE,
+			( void * ) 0,
+			vTimerButtonCallback,
+			&xBufferTimerButton);
+
+	xTimerStart(xHandleTimerButton,0 );
 	vTaskResume(xHandleBatterie);
+}
+
+/*
+ * Lit les pins GPIO
+ */
+BATTERIE_StatusChargerTypedef BATTERIE_LireStatusChargeur(void) {
+	uint32_t st2 = LL_GPIO_ReadInputPort(CHARGER_ST2_GPIO_Port) & CHARGER_ST2_Pin;
+	uint32_t st1 = LL_GPIO_ReadInputPort(CHARGER_ST1_GPIO_Port) & CHARGER_ST1_Pin;
+
+	BATTERIE_StatusChargerTypedef status;
+
+	if (st1 && st2)
+		status = CHARGEUR_NOT_PLUGGED;
+	else if (st1 && !st2)
+		status = CHARGEUR_CHARGE_COMPLETE;
+	else if (!st1 && st2)
+		status = CHARGEUR_IN_CHARGE;
+	else /* !st1 && !st2 */
+		status = CHARGEUR_ERROR;
+
+	return status;
 }
 
 int BATTERIE_LireTension(uint16_t *val) {
@@ -66,6 +119,8 @@ int BATTERIE_LireTension(uint16_t *val) {
 
 void BATTERIE_VoltageThread(void* params) {
 	static uint16_t tension;
+	BATTERIE_StatusChargerTypedef currentStatus;
+
 	TickType_t xLastWakeTime;
 
 	// Initialise the xLastWakeTime variable with the current time.
@@ -73,10 +128,16 @@ void BATTERIE_VoltageThread(void* params) {
 
 	while (1) {
 		if (BATTERIE_LireTension(&tension) ==0) {
-			if (HAL_GPIO_ReadPin(GPIOB, USB_SENSE_Pin)==GPIO_PIN_SET) // le chargeur est branché
-				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE, (QueueHandle_t)0x0, (void*)&tension);
+
+			currentStatus = BATTERIE_LireStatusChargeur();
+			if (currentStatus == CHARGEUR_ERROR)
+				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE_ERR, (QueueHandle_t)0x0, (void*)NULL);
+			else if (currentStatus == CHARGEUR_IN_CHARGE)
+				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE_ON, (QueueHandle_t)0x0, (void*)&tension);
+			else if (currentStatus == CHARGEUR_CHARGE_COMPLETE)
+				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE_COMPLETE, (QueueHandle_t)0x0, (void*)&tension);
 			else
-				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_NIVEAU, (QueueHandle_t)0x0, (void*)&tension);
+				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE_OFF, (QueueHandle_t)0x0, (void*)&tension);
 		} else {
 			MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_ADC_ERR, (QueueHandle_t)0x0, (void*)0x0);
 		}
@@ -106,21 +167,31 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
 	}
 }
 
+void vTimerButtonCallback( TimerHandle_t xTimer ) {
+	BUTTON_Inactivity=0;
+
+	xTimerStop(xHandleTimerButton,0 );
+}
+
 /**
  * @brief This function handles EXTI line0 interrupt.
  */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-	if (GPIO_Pin == USB_SENSE_Pin) { // Le chargeur vient d'etre branché ou debranché
-		if (HAL_GPIO_ReadPin(GPIOB, GPIO_Pin)==GPIO_PIN_SET) // le chargeur est branché
-			MESSAGE_SendMailboxFromISR(APPLICATION_Mailbox, MSG_ID_BAT_CHARGEUR_ON, (QueueHandle_t)0x0, 0x0, &xHigherPriorityTaskWoken);
-		else
-			MESSAGE_SendMailboxFromISR(APPLICATION_Mailbox, MSG_ID_BAT_CHARGEUR_OFF, (QueueHandle_t)0x0, 0x0, &xHigherPriorityTaskWoken);
-	}
-	else if (GPIO_Pin == BUTTON_SENSE_Pin) { // on vient d'appuyer sur le bouton on/off
-		if (HAL_GPIO_ReadPin(GPIOB, GPIO_Pin)==GPIO_PIN_SET)  // le chargeur est branché
-			MESSAGE_SendMailboxFromISR(APPLICATION_Mailbox, MSG_ID_BUTTON_PRESSED, (QueueHandle_t)0x0, 0x0, &xHigherPriorityTaskWoken);
+	//	if (GPIO_Pin == USB_SENSE_Pin) { // Le chargeur vient d'etre branché ou debranché
+	//		if (HAL_GPIO_ReadPin(USB_SENSE_GPIO_Port, GPIO_Pin)==GPIO_PIN_SET) // le chargeur est branché
+	//			MESSAGE_SendMailboxFromISR(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE_ON, (QueueHandle_t)0x0, 0x0, &xHigherPriorityTaskWoken);
+	//		else
+	//			MESSAGE_SendMailboxFromISR(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE_OFF, (QueueHandle_t)0x0, 0x0, &xHigherPriorityTaskWoken);
+	//	}
+	//	else
+
+	if (GPIO_Pin == BUTTON_SENSE_Pin) { // on vient d'appuyer sur le bouton on/off
+		if (!BUTTON_Inactivity) {
+			if (HAL_GPIO_ReadPin(BUTTON_SENSE_GPIO_Port, GPIO_Pin)==GPIO_PIN_RESET)  // GPIOB.3 = 0 => le bouton est appuyé
+				MESSAGE_SendMailboxFromISR(APPLICATION_Mailbox, MSG_ID_BUTTON_PRESSED, (QueueHandle_t)0x0, 0x0, &xHigherPriorityTaskWoken);
+		}
 	}
 
 	if (xHigherPriorityTaskWoken) {

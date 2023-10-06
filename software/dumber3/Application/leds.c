@@ -108,17 +108,26 @@ uint16_t LEDS_Patterns [LED_MAX_PATTERNS][4]= {
 LEDS_State LEDS_Animation;
 LEDS_State LEDS_AnimationAncien;
 
-StaticTask_t xTaskLeds;
+StaticTask_t xTaskLedsHandler;
 
 /* Buffer that the task being created will use as its stack.  Note this is
     an array of StackType_t variables.  The size of StackType_t is dependent on
     the RTOS port. */
-StackType_t xStackLeds[ STACK_SIZE ];
-TaskHandle_t xHandleLeds = NULL;
+StackType_t xStackLedsHandler[ STACK_SIZE ];
+TaskHandle_t xHandleLedsHandler = NULL;
 
-void LEDS_AnimationThread(void* params);
+StaticTask_t xTaskLedsAction;
+
+/* Buffer that the task being created will use as its stack.  Note this is
+    an array of StackType_t variables.  The size of StackType_t is dependent on
+    the RTOS port. */
+StackType_t xStackLedsAction[ STACK_SIZE ];
+TaskHandle_t xHandleLedsAction = NULL;
+
+void LEDS_ActionThread(void* params);
 void LEDS_ShowPattern(uint8_t pattern);
 void LEDS_Tests(void* params);
+void LEDS_HandlerThread(void* params);
 
 void LEDS_Init(void) {
 	LEDS_Eteint_Tout();
@@ -129,15 +138,16 @@ void LEDS_Init(void) {
 	/* Mailbox is created in messages.c */
 
 	/* Create the task without using any dynamic memory allocation. */
-	xHandleLeds = xTaskCreateStatic(
-			LEDS_AnimationThread,       /* Function that implements the task. */
-			"LEDS Animation",          /* Text name for the task. */
+	xHandleLedsHandler = xTaskCreateStatic(
+			LEDS_HandlerThread,       /* Function that implements the task. */
+			"LEDS Handler",          /* Text name for the task. */
 			STACK_SIZE,      /* Number of indexes in the xStack array. */
 			NULL,    /* Parameter passed into the task. */
-			PriorityLeds,/* Priority at which the task is created. */
-			xStackLeds,          /* Array to use as the task's stack. */
-			&xTaskLeds);  /* Variable to hold the task's data structure. */
-	vTaskResume(xHandleLeds);
+			PriorityLedsHandler,/* Priority at which the task is created. */
+			xStackLedsHandler,          /* Array to use as the task's stack. */
+			&xTaskLedsHandler);  /* Variable to hold the task's data structure. */
+
+	vTaskResume(xHandleLedsHandler);
 }
 
 void LEDS_ShowPattern(uint8_t pattern) {
@@ -166,20 +176,12 @@ void LEDS_Tests(void* params) {
 	}
 }
 
-void LEDS_AnimationThread(void* params) {
+void LEDS_HandlerThread(void* params) {
 	MESSAGE_Typedef msg;
-	uint8_t cnt=0;
-	TickType_t xLastWakeTime;
-
-	// Initialise the xLastWakeTime variable with the current time.
-	xLastWakeTime = xTaskGetTickCount();
 
 	while (1) {
-		// Wait for the next cycle.
-		vTaskDelayUntil( &xLastWakeTime, pdMS_TO_TICKS(LEDS_PERIODE));
 
-		msg = MESSAGE_ReadMailboxNoDelay(LEDS_Mailbox);
-		cnt++;
+		msg = MESSAGE_ReadMailbox(LEDS_Mailbox);
 
 		if (msg.id == MSG_ID_LED_ETAT) { // Si c'est bien un message de changement d'etat LEDS
 			LEDS_Animation = *((LEDS_State*)msg.data);
@@ -188,10 +190,35 @@ void LEDS_AnimationThread(void* params) {
 				// dans ce cas, on eteint les leds pour repartir sur une base saine
 				LEDS_AnimationAncien = LEDS_Animation;
 
-				LEDS_Eteint_Tout();
-				cnt=0;
+				/* If action task is running, destroy it first */
+				if (xHandleLedsAction!= NULL) vTaskDelete(xHandleLedsAction);
+
+				/* Create the task without using any dynamic memory allocation. */
+				xHandleLedsAction = xTaskCreateStatic(
+						LEDS_ActionThread,       /* Function that implements the task. */
+						"LEDS Action",          /* Text name for the task. */
+						STACK_SIZE,      /* Number of indexes in the xStack array. */
+						NULL,    /* Parameter passed into the task. */
+						PriorityLedsAction,/* Priority at which the task is created. */
+						xStackLedsAction,          /* Array to use as the task's stack. */
+						&xTaskLedsAction);  /* Variable to hold the task's data structure. */
+
+				vTaskResume(xHandleLedsAction);
 			}
 		}
+	}
+}
+
+void LEDS_ActionThread(void* params) {
+	uint8_t cnt=0;
+	TickType_t xLastWakeTime;
+
+	// Initialise the xLastWakeTime variable with the current time.
+	xLastWakeTime = xTaskGetTickCount();
+
+	LEDS_Eteint_Tout();
+
+	while (1) {
 
 		switch (LEDS_Animation) {
 		case leds_off:
@@ -342,5 +369,11 @@ void LEDS_AnimationThread(void* params) {
 		default:
 			break;
 		}
+
+		// Wait for the next cycle.
+		vTaskDelayUntil( &xLastWakeTime, pdMS_TO_TICKS(LEDS_PERIODE));
+
+		cnt++;
 	}
 }
+
