@@ -72,6 +72,7 @@ void TESTS_BasicTests(void* params) {
 	CMD_Generic* cmd;
 
 	char* ans;
+	char str[100];
 
 	ledsStates = leds_run;
 	MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledsStates); // show program is running
@@ -114,7 +115,6 @@ void TESTS_BasicTests(void* params) {
 
 		while (1) {
 			int length;
-			char* str;
 
 			msg = MESSAGE_ReadMailbox(APPLICATION_Mailbox); // Wait for a message from Xbee
 
@@ -132,67 +132,80 @@ void TESTS_BasicTests(void* params) {
 
 				cmd = cmdDecode((char*)msg.data, strlen((char*)msg.data));
 				free(msg.data);
-				str = (char*)malloc(100);
-				str[0] = 0; // empty string
 
+				str[0]=0;
 				switch (cmd->type) {
 				case CMD_PING:
 					snprintf(str, 99, "PING received\r");
 					cmdSendAnswer(ANS_OK);
 					break;
 				case CMD_RESET:
+
 					snprintf(str, 99, "RESET received\r");
 					cmdSendAnswer(ANS_OK);
 					break;
 				case CMD_START_WITH_WATCHDOG:
+
 					snprintf(str, 99, "START with Watchdog received\r");
 					cmdSendAnswer(ANS_OK);
 					break;
 				case CMD_RESET_WATCHDOG:
+
 					snprintf(str, 99, "RESET Watchdog received\r");
 					cmdSendAnswer(ANS_OK);
 					break;
 				case CMD_GET_BATTERY:
+
 					snprintf(str, 99, "GET_BATTERY received\r");
 					cmdSendBatteryLevel(ANS_BAT_OK);
 					break;
 				case CMD_GET_VERSION:
+
 					snprintf(str, 99, "GET_VERSION received\r");
 					cmdSendVersion();
 					break;
 				case CMD_START_WITHOUT_WATCHDOG:
+
 					snprintf(str, 99, "START without Watchdog received\r");
 					cmdSendAnswer(ANS_OK);
 					break;
 				case CMD_MOVE:
+
 					snprintf(str, 99, "MOVE received\r");
 					cmdSendAnswer(ANS_OK);
 					break;
 				case CMD_TURN:
+
 					snprintf(str, 99, "TURN received\r");
 					cmdSendAnswer(ANS_OK);
 					break;
 				case CMD_GET_BUSY_STATE:
+
 					snprintf(str, 99, "GET_BUSY_STATE received\r");
 					cmdSendBusyState(ANS_STATE_BUSY);
 					break;
 				case CMD_TEST:
+
 					snprintf(str, 99, "TEST received\r");
 					cmdSendAnswer(ANS_OK);
 					break;
 				case CMD_DEBUG:
+
 					snprintf(str, 99, "DEBUG received\r");
 					cmdSendAnswer(ANS_OK);
 					break;
 				case CMD_POWER_OFF:
+
 					snprintf(str, 99, "POWER_OFF received\r");
 					cmdSendAnswer(ANS_OK);
 					break;
 				default:
+
 					snprintf(str, 99, "Unknown command\r");
 					cmdSendAnswer(ANS_UNKNOWN);
 					break;
 				}
+
 
 				MESSAGE_SendMailbox(XBEE_Mailbox, MSG_ID_XBEE_ANS, APPLICATION_Mailbox, (void*)str);
 			}
@@ -201,10 +214,10 @@ void TESTS_BasicTests(void* params) {
 	case BATTERY_Tests:
 
 		while (1) {
-			char* str;
+			//char* str;
 
 			msg = MESSAGE_ReadMailbox(APPLICATION_Mailbox); // Wait for a message from Xbee
-			str = (char*)malloc(100); /* allocate a buffer of 100 bytes */
+			//str = (char*)malloc(100); /* allocate a buffer of 100 bytes */
 			str[0]=0;
 
 			switch (msg.id) {
@@ -224,7 +237,7 @@ void TESTS_BasicTests(void* params) {
 				snprintf(str, 99, "Charge error (plug in)\r");
 				break;
 			default:
-				free(str); // buffer alloué non utilisé
+				//free(str); // buffer alloué non utilisé
 				break;
 			}
 

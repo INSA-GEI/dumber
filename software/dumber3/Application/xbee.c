@@ -131,24 +131,28 @@ int XBEE_SendData(char* data) {
 	int status = XBEE_OK;
 
 	// Prevents successive calls to overlap
-	state = xSemaphoreTake(xHandleSemaphoreTX, pdMS_TO_TICKS(XBEE_TX_SEMAPHORE_WAIT)); // wait max 500 ms (to avoid interlocking)
+	//state = xSemaphoreTake(xHandleSemaphoreTX, pdMS_TO_TICKS(XBEE_TX_SEMAPHORE_WAIT)); // wait max 500 ms (to avoid interlocking)
 
-	if (state != pdFALSE) { /* test semaphore take answer
-	                           if answer is false, it means timeout appends
-	                           We should probably reset something in "else" branch */
+	//if (state != pdFALSE) { /* test semaphore take answer
+	//                           if answer is false, it means timeout appends
+	//                           We should probably reset something in "else" branch */
 
-		strncpy((char*)txBuffer,data,XBEE_TX_BUFFER_MAX_LENGTH-1);
-		txBuffer[XBEE_TX_BUFFER_MAX_LENGTH-1]=0;
-		txRemainingData = strlen((char*)txBuffer);
+	while (LL_USART_IsEnabledIT_TXE(hlpuart1.Instance)) {
+		vTaskDelay(pdMS_TO_TICKS(1));
+	}
 
-		if (txRemainingData!=0) {
-			txIndex =1;
-			txRemainingData=txRemainingData-1;
+	strncpy((char*)txBuffer,data,XBEE_TX_BUFFER_MAX_LENGTH-1);
+	txBuffer[XBEE_TX_BUFFER_MAX_LENGTH-1]=0;
+	txRemainingData = strlen((char*)txBuffer);
 
-			LL_USART_TransmitData8(hlpuart1.Instance, txBuffer[0]);
-			LL_USART_EnableIT_TXE(hlpuart1.Instance); // enable TX Interrupt
-		}
-	} else status= XBEE_TX_TIMEOUT;
+	if (txRemainingData!=0) {
+		txIndex =1;
+		txRemainingData=txRemainingData-1;
+
+		LL_USART_TransmitData8(hlpuart1.Instance, txBuffer[0]);
+		LL_USART_EnableIT_TXE(hlpuart1.Instance); // enable TX Interrupt
+	}
+	//} else status= XBEE_TX_TIMEOUT;
 
 	return status;
 }
@@ -158,7 +162,7 @@ void XBEE_TX_IRQHandler(void) {
 
 	if (txRemainingData==0) { // No more data, disable TXE bit
 		LL_USART_DisableIT_TXE(hlpuart1.Instance);
-		xSemaphoreGiveFromISR( xHandleSemaphoreTX, &xHigherPriorityTaskWoken );
+		//xSemaphoreGiveFromISR( xHandleSemaphoreTX, &xHigherPriorityTaskWoken );
 	} else {
 		LL_USART_TransmitData8(hlpuart1.Instance, txBuffer[txIndex]);
 		txIndex++;
@@ -182,7 +186,6 @@ void XBEE_TX_IRQHandler(void) {
  * \param params not used
  */
 void XBEE_RxThread(void* params) {
-	//XBEE_INCOMING_FRAME *incomingFrame;
 	char* incomingData;
 	rxCmdLength=0;
 	rxIndex=0;
@@ -196,8 +199,11 @@ void XBEE_RxThread(void* params) {
 	while (1) {
 		if (xSemaphoreTake(xHandleSemaphoreRX, portMAX_DELAY)==pdTRUE) { // wait forever
 
+			if (rxCmdLength> XBEE_RX_BUFFER_MAX_LENGTH)
+				rxCmdLength = XBEE_RX_BUFFER_MAX_LENGTH;
+
 			incomingData = (char*)malloc(rxCmdLength+1); // +1 for ending zero !
-			strncpy (incomingData, (char*)rxBuffer, XBEE_RX_BUFFER_MAX_LENGTH);
+			strncpy (incomingData, (char*)rxBuffer, rxCmdLength+1);
 
 			rxCmdLength=0; // reset counters for next command
 			rxIndex=0;

@@ -178,7 +178,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     /* LPUART1 interrupt Init */
-    HAL_NVIC_SetPriority(LPUART1_IRQn, 2, 0);
+    HAL_NVIC_SetPriority(LPUART1_IRQn, 3, 0);
     HAL_NVIC_EnableIRQ(LPUART1_IRQn);
   /* USER CODE BEGIN LPUART1_MspInit 1 */
     //HAL_NVIC_SetPriority(LPUART1_IRQn, 3, 0);

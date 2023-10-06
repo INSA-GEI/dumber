@@ -37,6 +37,8 @@
 extern int __io_putchar(int ch) __attribute__((weak));
 extern int __io_getchar(void) __attribute__((weak));
 
+extern uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
+
 
 char *__env[1] = { 0 };
 char **environ = __env;
@@ -45,24 +47,26 @@ char **environ = __env;
 /* Functions */
 void* malloc(size_t size)
 {
-    void* ptr = NULL;
+	void* ptr = NULL;
 
-    if(size > 0)
-    {
-        // We simply wrap the FreeRTOS call into a standard form
-        ptr = pvPortMalloc(size);
-    } // else NULL if there was an error
+	if(size > 0)
+	{
+		// We simply wrap the FreeRTOS call into a standard form
+		ptr = pvPortMalloc(size);
+	} // else NULL if there was an error
 
-    return ptr;
+	return ptr;
 }
 
 void free(void* ptr)
 {
-    if(ptr)
-    {
-        // We simply wrap the FreeRTOS call into a standard form
-        vPortFree(ptr);
-    }
+	if (ptr)
+	{
+		if ((ptr>=(void*)ucHeap) && (ptr<=(void*)ucHeap+configTOTAL_HEAP_SIZE)) {
+			// We simply wrap the FreeRTOS call into a standard form
+			vPortFree(ptr);
+		}
+	}
 }
 
 void initialise_monitor_handles()
@@ -95,7 +99,7 @@ __attribute__((weak)) int _read(int file, char *ptr, int len)
 		*ptr++ = __io_getchar();
 	}
 
-return len;
+	return len;
 }
 
 __attribute__((weak)) int _write(int file, char *ptr, int len)
