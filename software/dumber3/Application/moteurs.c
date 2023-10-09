@@ -107,6 +107,7 @@ void MOTEURS_Avance(uint32_t distance) {
 
 	if (distance) {
 		dist = distance;
+		MOTEURS_ActiveAlim();
 		MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_MOVE, APPLICATION_Mailbox, (void*)&dist);
 	} else
 		MOTEURS_Stop();
@@ -117,12 +118,14 @@ void MOTEURS_Tourne(uint32_t tours) {
 
 	if (tours) {
 		turns = tours;
+		MOTEURS_ActiveAlim();
 		MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_TURN, APPLICATION_Mailbox, (void*)&turns);
 	} else
 		MOTEURS_Stop();
 }
 
 void MOTEURS_Stop(void) {
+	MOTEURS_DesactiveAlim();
 	MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_STOP, APPLICATION_Mailbox, (void*)NULL);
 }
 
@@ -386,8 +389,8 @@ void MOTEURS_ActiveAlim(void) {
 void MOTEURS_Set(int16_t cmdGauche, int16_t cmdDroit) {
 	int32_t locValGauche, locValDroit;
 
-	locValGauche = (int32_t)(((int32_t)cmdGauche * (int32_t)MOTEURS_MAX_COMMANDE)/((int32_t)SHRT_MAX));
-	locValDroit = (int32_t)(((int32_t)cmdDroit * (int32_t)MOTEURS_MAX_COMMANDE)/((int32_t)SHRT_MAX));
+	locValGauche = (int32_t)(((int32_t)cmdGauche * (int32_t)SHRT_MAX)/((int32_t)MOTEURS_MAX_COMMANDE));
+	locValDroit = (int32_t)(((int32_t)cmdDroit * (int32_t)SHRT_MAX)/((int32_t)MOTEURS_MAX_COMMANDE));
 
 	if (LL_GPIO_IsOutputPinSet(GPIOB, SHUTDOWN_5V_Pin)==GPIO_PIN_RESET)
 		MOTEURS_ActiveAlim();
