@@ -131,28 +131,28 @@ int XBEE_SendData(char* data) {
 	int status = XBEE_OK;
 
 	// Prevents successive calls to overlap
-	//state = xSemaphoreTake(xHandleSemaphoreTX, pdMS_TO_TICKS(XBEE_TX_SEMAPHORE_WAIT)); // wait max 500 ms (to avoid interlocking)
+	state = xSemaphoreTake(xHandleSemaphoreTX, pdMS_TO_TICKS(XBEE_TX_SEMAPHORE_WAIT)); // wait max 500 ms (to avoid interlocking)
 
-	//if (state != pdFALSE) { /* test semaphore take answer
-	//                           if answer is false, it means timeout appends
-	//                           We should probably reset something in "else" branch */
+	if (state != pdFALSE) { /* test semaphore take answer
+	                           if answer is false, it means timeout appends
+	                           We should probably reset something in "else" branch */
 
-	while (LL_USART_IsEnabledIT_TXE(hlpuart1.Instance)) {
-		vTaskDelay(pdMS_TO_TICKS(1));
-	}
+		//	while (LL_USART_IsEnabledIT_TXE(hlpuart1.Instance)) {
+		//		vTaskDelay(pdMS_TO_TICKS(1));
+		//	}
 
-	strncpy((char*)txBuffer,data,XBEE_TX_BUFFER_MAX_LENGTH-1);
-	txBuffer[XBEE_TX_BUFFER_MAX_LENGTH-1]=0;
-	txRemainingData = strlen((char*)txBuffer);
+		strncpy((char*)txBuffer,data,XBEE_TX_BUFFER_MAX_LENGTH-1);
+		txBuffer[XBEE_TX_BUFFER_MAX_LENGTH-1]=0;
+		txRemainingData = strlen((char*)txBuffer);
 
-	if (txRemainingData!=0) {
-		txIndex =1;
-		txRemainingData=txRemainingData-1;
+		if (txRemainingData!=0) {
+			txIndex =1;
+			txRemainingData=txRemainingData-1;
 
-		LL_USART_TransmitData8(hlpuart1.Instance, txBuffer[0]);
-		LL_USART_EnableIT_TXE(hlpuart1.Instance); // enable TX Interrupt
-	}
-	//} else status= XBEE_TX_TIMEOUT;
+			LL_USART_TransmitData8(hlpuart1.Instance, txBuffer[0]);
+			LL_USART_EnableIT_TXE(hlpuart1.Instance); // enable TX Interrupt
+		}
+	} else status= XBEE_TX_TIMEOUT;
 
 	return status;
 }
@@ -162,7 +162,7 @@ void XBEE_TX_IRQHandler(void) {
 
 	if (txRemainingData==0) { // No more data, disable TXE bit
 		LL_USART_DisableIT_TXE(hlpuart1.Instance);
-		//xSemaphoreGiveFromISR( xHandleSemaphoreTX, &xHigherPriorityTaskWoken );
+		xSemaphoreGiveFromISR( xHandleSemaphoreTX, &xHigherPriorityTaskWoken );
 	} else {
 		LL_USART_TransmitData8(hlpuart1.Instance, txBuffer[txIndex]);
 		txIndex++;

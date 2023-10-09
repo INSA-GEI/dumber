@@ -8,6 +8,7 @@
 #include "commands.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 /* Definition des commandes */
 
@@ -75,7 +76,7 @@ char* cmdAddChecksum(const char* str) {
  *				Si celui-ci est bon, ll retournera 0 et supprimera le checksum de str
  * 				sinon il retournera 1 sans faire de modification.
  * @param  		None
- * @retval 		0 ou 1
+ * @retval 		0 si le checksum est faux, 1 sinon
  *
  */
 char cmdVerifyChecksum(char* str) {
@@ -84,131 +85,130 @@ char cmdVerifyChecksum(char* str) {
 	unsigned char checksum=0;
 
 	length = strlen(str);
-	for (j = 0; j < length - 2; j++) {
+	/* Warning: str should be without ending CR (0x0D) character, so, a ping command should be
+	 * received as "pp", 2 chars long
+	 *
+	 * in the loop after, ending length is length of the caommand string whithout last char, the checksum
+	 * so, we have j<length-1
+	 */
+	for (j = 0; j<length-1; j++) {
 		checksum ^= str[j];
 	}
+
 	if (checksum == '\r')
 		checksum++;
 
 	if (str[j] == checksum) {
-		str[length - 2] = 13;
+		/*str[length - 2] = 13;
 		str[length - 1] = 0;
+		str[length] = 0;*/
+
+		str[length - 1] = 0; /* we remove checksum char */
 		str[length] = 0;
 
-		return 0;
-	} else
 		return 1;
+	} else
+		return 0;
 }
 
 /**
  * @}
  */
 
-//CMD_Generic* cmdDecode(char* cmd, uint8_t length) {
-//	CMD_Generic* decodedCmd;
-//	char cmd_type = cmd[0];
-//
-//	switch (cmd_type)
-//	{
-//	case CMD_MOVE:
-//		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Move));
-//		decodedCmd->type = CMD_MOVE;
-//		((CMD_Move*)decodedCmd)->distance = ((int16_t)cmd[1]<<8) + (int16_t)cmd[2];
-//		break;
-//
-//	case CMD_TURN:
-//		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Turn));
-//		decodedCmd->type = CMD_TURN;
-//		((CMD_Turn*)decodedCmd)->turns = ((int16_t)cmd[1]<<8) + (int16_t)cmd[2];
-//		break;
-//
-//	case CMD_PING:
-//	case CMD_RESET:
-//	case CMD_START_WITHOUT_WATCHDOG:
-//	case CMD_START_WITH_WATCHDOG:
-//	case CMD_RESET_WATCHDOG:
-//	case CMD_GET_BATTERY:
-//	case CMD_GET_BUSY_STATE:
-//	case CMD_GET_VERSION:
-//	case CMD_TEST:
-//	case CMD_DEBUG:
-//	case CMD_POWER_OFF:
-//		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
-//		decodedCmd->type = cmd_type;
-//		break;
-//
-//	default:
-//		decodedCmd = CMD_DECODE_UNKNOWN;
-//	}
-//
-//	return decodedCmd;
-//}
-
 CMD_Generic* cmdDecode(char* cmd, uint8_t length) {
 	CMD_Generic* decodedCmd;
 	char cmd_type = cmd[0];
+	char *p;
 
-	switch (cmd_type)
-	{
-	case MoveCMD:
-		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Move));
-		decodedCmd->type = CMD_MOVE;
-		((CMD_Move*)decodedCmd)->distance = ((int16_t)cmd[1]<<8) + (int16_t)cmd[2];
-		break;
+	/* First, verify checksum */
+	if (cmdVerifyChecksum(cmd)) {
+		switch (cmd_type)
+		{
+		case MoveCMD:
+			decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Move));
+			decodedCmd->type = CMD_MOVE;
+			//((CMD_Move*)decodedCmd)->distance = ((int16_t)cmd[1]<<8) + (int16_t)cmd[2];
 
-	case TurnCMD:
-		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Turn));
-		decodedCmd->type = CMD_TURN;
-		((CMD_Turn*)decodedCmd)->turns = ((int16_t)cmd[1]<<8) + (int16_t)cmd[2];
-		break;
+			/* verify that command start with "M=" */
+			if ((cmd[0]=='M')&&(cmd[1]=='=')) {
+				cmd = cmd+2; //cmd+2 for removing "M=" at start of the string
+				((CMD_Move*)decodedCmd)->distance=strtoul(cmd , &p, 10);
+				if (p==cmd)
+					decodedCmd->type = CMD_NONE; /* missing number value xxxxx in "M=xxxxx" */
+			} else
+				decodedCmd->type = CMD_NONE; /* misformed command (should start with "M=" */
+			break;
 
-	case PingCMD:
-		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
-		decodedCmd->type = CMD_PING;
-		break;
-	case ResetCMD:
-		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
-		decodedCmd->type = CMD_RESET;
-		break;
-	case StartWWatchDogCMD:
-		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
-		decodedCmd->type = CMD_START_WITH_WATCHDOG;
-		break;
-	case StartWithoutWatchCMD:
-		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
-		decodedCmd->type = CMD_START_WITHOUT_WATCHDOG;
-		break;
-	case ResetWatchdogCMD:
-		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
-		decodedCmd->type = CMD_RESET_WATCHDOG;
-		break;
-	case GetBatteryVoltageCMD:
-		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
-		decodedCmd->type = CMD_GET_BATTERY;
-		break;
-	case GetVersionCMD:
-		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
-		decodedCmd->type = CMD_GET_VERSION;
-		break;
-	case BusyStateCMD:
-		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
-		decodedCmd->type = CMD_GET_BUSY_STATE;
-		break;
-	case TestCMD:
-		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
-		decodedCmd->type = CMD_TEST;
-		break;
-	case DebugCMD:
-		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
-		decodedCmd->type = CMD_DEBUG;
-		break;
-	case PowerOffCMD:
-		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
-		decodedCmd->type = CMD_POWER_OFF;
-		break;
+		case TurnCMD:
+			decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Turn));
+			decodedCmd->type = CMD_TURN;
+			//((CMD_Turn*)decodedCmd)->turns = ((int16_t)cmd[1]<<8) + (int16_t)cmd[2];
 
-	default:
-		decodedCmd = CMD_DECODE_UNKNOWN;
+			//if (!sscanf(cmd,"T=%hd",&((CMD_Turn*)decodedCmd)->turns ))
+			//	decodedCmd->type = CMD_NONE;
+
+			/* verify that command start with "T=" */
+			if ((cmd[0]=='T')&&(cmd[1]=='=')) {
+				cmd = cmd+2; //cmd+2 for removing "T=" at start of the string
+				((CMD_Turn*)decodedCmd)->turns=strtoul(cmd , &p, 10);
+				if (p==cmd)
+					decodedCmd->type = CMD_NONE; /* missing number value xxxxx in "T=xxxxx" */
+			} else
+				decodedCmd->type = CMD_NONE; /* misformed command (should start with "T=" */
+			break;
+
+		case PingCMD:
+			decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
+			decodedCmd->type = CMD_PING;
+			break;
+		case ResetCMD:
+			decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
+			decodedCmd->type = CMD_RESET;
+			break;
+		case StartWWatchDogCMD:
+			decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
+			decodedCmd->type = CMD_START_WITH_WATCHDOG;
+			break;
+		case StartWithoutWatchCMD:
+			decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
+			decodedCmd->type = CMD_START_WITHOUT_WATCHDOG;
+			break;
+		case ResetWatchdogCMD:
+			decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
+			decodedCmd->type = CMD_RESET_WATCHDOG;
+			break;
+		case GetBatteryVoltageCMD:
+			decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
+			decodedCmd->type = CMD_GET_BATTERY;
+			break;
+		case GetVersionCMD:
+			decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
+			decodedCmd->type = CMD_GET_VERSION;
+			break;
+		case BusyStateCMD:
+			decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
+			decodedCmd->type = CMD_GET_BUSY_STATE;
+			break;
+		case TestCMD:
+			decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
+			decodedCmd->type = CMD_TEST;
+			break;
+		case DebugCMD:
+			decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
+			decodedCmd->type = CMD_DEBUG;
+			break;
+		case PowerOffCMD:
+			decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
+			decodedCmd->type = CMD_POWER_OFF;
+			break;
+
+		default:
+			decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
+			decodedCmd->type = CMD_NONE;
+		}
+	} else { /* Checksum is wrong*/
+		decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Generic));
+		decodedCmd->type = CMD_INVALID_CHECKSUM;
 	}
 
 	return decodedCmd;

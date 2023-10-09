@@ -105,15 +105,21 @@ void MOTEURS_Init(void) {
 void MOTEURS_Avance(uint32_t distance) {
 	static uint32_t dist;
 
-	dist = distance;
-	MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_MOVE, APPLICATION_Mailbox, (void*)dist);
+	if (distance) {
+		dist = distance;
+		MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_MOVE, APPLICATION_Mailbox, (void*)&dist);
+	} else
+		MOTEURS_Stop();
 }
 
 void MOTEURS_Tourne(uint32_t tours) {
 	static uint32_t turns;
 
-	turns = tours;
-	MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_TURN, APPLICATION_Mailbox, (void*)turns);
+	if (tours) {
+		turns = tours;
+		MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_TURN, APPLICATION_Mailbox, (void*)&turns);
+	} else
+		MOTEURS_Stop();
 }
 
 void MOTEURS_Stop(void) {

@@ -125,8 +125,10 @@ void APPLICATION_MainThread(void* params) {
 			if (receivedCMD != NULL) {
 				decodedCmd = cmdDecode(receivedCMD,strlen(receivedCMD));
 
-				if (decodedCmd==CMD_DECODE_UNKNOWN)
+				if (decodedCmd->type==CMD_NONE)
 					cmdSendAnswer(ANS_UNKNOWN);
+				else if (decodedCmd->type == CMD_INVALID_CHECKSUM)
+					cmdSendAnswer(ANS_ERR);
 				else {
 					systemInfos.cmd = decodedCmd->type;
 					systemTimeout.inactivityCnt = 0;
@@ -164,8 +166,9 @@ void APPLICATION_MainThread(void* params) {
 						 */
 						break;
 					}
-					free(decodedCmd);
 				}
+
+				free(decodedCmd);
 				break;
 
 		default:

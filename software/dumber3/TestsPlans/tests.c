@@ -35,7 +35,7 @@ typedef enum {
 	MISC_Tests
 } TESTS_Type;
 
-TESTS_Type TESTS_Nbr=COMMANDS_Tests; // Number indicating which test is being run
+TESTS_Type TESTS_Nbr=MOTEURS_Tests; // Number indicating which test is being run
 
 void TESTS_BasicTests(void* params);
 
@@ -171,12 +171,12 @@ void TESTS_BasicTests(void* params) {
 					break;
 				case CMD_MOVE:
 
-					snprintf(str, 99, "MOVE received\r");
+					snprintf(str, 99, "MOVE received (dist=%hd)\r",((CMD_Move*)cmd)->distance);
 					cmdSendAnswer(ANS_OK);
 					break;
 				case CMD_TURN:
 
-					snprintf(str, 99, "TURN received\r");
+					snprintf(str, 99, "TURN received (turns=%hd)\r",((CMD_Turn*)cmd)->turns);
 					cmdSendAnswer(ANS_OK);
 					break;
 				case CMD_GET_BUSY_STATE:
@@ -199,14 +199,22 @@ void TESTS_BasicTests(void* params) {
 					snprintf(str, 99, "POWER_OFF received\r");
 					cmdSendAnswer(ANS_OK);
 					break;
-				default:
+				case CMD_NONE:
+					snprintf(str, 99, "Unknown command\r");
+					cmdSendAnswer(ANS_UNKNOWN);
+					break;
+				case CMD_INVALID_CHECKSUM:
+					snprintf(str, 99, "Invalid checksum\r");
+					cmdSendAnswer(ANS_ERR);
+					break;
 
+				default:
 					snprintf(str, 99, "Unknown command\r");
 					cmdSendAnswer(ANS_UNKNOWN);
 					break;
 				}
 
-
+				free(cmd);
 				MESSAGE_SendMailbox(XBEE_Mailbox, MSG_ID_XBEE_ANS, APPLICATION_Mailbox, (void*)str);
 			}
 		}
@@ -246,6 +254,40 @@ void TESTS_BasicTests(void* params) {
 		break;
 	case MOTEURS_Tests:
 
+		while (1) {
+			msg = MESSAGE_ReadMailbox(APPLICATION_Mailbox); // Wait for a message from Xbee
+
+			if (msg.id == MSG_ID_XBEE_CMD) {
+				cmd = cmdDecode((char*)msg.data, strlen((char*)msg.data));
+				free(msg.data);
+
+				str[0]=0;
+				switch (cmd->type) {
+				case CMD_RESET:
+					snprintf(str, 99, "RESET received (stop motors)\r");
+					cmdSendAnswer(ANS_OK);
+					MOTEURS_Stop();
+					break;
+				case CMD_MOVE:
+					snprintf(str, 99, "MOVE received (dist=%hd)\r",((CMD_Move*)cmd)->distance);
+					cmdSendAnswer(ANS_OK);
+					MOTEURS_Avance(((CMD_Move*)cmd)->distance);
+					break;
+				case CMD_TURN:
+					snprintf(str, 99, "TURN received (turns=%hd)\r",((CMD_Turn*)cmd)->turns);
+					cmdSendAnswer(ANS_OK);
+					MOTEURS_Tourne(((CMD_Turn*)cmd)->turns);
+					break;
+				default:
+					snprintf(str, 99, "Motor test: cmd M or T et R only\r");
+					cmdSendAnswer(ANS_ERR);
+					break;
+				}
+
+				free(cmd);
+				MESSAGE_SendMailbox(XBEE_Mailbox, MSG_ID_XBEE_ANS, APPLICATION_Mailbox, (void*)str);
+			}
+		}
 		break;
 	case MISC_Tests: // test du bouton on/off
 

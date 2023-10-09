@@ -24,7 +24,8 @@ typedef enum {
 	CMD_GET_BUSY_STATE,
 	CMD_TEST,
 	CMD_DEBUG,
-	CMD_POWER_OFF
+	CMD_POWER_OFF,
+	CMD_INVALID_CHECKSUM=0xFF
 } CMD_CommandsType;
 
 typedef enum {
@@ -76,9 +77,6 @@ typedef struct __attribute__((packed)) {
 	uint8_t ans;
 	uint8_t state;
 } ANS_Busy_State;
-
-#define CMD_DECODE_INVALID		((CMD_Generic*)NULL)
-#define CMD_DECODE_UNKNOWN		((CMD_Generic*)UINT32_MAX)
 
 CMD_Generic* cmdDecode(char* cmd, uint8_t length);
 void cmdSendAnswer(uint8_t ans);

@@ -39,10 +39,11 @@ extern int __io_getchar(void) __attribute__((weak));
 
 extern uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
 
-
 char *__env[1] = { 0 };
 char **environ = __env;
 
+uint32_t Counter_Malloc=0;
+uint32_t Counter_Free=0;
 
 /* Functions */
 void* malloc(size_t size)
@@ -53,6 +54,7 @@ void* malloc(size_t size)
 	{
 		// We simply wrap the FreeRTOS call into a standard form
 		ptr = pvPortMalloc(size);
+		Counter_Malloc++;
 	} // else NULL if there was an error
 
 	return ptr;
@@ -65,6 +67,7 @@ void free(void* ptr)
 		if ((ptr>=(void*)ucHeap) && (ptr<=(void*)ucHeap+configTOTAL_HEAP_SIZE)) {
 			// We simply wrap the FreeRTOS call into a standard form
 			vPortFree(ptr);
+			Counter_Free++;
 		}
 	}
 }
