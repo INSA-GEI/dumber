@@ -20,6 +20,9 @@
     <packet name="Start Without Watchdog">
       <payload>75750D</payload>
     </packet>
+    <packet name="STOP">
+      <payload>4D3D30400D</payload>
+    </packet>
     <packet name="Move forward">
       <payload>4D3D3230720D</payload>
     </packet>
@@ -31,6 +34,12 @@
     </packet>
     <packet name="Turn Right">
       <payload>543D2D39304D0D</payload>
+    </packet>
+    <packet name="Turn Right - Extreme">
+      <payload>543D2D3332373637730D</payload>
+    </packet>
+    <packet name="Move backward - Extreme">
+      <payload>4D3D2D33323736376A0D</payload>
     </packet>
     <packet name="Get battery">
       <payload>76760D</payload>
@@ -55,12 +64,6 @@
     </packet>
     <packet name="Invalid Checksum">
       <payload>543D2D39303D0D</payload>
-    </packet>
-    <packet name="Turn Right - Extreme">
-      <payload>543D2D3332373637730D</payload>
-    </packet>
-    <packet name="Move backward - Extreme">
-      <payload>4D3D2D33323736376A0D</payload>
     </packet>
   </packets_list>
 </data>
