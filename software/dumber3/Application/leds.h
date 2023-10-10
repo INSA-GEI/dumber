@@ -15,18 +15,14 @@ typedef enum {
 	leds_idle,
 	leds_run,
 	leds_run_with_watchdog,
-	leds_niveau_bat_0,
-	leds_niveau_bat_1,
-	leds_niveau_bat_2,
-	leds_niveau_bat_3,
-	leds_niveau_bat_4,
-	leds_niveau_bat_5,
-	leds_charge_bat_0,
-	leds_charge_bat_1,
-	leds_charge_bat_2,
-	leds_charge_bat_3,
-	leds_charge_bat_4,
-	leds_charge_bat_5,
+	leds_bat_critical_low,
+	leds_bat_low,
+	leds_bat_med,
+	leds_bat_high,
+	leds_bat_charge_low,
+	leds_bat_charge_med,
+	leds_bat_charge_high,
+	leds_bat_charge_complete,
 	leds_erreur_1,
 	leds_erreur_2,
 	leds_erreur_3,
@@ -36,4 +32,6 @@ typedef enum {
 } LEDS_State;
 
 void LEDS_Init(void);
+void LEDS_Set(LEDS_State state);
+
 #endif /* INC_LEDS_H_ */

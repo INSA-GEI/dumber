@@ -65,9 +65,35 @@
 #define LED_PATTERN_DIGIT_7			28
 #define LED_PATTERN_DIGIT_8			29
 #define LED_PATTERN_DIGIT_9			30
-#define LED_PATTERN_DIGIT_UNKNOWN	31
+#define LED_PATTERN_DIGIT_C			31
+#define LED_PATTERN_DIGIT_L			32
+#define LED_PATTERN_DIGIT_B			33
+#define LED_PATTERN_DIGIT_UNKNOWN	34
 
-#define LED_MAX_PATTERNS			32
+#define LED_MAX_PATTERNS			35
+
+/*
+ * Relation entre segment et nom
+ *
+ *        Avant du robot
+ *
+ *
+ *               D
+ *             -----
+ *           |       |
+ *         C |       | E
+ *           |   G   |
+ *             -----
+ *           |       |
+ *         B |       | F
+ *           |       |
+ *             -----
+ *               A
+ *
+ *
+ *       Arriere du robot
+ *
+ */
 
 uint16_t LEDS_Patterns [LED_MAX_PATTERNS][4]= {
 		// GPIOA ON / GPIOB ON / GPIOA OFF / GPIOB OFF
@@ -102,7 +128,10 @@ uint16_t LEDS_Patterns [LED_MAX_PATTERNS][4]= {
 		{ LED_SEG_D_Pin|LED_SEG_E_Pin|LED_SEG_F_Pin, 0, LED_SEG_G_Pin|LED_SEG_DP_Pin, LED_SEG_A_Pin|LED_SEG_B_Pin|LED_SEG_C_Pin}, // 7
 		{ LED_SEG_D_Pin|LED_SEG_E_Pin|LED_SEG_F_Pin|LED_SEG_G_Pin, LED_SEG_A_Pin|LED_SEG_B_Pin|LED_SEG_C_Pin, LED_SEG_DP_Pin, 0}, // 8
 		{ LED_SEG_D_Pin|LED_SEG_E_Pin|LED_SEG_F_Pin|LED_SEG_G_Pin, LED_SEG_A_Pin|LED_SEG_C_Pin, LED_SEG_DP_Pin, LED_SEG_B_Pin},   // 9
-		{ LED_SEG_D_Pin|LED_SEG_E_Pin|LED_SEG_G_Pin, LED_SEG_B_Pin, LED_SEG_G_Pin|LED_SEG_DP_Pin, LED_SEG_A_Pin|LED_SEG_C_Pin}    // ?
+		{ LED_SEG_D_Pin, LED_SEG_A_Pin|LED_SEG_B_Pin|LED_SEG_C_Pin, LED_SEG_E_Pin|LED_SEG_F_Pin|LED_SEG_G_Pin|LED_SEG_DP_Pin, 0}, // C
+		{ 0, LED_SEG_A_Pin|LED_SEG_B_Pin|LED_SEG_C_Pin, LED_SEG_D_Pin|LED_SEG_E_Pin|LED_SEG_F_Pin|LED_SEG_G_Pin|LED_SEG_DP_Pin, 0},// L
+		{ LED_SEG_F_Pin|LED_SEG_G_Pin, LED_SEG_A_Pin|LED_SEG_B_Pin|LED_SEG_C_Pin, LED_SEG_D_Pin|LED_SEG_E_Pin|LED_SEG_DP_Pin, 0}, // b
+		{ LED_SEG_D_Pin|LED_SEG_E_Pin|LED_SEG_G_Pin, LED_SEG_B_Pin, LED_SEG_F_Pin|LED_SEG_DP_Pin, LED_SEG_A_Pin|LED_SEG_C_Pin}    // ?
 };
 
 LEDS_State LEDS_Animation;
@@ -148,6 +177,16 @@ void LEDS_Init(void) {
 			&xTaskLedsHandler);  /* Variable to hold the task's data structure. */
 
 	vTaskResume(xHandleLedsHandler);
+}
+
+void LEDS_Set(LEDS_State state) {
+static LEDS_State leds_state;
+
+	if ((state>=leds_off) && (state <=leds_state_unknown)) {
+		leds_state = state;
+		MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT,
+				(QueueHandle_t)0x0, (void*) &leds_state);
+	}
 }
 
 void LEDS_ShowPattern(uint8_t pattern) {
@@ -240,16 +279,25 @@ void LEDS_ActionThread(void* params) {
 			if (cnt>5) cnt=0;
 			LEDS_ShowPattern(LED_PATTERN_RUN_WITH_WATCHDOG_0+cnt);
 			break;
-		case leds_niveau_bat_0:
+		case leds_bat_critical_low:
+			if (cnt<3)
+				LEDS_ShowPattern(LED_PATTERN_DIGIT_C);
+			else if (cnt<6)
+				LEDS_ShowPattern(LED_PATTERN_DIGIT_L);
+			else if (cnt <9)
+				LEDS_ShowPattern(LED_PATTERN_DIGIT_B);
+			else if (cnt <12)
+				LEDS_ShowPattern(LED_PATTERN_ALL_OFF);
+			else
+				cnt=0;
+			break;
+		case leds_bat_low:
 			if (!(cnt%2))
 				LEDS_ShowPattern(LED_PATTERN_BAT_SPRITE_1);
 			else
 				LEDS_ShowPattern(LED_PATTERN_ALL_OFF);
 			break;
-		case leds_niveau_bat_1:
-			LEDS_ShowPattern(LED_PATTERN_BAT_SPRITE_1);
-			break;
-		case leds_niveau_bat_2:
+		case leds_bat_med:
 			if (cnt<3)
 				LEDS_ShowPattern(LED_PATTERN_BAT_SPRITE_1);
 			else if (cnt<6)
@@ -257,15 +305,7 @@ void LEDS_ActionThread(void* params) {
 			else
 				cnt=0;
 			break;
-		case leds_niveau_bat_3:
-			if (cnt<3)
-				LEDS_ShowPattern(LED_PATTERN_BAT_SPRITE_1);
-			else if (cnt<6)
-				LEDS_ShowPattern(LED_PATTERN_BAT_SPRITE_2);
-			else
-				cnt=7; // on maintient l'affichage de deux barres
-			break;
-		case leds_niveau_bat_4:
+		case leds_bat_high:
 			if (cnt<3)
 				LEDS_ShowPattern(LED_PATTERN_BAT_SPRITE_1);
 			else if (cnt<6)
@@ -275,18 +315,7 @@ void LEDS_ActionThread(void* params) {
 			else
 				cnt=3;
 			break;
-		case leds_niveau_bat_5:
-			if (cnt<3)
-				LEDS_ShowPattern(LED_PATTERN_BAT_SPRITE_1);
-			else if (cnt<6)
-				LEDS_ShowPattern(LED_PATTERN_BAT_SPRITE_2);
-			else if (cnt <9)
-				LEDS_ShowPattern(LED_PATTERN_BAT_SPRITE_3);
-			else
-				cnt=10;
-			break;
-		case leds_charge_bat_0:
-		case leds_charge_bat_1:
+		case leds_bat_charge_low:
 			if (cnt<3)
 				LEDS_ShowPattern(LED_PATTERN_BAT_SPRITE_1);
 			else if (cnt<6)
@@ -298,8 +327,7 @@ void LEDS_ActionThread(void* params) {
 			else
 				cnt=0;
 			break;
-		case leds_charge_bat_2:
-		case leds_charge_bat_3:
+		case leds_bat_charge_med:
 			if (cnt<3)
 				LEDS_ShowPattern(LED_PATTERN_BAT_SPRITE_2);
 			else if (cnt<6)
@@ -309,14 +337,18 @@ void LEDS_ActionThread(void* params) {
 			else
 				cnt=0;
 			break;
-		case leds_charge_bat_4:
-		case leds_charge_bat_5:
+		case leds_bat_charge_high:
 			if (cnt<3)
 				LEDS_ShowPattern(LED_PATTERN_BAT_SPRITE_3);
 			else if (cnt<6)
 				LEDS_ShowPattern(LED_PATTERN_BAT_SPRITE_2);
 			else
 				cnt=0;
+			break;
+		case leds_bat_charge_complete:
+			LEDS_ShowPattern(LED_PATTERN_BAT_SPRITE_3);
+
+			cnt=0;
 			break;
 		case leds_erreur_1:
 			if (cnt<5)

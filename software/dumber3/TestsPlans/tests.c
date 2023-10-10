@@ -27,7 +27,7 @@ StackType_t xStackBasicTests[ STACK_SIZE ];
 TaskHandle_t xHandleBasicTests = NULL;
 
 typedef enum {
-	LED_Tests=1,
+	LEDS_Tests=1,
 	XBEE_Tests,
 	COMMANDS_Tests,
 	BATTERY_Tests,
@@ -35,7 +35,7 @@ typedef enum {
 	MISC_Tests
 } TESTS_Type;
 
-TESTS_Type TESTS_Nbr=MOTEURS_Tests; // Number indicating which test is being run
+TESTS_Type TESTS_Nbr=LEDS_Tests; // Number indicating which test is being run
 
 void TESTS_BasicTests(void* params);
 
@@ -67,24 +67,24 @@ void TESTS_Init(void) {
 }
 
 void TESTS_BasicTests(void* params) {
-	static LEDS_State ledsStates = leds_off;
+	static LEDS_State ledsState = leds_off;
 	MESSAGE_Typedef msg;
 	CMD_Generic* cmd;
 
 	char* ans;
 	char str[100];
 
-	ledsStates = leds_run;
-	MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledsStates); // show program is running
+	ledsState = leds_run;
+	MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledsState); // show program is running
 
 	switch (TESTS_Nbr) {
-	case LED_Tests: //Leds tests
+	case LEDS_Tests: //Leds tests
 
-		while (ledsStates<=leds_state_unknown) {
-			ledsStates++;
-
-			MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledsStates);
+		while (ledsState<=leds_state_unknown) {
+			//MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledsState);
+			LEDS_Set(ledsState);
 			vTaskDelay(pdMS_TO_TICKS(TESTS_PERIODE)); // wait 10s
+			ledsState++;
 		}
 		break;
 	case XBEE_Tests: // Xbee tests
@@ -220,32 +220,56 @@ void TESTS_BasicTests(void* params) {
 		}
 		break;
 	case BATTERY_Tests:
+		LEDS_Set(leds_off);
 
 		while (1) {
-			//char* str;
-
 			msg = MESSAGE_ReadMailbox(APPLICATION_Mailbox); // Wait for a message from Xbee
-			//str = (char*)malloc(100); /* allocate a buffer of 100 bytes */
 			str[0]=0;
 
 			switch (msg.id) {
+			case MSG_ID_BAT_LEVEL:
+				snprintf(str, 99, "Bat level %u\r", *((uint16_t*)msg.data));
+				break;
 			case MSG_ID_BAT_ADC_ERR:
 				snprintf(str, 99, "ADC error received\r");
 				break;
 			case MSG_ID_BAT_CHARGE_COMPLETE:
-				snprintf(str, 99, "Charge complete (plug in) [Level = %u]\r", *((uint16_t*)msg.data));
+				snprintf(str, 99, "Charge complete (plug in)\r");
+				LEDS_Set(leds_bat_charge_complete);
 				break;
-			case MSG_ID_BAT_CHARGE_ON:
-				snprintf(str, 99, "Charging (plug in) [Level = %u]\r", *((uint16_t*)msg.data));
+			case MSG_ID_BAT_CHARGE_HIGH:
+				snprintf(str, 99, "Charge high (plug in)\r");
+				LEDS_Set(leds_bat_charge_high);
 				break;
-			case MSG_ID_BAT_CHARGE_OFF:
-				snprintf(str, 99, "Not in charge (plug removed) [Level = %u]\r", *((uint16_t*)msg.data));
+			case MSG_ID_BAT_CHARGE_MED:
+				snprintf(str, 99, "Charge med (plug in)\r");
+				LEDS_Set(leds_bat_charge_med);
+				break;
+			case MSG_ID_BAT_CHARGE_LOW:
+				snprintf(str, 99, "Charge low (plug in)\r");
+				LEDS_Set(leds_bat_charge_low);
+				break;
+			case MSG_ID_BAT_HIGH:
+				snprintf(str, 99, "Battery high (unplugged)\r");
+				LEDS_Set(leds_bat_high);
+				break;
+			case MSG_ID_BAT_MED:
+				snprintf(str, 99, "Battery med (unplugged)\r");
+				LEDS_Set(leds_bat_med);
+				break;
+			case MSG_ID_BAT_LOW:
+				snprintf(str, 99, "Battery low (unplugged)\r");
+				LEDS_Set(leds_bat_low);
+				break;
+			case MSG_ID_BAT_CRITICAL_LOW:
+				snprintf(str, 99, "Battery critical low (unplugged)\r");
+				LEDS_Set(leds_bat_critical_low);
 				break;
 			case MSG_ID_BAT_CHARGE_ERR:
 				snprintf(str, 99, "Charge error (plug in)\r");
+				LEDS_Set(leds_erreur_2);
 				break;
 			default:
-				//free(str); // buffer alloué non utilisé
 				break;
 			}
 

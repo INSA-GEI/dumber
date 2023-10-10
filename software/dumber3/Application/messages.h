@@ -26,11 +26,20 @@ extern QueueHandle_t XBEE_Mailbox;
 
 #define MSG_ID_LED_ETAT				0x10
 
-#define MSG_ID_BAT_CHARGE_COMPLETE	0x20
-#define MSG_ID_BAT_CHARGE_ON		0x21
-#define MSG_ID_BAT_CHARGE_OFF		0x22
-#define MSG_ID_BAT_CHARGE_ERR		0x23
-#define MSG_ID_BAT_ADC_ERR			0x24
+#define MSG_ID_BAT_CHARGE_ERR		0x20
+#define MSG_ID_BAT_ADC_ERR			0x21
+#define MSG_ID_BAT_LEVEL			0x22
+#define MSG_ID_BAT_CRITICAL_LOW		0x23
+#define MSG_ID_BAT_LOW				0x24
+#define MSG_ID_BAT_MED				0x25
+#define MSG_ID_BAT_HIGH				0x26
+#define MSG_ID_BAT_CHARGE_LOW		0x27
+#define MSG_ID_BAT_CHARGE_MED		0x28
+#define MSG_ID_BAT_CHARGE_HIGH		0x29
+#define MSG_ID_BAT_CHARGE_COMPLETE	0x2A
+//#define MSG_ID_BAT_CHARGE_ON		0x23
+//#define MSG_ID_BAT_CHARGE_OFF		0x24
+
 
 #define MSG_ID_BUTTON_PRESSED		0x30
 

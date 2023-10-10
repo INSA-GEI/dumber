@@ -117,9 +117,28 @@ int BATTERIE_LireTension(uint16_t *val) {
 	return 0;
 }
 
+const uint8_t BATTERIE_NiveauBatteryNormal[5] = {
+		0
+};
+
+const uint8_t BATTERIE_NiveauBatteryCharge[5] = {
+		0
+};
+
+uint16_t BATTERIE_BatteryLevel(uint8_t voltage, BATTERIE_StatusChargerTypedef chargerStatus) {
+	uint16_t msgId=0;
+
+	/* TODO: A faire
+	 * Pour l'instant, testons les niveaux de batterie
+	 */
+
+	return msgId;
+}
+
 void BATTERIE_VoltageThread(void* params) {
 	static uint16_t tension;
 	BATTERIE_StatusChargerTypedef currentStatus;
+	uint16_t messageID;
 
 	TickType_t xLastWakeTime;
 
@@ -128,16 +147,21 @@ void BATTERIE_VoltageThread(void* params) {
 
 	while (1) {
 		if (BATTERIE_LireTension(&tension) ==0) {
-
 			currentStatus = BATTERIE_LireStatusChargeur();
 			if (currentStatus == CHARGEUR_ERROR)
 				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE_ERR, (QueueHandle_t)0x0, (void*)NULL);
-			else if (currentStatus == CHARGEUR_IN_CHARGE)
+			/*else if (currentStatus == CHARGEUR_IN_CHARGE)
 				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE_ON, (QueueHandle_t)0x0, (void*)&tension);
 			else if (currentStatus == CHARGEUR_CHARGE_COMPLETE)
 				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE_COMPLETE, (QueueHandle_t)0x0, (void*)&tension);
 			else
-				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE_OFF, (QueueHandle_t)0x0, (void*)&tension);
+				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE_OFF, (QueueHandle_t)0x0, (void*)&tension);*/
+			messageID = BATTERIE_BatteryLevel(tension, currentStatus);
+			MESSAGE_SendMailbox(APPLICATION_Mailbox, messageID, (QueueHandle_t)0x0, (void*)NULL);
+
+#ifdef TESTS
+			MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_LEVEL, (QueueHandle_t)0x0, (void*)&tension);
+#endif /* TESTS*/
 		} else {
 			MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_ADC_ERR, (QueueHandle_t)0x0, (void*)0x0);
 		}

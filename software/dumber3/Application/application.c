@@ -177,20 +177,23 @@ void APPLICATION_MainThread(void* params) {
 
 			break;
 
-		case MSG_ID_BAT_CHARGE_OFF:
-		case MSG_ID_BAT_CHARGE_COMPLETE:
-			systemInfos.batteryVoltage = *((uint16_t*)msg.data);
-			systemInfos.batteryUpdate = 1;
-
-			if (msg.id == MSG_ID_BAT_CHARGE_COMPLETE)
-				systemInfos.inCharge =1;
-			else
-				systemInfos.inCharge =0;
-			break;
-
-		case MSG_ID_BAT_CHARGE_ON:
-				systemInfos.inCharge =1;
-			break;
+/* TODO
+ * Revoir la gestion de la batterie ici
+ */
+//		case MSG_ID_BAT_CHARGE_OFF:
+//		case MSG_ID_BAT_CHARGE_COMPLETE:
+//			systemInfos.batteryVoltage = *((uint16_t*)msg.data);
+//			systemInfos.batteryUpdate = 1;
+//
+//			if (msg.id == MSG_ID_BAT_CHARGE_COMPLETE)
+//				systemInfos.inCharge =1;
+//			else
+//				systemInfos.inCharge =0;
+//			break;
+//
+//		case MSG_ID_BAT_CHARGE_ON:
+//				systemInfos.inCharge =1;
+//			break;
 
 		case MSG_ID_MOTEURS_STOP:
 			systemInfos.endOfMouvement= 1;
@@ -215,15 +218,18 @@ void APPLICATION_StateMachine() {
 		APPLICATION_TransitionToNewState(stateInCharge);
 	}
 
-	if (systemInfos.batteryUpdate) {
-		ledState = APPLICATION_BatteryLevel(systemInfos.batteryVoltage, systemInfos.state);
-
-		if (ledState == leds_niveau_bat_0)
-			APPLICATION_TransitionToNewState(stateLowBatDisable);
-		else if (systemInfos.state==stateStartup) {
-			MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
-		}
-	}
+/* TODO
+ * Revoir la gestion de la batterie ici
+ */
+//	if (systemInfos.batteryUpdate) {
+//		ledState = APPLICATION_BatteryLevel(systemInfos.batteryVoltage, systemInfos.state);
+//
+//		if (ledState == leds_niveau_bat_0)
+//			APPLICATION_TransitionToNewState(stateLowBatDisable);
+//		else if (systemInfos.state==stateStartup) {
+//			MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
+//		}
+//	}
 
 	if (systemInfos.cmd != CMD_NONE) {
 		/* a newer command just arrived, process it
@@ -353,8 +359,9 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 		systemTimeout.watchdogEnabled=0;
 		break;
 	case stateLowBatDisable:
-		ledState = leds_charge_bat_0;
-		MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
+		ledState = leds_bat_critical_low;
+		LEDS_Set(ledState);
+		//MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
 		systemTimeout.watchdogEnabled=0;
 
 		vTaskDelay(pdMS_TO_TICKS(4000)); // wait 4s
@@ -367,24 +374,6 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 	}
 
 	systemInfos.state = new_state;
-}
-
-const uint8_t APPLICATION_NiveauBatteryNormal[5] = {
-		0
-};
-
-const uint8_t APPLICATION_NiveauBatteryCharge[5] = {
-		0
-};
-
-LEDS_State APPLICATION_BatteryLevel(uint8_t voltage,  APPLICATION_State state) {
-	LEDS_State ledState=leds_niveau_bat_0;
-
-	/* TODO: A faire
-	 * Pour l'instant, testons les niveaux de batterie
-	 */
-	ledState = leds_niveau_bat_5;
-	return ledState;
 }
 
 void APPLICATION_PowerOff() {
