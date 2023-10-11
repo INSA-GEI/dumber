@@ -33,6 +33,8 @@
 
 #include "cmsis_os.h"
 
+#include "panic.h"
+
 /* Variables */
 extern int __io_putchar(int ch) __attribute__((weak));
 extern int __io_getchar(void) __attribute__((weak));
@@ -55,6 +57,10 @@ void* malloc(size_t size)
 		// We simply wrap the FreeRTOS call into a standard form
 		ptr = pvPortMalloc(size);
 		Counter_Malloc++;
+
+		if (ptr==NULL) { /* plus assez de memoire dynamique*/
+			PANIC_Raise(panic_malloc);
+		}
 	} // else NULL if there was an error
 
 	return ptr;

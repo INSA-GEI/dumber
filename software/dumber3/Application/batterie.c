@@ -45,8 +45,8 @@ uint8_t BUTTON_Inactivity=1; //start with button on/off inactive
 void BATTERIE_VoltageThread(void* params);
 
 void BATTERIE_Init(void) {
-	task_handler = NULL;
-	charger_thread_handler = NULL;
+	//task_handler = NULL;
+	//charger_thread_handler = NULL;
 
 	/* Create the task without using any dynamic memory allocation. */
 	xHandleBatterie = xTaskCreateStatic(

@@ -68,9 +68,11 @@
 #define LED_PATTERN_DIGIT_C			31
 #define LED_PATTERN_DIGIT_L			32
 #define LED_PATTERN_DIGIT_B			33
-#define LED_PATTERN_DIGIT_UNKNOWN	34
+#define LED_PATTERN_WDT_EXP_1		34
+#define LED_PATTERN_WDT_EXP_2		35
+#define LED_PATTERN_DIGIT_UNKNOWN	36
 
-#define LED_MAX_PATTERNS			35
+#define LED_MAX_PATTERNS			37
 
 /*
  * Relation entre segment et nom
@@ -131,6 +133,8 @@ uint16_t LEDS_Patterns [LED_MAX_PATTERNS][4]= {
 		{ LED_SEG_D_Pin, LED_SEG_A_Pin|LED_SEG_B_Pin|LED_SEG_C_Pin, LED_SEG_E_Pin|LED_SEG_F_Pin|LED_SEG_G_Pin|LED_SEG_DP_Pin, 0}, // C
 		{ 0, LED_SEG_A_Pin|LED_SEG_B_Pin|LED_SEG_C_Pin, LED_SEG_D_Pin|LED_SEG_E_Pin|LED_SEG_F_Pin|LED_SEG_G_Pin|LED_SEG_DP_Pin, 0},// L
 		{ LED_SEG_F_Pin|LED_SEG_G_Pin, LED_SEG_A_Pin|LED_SEG_B_Pin|LED_SEG_C_Pin, LED_SEG_D_Pin|LED_SEG_E_Pin|LED_SEG_DP_Pin, 0}, // b
+		{ LED_SEG_E_Pin, LED_SEG_B_Pin, LED_SEG_D_Pin|LED_SEG_F_Pin|LED_SEG_G_Pin|LED_SEG_DP_Pin, LED_SEG_A_Pin|LED_SEG_C_Pin}, // Watchdog expired 1
+		{ LED_SEG_F_Pin, LED_SEG_C_Pin, LED_SEG_D_Pin|LED_SEG_E_Pin|LED_SEG_G_Pin|LED_SEG_DP_Pin, LED_SEG_A_Pin|LED_SEG_B_Pin}, // Watchdog expired 2
 		{ LED_SEG_D_Pin|LED_SEG_E_Pin|LED_SEG_G_Pin, LED_SEG_B_Pin, LED_SEG_F_Pin|LED_SEG_DP_Pin, LED_SEG_A_Pin|LED_SEG_C_Pin}    // ?
 };
 
@@ -349,6 +353,14 @@ void LEDS_ActionThread(void* params) {
 			LEDS_ShowPattern(LED_PATTERN_BAT_SPRITE_3);
 
 			cnt=0;
+			break;
+		case leds_watchdog_expired:
+			if (cnt<3)
+				LEDS_ShowPattern(LED_PATTERN_WDT_EXP_1);
+			else if (cnt<6)
+				LEDS_ShowPattern(LED_PATTERN_WDT_EXP_2);
+			else
+				cnt=0;
 			break;
 		case leds_erreur_1:
 			if (cnt<5)

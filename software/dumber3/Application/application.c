@@ -16,6 +16,8 @@
 #include "batterie.h"
 #include "messages.h"
 
+#include "panic.h"
+
 typedef enum {
 	stateStartup=0,
 	stateIdle,
@@ -179,9 +181,11 @@ void APPLICATION_MainThread(void* params) {
 
 		case MSG_ID_BAT_ADC_ERR:
 			/* depart en panic: error 2 */
+			PANIC_Raise(panic_adc_err);
 			break;
 		case MSG_ID_BAT_CHARGE_ERR:
 			/* depart en panic: error 3 */
+			PANIC_Raise(panic_charger_err);
 			break;
 		case MSG_ID_BAT_CHARGE_COMPLETE:
 		case MSG_ID_BAT_CHARGE_LOW:
@@ -382,7 +386,7 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 		systemTimeout.watchdogEnabled=0;
 		break;
 	case stateWatchdogDisable:
-		ledState = leds_erreur_1;
+		ledState = leds_watchdog_expired;
 		LEDS_Set(ledState);
 
 		systemTimeout.watchdogEnabled=0;
@@ -440,7 +444,7 @@ void vTimerTimeoutCallback( TimerHandle_t xTimer ) {
 			systemTimeout.watchdogMissedCnt++;
 
 			if (systemTimeout.watchdogMissedCnt>=(APPLICATION_WATCHDOG_MISSED_MAX/100))
-				APPLICATION_TransitionToNewState(stateWatchdogDisable);
+				APPLICATION_TransitionToNewState(stateWatchdogDisable); /* TODO: Reprendre pour en faire un envoi de message */
 		}
 	}
 }

@@ -23,6 +23,7 @@ typedef enum {
 	leds_bat_charge_med,
 	leds_bat_charge_high,
 	leds_bat_charge_complete,
+	leds_watchdog_expired,
 	leds_erreur_1,
 	leds_erreur_2,
 	leds_erreur_3,
