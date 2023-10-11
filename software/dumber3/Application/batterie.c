@@ -117,20 +117,49 @@ int BATTERIE_LireTension(uint16_t *val) {
 	return 0;
 }
 
-const uint8_t BATTERIE_NiveauBatteryNormal[5] = {
-		0
-};
+/*
+ * Il faut considerer ces valeurs comme les seuils de baculement dans une categorie
+ * ou une autre
+ *
+ * Seuil :                         critical          low          high
+ * Tension batterie:   2.9   critic  3.1      low    3.3    med    3.6    high     4.2
+ *
+ */
+#define BATTERIE_LEVEL_CRITICAL  		200
+#define BATTERIE_LEVEL_LOW       		300
+#define BATTERIE_LEVEL_HIGH      		500
 
-const uint8_t BATTERIE_NiveauBatteryCharge[5] = {
-		0
-};
+#define BATTERIE_LEVEL_CHARGE_LOW		400
+#define BATTERIE_LEVEL_CHARGE_HIGH      700
 
 uint16_t BATTERIE_BatteryLevel(uint8_t voltage, BATTERIE_StatusChargerTypedef chargerStatus) {
 	uint16_t msgId=0;
 
-	/* TODO: A faire
-	 * Pour l'instant, testons les niveaux de batterie
-	 */
+	switch (chargerStatus) {
+	case CHARGEUR_CHARGE_COMPLETE:
+		msgId = MSG_ID_BAT_CHARGE_COMPLETE;
+		break;
+	case CHARGEUR_IN_CHARGE:
+		if (voltage<=BATTERIE_LEVEL_CHARGE_LOW)
+			msgId = MSG_ID_BAT_CHARGE_LOW;
+		else if (voltage>=BATTERIE_LEVEL_CHARGE_HIGH)
+			msgId = MSG_ID_BAT_CHARGE_HIGH;
+		else
+			msgId = MSG_ID_BAT_CHARGE_MED;
+		break;
+	case CHARGEUR_NOT_PLUGGED:
+		if (voltage<=BATTERIE_LEVEL_CRITICAL)
+			msgId = MSG_ID_BAT_CRITICAL_LOW;
+		else if (voltage<=BATTERIE_LEVEL_LOW)
+			msgId = MSG_ID_BAT_LOW;
+		else if (voltage>=BATTERIE_LEVEL_HIGH)
+			msgId = MSG_ID_BAT_HIGH;
+		else
+			msgId = MSG_ID_BAT_MED;
+		break;
+	default:
+		msgId = MSG_ID_BAT_CHARGE_ERR;
+	}
 
 	return msgId;
 }

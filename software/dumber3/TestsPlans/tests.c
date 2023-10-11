@@ -75,13 +75,12 @@ void TESTS_BasicTests(void* params) {
 	char str[100];
 
 	ledsState = leds_run;
-	MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledsState); // show program is running
+	LEDS_Set(ledsState); // show program is running
 
 	switch (TESTS_Nbr) {
 	case LEDS_Tests: //Leds tests
 
 		while (ledsState<=leds_state_unknown) {
-			//MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledsState);
 			LEDS_Set(ledsState);
 			vTaskDelay(pdMS_TO_TICKS(TESTS_PERIODE)); // wait 10s
 			ledsState++;

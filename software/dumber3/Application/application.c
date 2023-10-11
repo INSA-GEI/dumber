@@ -29,7 +29,7 @@ typedef enum {
 typedef struct {
 	APPLICATION_State state;
 	uint8_t cmd;
-	uint16_t batteryVoltage;
+	uint16_t batteryState;
 	char batteryUpdate;
 	char inCharge;
 	int32_t distance;
@@ -143,7 +143,7 @@ void APPLICATION_MainThread(void* params) {
 						cmdSendAnswer(ANS_OK);
 						break;
 					case CMD_GET_BATTERY:
-						cmdSendBatteryLevel(systemInfos.batteryVoltage);
+						cmdSendBatteryLevel(systemInfos.batteryState);
 						break;
 					case CMD_GET_VERSION:
 						cmdSendVersion();
@@ -177,25 +177,28 @@ void APPLICATION_MainThread(void* params) {
 
 			break;
 
-/* TODO
- * Revoir la gestion de la batterie ici
- */
-//		case MSG_ID_BAT_CHARGE_OFF:
-//		case MSG_ID_BAT_CHARGE_COMPLETE:
-//			systemInfos.batteryVoltage = *((uint16_t*)msg.data);
-//			systemInfos.batteryUpdate = 1;
-//
-//			if (msg.id == MSG_ID_BAT_CHARGE_COMPLETE)
-//				systemInfos.inCharge =1;
-//			else
-//				systemInfos.inCharge =0;
-//			break;
-//
-//		case MSG_ID_BAT_CHARGE_ON:
-//				systemInfos.inCharge =1;
-//			break;
-
-		case MSG_ID_MOTEURS_STOP:
+		case MSG_ID_BAT_ADC_ERR:
+			/* depart en panic: error 2 */
+			break;
+		case MSG_ID_BAT_CHARGE_ERR:
+			/* depart en panic: error 3 */
+			break;
+		case MSG_ID_BAT_CHARGE_COMPLETE:
+		case MSG_ID_BAT_CHARGE_LOW:
+		case MSG_ID_BAT_CHARGE_MED:
+		case MSG_ID_BAT_CHARGE_HIGH:
+			systemInfos.batteryUpdate=1;
+			systemInfos.inCharge=1;
+			systemInfos.batteryState = msg.id;
+			break;
+		case MSG_ID_BAT_CRITICAL_LOW:
+		case MSG_ID_BAT_LOW:
+		case MSG_ID_BAT_MED:
+		case MSG_ID_BAT_HIGH:
+			systemInfos.batteryUpdate=1;
+			systemInfos.batteryState = msg.id;
+			break;
+		case MSG_ID_MOTEURS_END_OF_MOUVMENT:
 			systemInfos.endOfMouvement= 1;
 			break;
 
@@ -218,18 +221,43 @@ void APPLICATION_StateMachine() {
 		APPLICATION_TransitionToNewState(stateInCharge);
 	}
 
-/* TODO
- * Revoir la gestion de la batterie ici
- */
-//	if (systemInfos.batteryUpdate) {
-//		ledState = APPLICATION_BatteryLevel(systemInfos.batteryVoltage, systemInfos.state);
-//
-//		if (ledState == leds_niveau_bat_0)
-//			APPLICATION_TransitionToNewState(stateLowBatDisable);
-//		else if (systemInfos.state==stateStartup) {
-//			MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
-//		}
-//	}
+	if (systemInfos.batteryUpdate) {
+		ledState = leds_off;
+
+		if (systemInfos.batteryState==MSG_ID_BAT_CRITICAL_LOW) {
+			ledState = leds_bat_critical_low;
+			APPLICATION_TransitionToNewState(stateLowBatDisable);
+		} else if (systemInfos.state == stateInCharge) {
+			switch (systemInfos.batteryState) {
+			case MSG_ID_BAT_CHARGE_COMPLETE:
+				ledState= leds_bat_charge_complete;
+				break;
+			case  MSG_ID_BAT_CHARGE_HIGH:
+				ledState= leds_bat_charge_high;
+				break;
+			case  MSG_ID_BAT_CHARGE_MED:
+				ledState= leds_bat_charge_med;
+				break;
+			case  MSG_ID_BAT_CHARGE_LOW:
+				ledState= leds_bat_charge_low;
+				break;
+			}
+		} else if (systemInfos.state==stateStartup) {
+			switch (systemInfos.batteryState) {
+			case  MSG_ID_BAT_HIGH:
+				ledState= leds_bat_high;
+				break;
+			case  MSG_ID_BAT_MED:
+				ledState= leds_bat_med;
+				break;
+			case  MSG_ID_BAT_LOW:
+				ledState= leds_bat_low;
+				break;
+			}
+		}
+
+		LEDS_Set(ledState);
+	}
 
 	if (systemInfos.cmd != CMD_NONE) {
 		/* a newer command just arrived, process it
@@ -317,7 +345,7 @@ void APPLICATION_StateMachine() {
 
 void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 	LEDS_State ledState = leds_off;
-	uint32_t data;
+	int32_t data;
 
 	switch (new_state) {
 	case stateStartup:
@@ -325,20 +353,20 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 		break;
 	case stateIdle:
 		ledState = leds_idle;
-		MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
+		LEDS_Set(ledState);
 
 		MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_STOP, APPLICATION_Mailbox, (void*)NULL);
 		systemTimeout.watchdogEnabled=0;
 		break;
 	case stateRun:
 		ledState = leds_run;
-		MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
+		LEDS_Set(ledState);
 
 		MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_STOP, APPLICATION_Mailbox, (void*)NULL);
 		break;
 	case stateInMouvement:
 		ledState = leds_run;
-		MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
+		LEDS_Set(ledState);
 
 		if (systemInfos.cmd == CMD_MOVE) {
 			data = systemInfos.distance;
@@ -349,19 +377,20 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 		}
 		break;
 	case stateInCharge:
-		ledState = APPLICATION_BatteryLevel(systemInfos.batteryVoltage, systemInfos.inCharge);
-		MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
+		/* les leds sont gerées dans APPLICATION_StateMachine */
+		MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_STOP, APPLICATION_Mailbox, (void*)NULL);
 		systemTimeout.watchdogEnabled=0;
 		break;
 	case stateWatchdogDisable:
 		ledState = leds_erreur_1;
-		MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
+		LEDS_Set(ledState);
+
 		systemTimeout.watchdogEnabled=0;
 		break;
 	case stateLowBatDisable:
 		ledState = leds_bat_critical_low;
 		LEDS_Set(ledState);
-		//MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, APPLICATION_Mailbox, (void*)&ledState);
+
 		systemTimeout.watchdogEnabled=0;
 
 		vTaskDelay(pdMS_TO_TICKS(4000)); // wait 4s

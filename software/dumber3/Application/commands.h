@@ -81,7 +81,7 @@ typedef struct __attribute__((packed)) {
 CMD_Generic* cmdDecode(char* cmd, uint8_t length);
 void cmdSendAnswer(uint8_t ans);
 void cmdSendString(char* str);
-void cmdSendBatteryLevel(char level);
+void cmdSendBatteryLevel(uint16_t batteryState);
 void cmdSendVersion(void);
 void cmdSendBusyState(uint8_t state);
 

@@ -247,18 +247,17 @@ void cmdSendString(char *str) {
 	MESSAGE_SendMailbox(XBEE_Mailbox, MSG_ID_XBEE_ANS, APPLICATION_Mailbox, (char*) answer);
 }
 
-void cmdSendBatteryLevel(char level) {
+void cmdSendBatteryLevel(uint16_t batteryState) {
 	char* answer;
-	char localLevel=level;
 
-	if (localLevel<0) localLevel=0;
-	else if (localLevel>2) localLevel=2;
-
-	switch (localLevel) {
-	case 2:
+	switch (batteryState) {
+	case MSG_ID_BAT_CHARGE_COMPLETE:
+	case MSG_ID_BAT_CHARGE_HIGH:
+	case MSG_ID_BAT_HIGH:
 		answer = cmdAddChecksum("2\r");
 		break;
-	case 1:
+	case MSG_ID_BAT_CHARGE_MED:
+	case MSG_ID_BAT_MED:
 		answer = cmdAddChecksum("1\r");
 		break;
 	default:
