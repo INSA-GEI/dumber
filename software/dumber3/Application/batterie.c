@@ -17,6 +17,8 @@ typedef enum {
 	CHARGEUR_ERROR
 } BATTERIE_StatusChargerTypedef;
 
+#define BATTERIE_MAX_ERROR		3
+
 extern ADC_HandleTypeDef hadc;
 uint8_t conversion_complete;
 uint16_t adc_raw_value;
@@ -125,15 +127,30 @@ int BATTERIE_LireTension(uint16_t *val) {
  * Tension batterie:   2.9   critic  3.1      low    3.3    med    3.6    high     4.2
  *
  */
-#define BATTERIE_LEVEL_CRITICAL  		200
-#define BATTERIE_LEVEL_LOW       		300
-#define BATTERIE_LEVEL_HIGH      		500
+#ifdef TESTS
+uint8_t BATTERIE_LEVEL_CRITICAL=135;
+uint8_t BATTERIE_LEVEL_LOW=145;
+uint8_t BATTERIE_LEVEL_HIGH=155;
 
-#define BATTERIE_LEVEL_CHARGE_LOW		400
-#define BATTERIE_LEVEL_CHARGE_HIGH      700
+uint8_t BATTERIE_LEVEL_CHARGE_LOW=150;
+uint8_t BATTERIE_LEVEL_CHARGE_HIGH=170;
+
+uint8_t BATTERIE_currentValue;
+#else
+#define BATTERIE_LEVEL_CRITICAL  		135
+#define BATTERIE_LEVEL_LOW       		145
+#define BATTERIE_LEVEL_HIGH      		155
+
+#define BATTERIE_LEVEL_CHARGE_LOW		150
+#define BATTERIE_LEVEL_CHARGE_HIGH      170
+#endif /* TESTS */
 
 uint16_t BATTERIE_BatteryLevel(uint8_t voltage, BATTERIE_StatusChargerTypedef chargerStatus) {
 	uint16_t msgId=0;
+
+#ifdef TESTS
+	BATTERIE_currentValue=voltage;
+#endif /* TESTS */
 
 	switch (chargerStatus) {
 	case CHARGEUR_CHARGE_COMPLETE:
@@ -166,6 +183,7 @@ uint16_t BATTERIE_BatteryLevel(uint8_t voltage, BATTERIE_StatusChargerTypedef ch
 
 void BATTERIE_VoltageThread(void* params) {
 	static uint16_t tension;
+	static uint8_t batteryErrorCnt=0;
 	BATTERIE_StatusChargerTypedef currentStatus;
 	uint16_t messageID;
 
@@ -177,17 +195,15 @@ void BATTERIE_VoltageThread(void* params) {
 	while (1) {
 		if (BATTERIE_LireTension(&tension) ==0) {
 			currentStatus = BATTERIE_LireStatusChargeur();
-			if (currentStatus == CHARGEUR_ERROR)
-				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE_ERR, (QueueHandle_t)0x0, (void*)NULL);
-			/*else if (currentStatus == CHARGEUR_IN_CHARGE)
-				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE_ON, (QueueHandle_t)0x0, (void*)&tension);
-			else if (currentStatus == CHARGEUR_CHARGE_COMPLETE)
-				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE_COMPLETE, (QueueHandle_t)0x0, (void*)&tension);
-			else
-				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE_OFF, (QueueHandle_t)0x0, (void*)&tension);*/
-			messageID = BATTERIE_BatteryLevel(tension, currentStatus);
-			MESSAGE_SendMailbox(APPLICATION_Mailbox, messageID, (QueueHandle_t)0x0, (void*)NULL);
+			if (currentStatus == CHARGEUR_ERROR) {
+				batteryErrorCnt++;
 
+				if (batteryErrorCnt>=BATTERIE_MAX_ERROR)
+					MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_CHARGE_ERR, (QueueHandle_t)0x0, (void*)NULL);
+			} else {
+				messageID = BATTERIE_BatteryLevel(tension, currentStatus);
+				MESSAGE_SendMailbox(APPLICATION_Mailbox, messageID, (QueueHandle_t)0x0, (void*)NULL);
+			}
 #ifdef TESTS
 			MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BAT_LEVEL, (QueueHandle_t)0x0, (void*)&tension);
 #endif /* TESTS*/

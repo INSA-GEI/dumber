@@ -236,10 +236,13 @@ void MOTEURS_TachePrincipale(void *params) {
 			MOTEURS_EtatMoteurGauche.consigne = 0;
 			MOTEURS_EtatMoteurDroit.consigne = 0;
 			if ((MOTEURS_CorrectionEncodeur(MOTEURS_EtatMoteurGauche) == 0)
-					&& (MOTEURS_CorrectionEncodeur(MOTEURS_EtatMoteurDroit) == 0))
+					&& (MOTEURS_CorrectionEncodeur(MOTEURS_EtatMoteurDroit) == 0)) {
 				// Les moteurs sont déjà arrêtés
 				vTaskSuspend(xHandleMoteursAsservissement);
-			else
+
+				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_MOTEURS_END_OF_MOUVMENT,
+						MOTEURS_Mailbox, (void*) NULL);
+			} else
 				// Les moteurs tournent encore
 				vTaskResume(xHandleMoteursAsservissement);
 			break;
@@ -289,6 +292,8 @@ void MOTEURS_TacheAsservissement(void *params) {
 				&& ((erreurD == 0) && (erreurG == 0))) {
 
 			MOTEURS_DesactiveAlim();
+			MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_MOTEURS_END_OF_MOUVMENT,
+									MOTEURS_Mailbox, (void*) NULL);
 			vTaskSuspend(xHandleMoteursAsservissement);
 		}
 

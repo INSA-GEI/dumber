@@ -32,10 +32,11 @@ typedef enum {
 	COMMANDS_Tests,
 	BATTERY_Tests,
 	MOTEURS_Tests,
-	MISC_Tests
+	MISC_Tests,
+	PANIC_Tests
 } TESTS_Type;
 
-TESTS_Type TESTS_Nbr=LEDS_Tests; // Number indicating which test is being run
+TESTS_Type TESTS_Nbr=BATTERY_Tests; // Number indicating which test is being run
 
 void TESTS_BasicTests(void* params);
 
@@ -326,6 +327,14 @@ void TESTS_BasicTests(void* params) {
 				snprintf(str, 99, "Bouton on/off appuyé\r");
 				MESSAGE_SendMailbox(XBEE_Mailbox, MSG_ID_XBEE_ANS, APPLICATION_Mailbox, (void*)str);
 			}
+		}
+		break;
+	case PANIC_Tests: // test du bouton on/off
+
+		/* test si le systeme detecte qu'il n'y a plus de memoire et part en panic */
+		while (1) {
+			volatile char* str;
+			str = (char*)malloc(100); /* allocate a buffer of 100 bytes */
 		}
 		break;
 	default:

@@ -171,6 +171,7 @@ void APPLICATION_MainThread(void* params) {
 				}
 
 				free(decodedCmd);
+				free(receivedCMD);
 				break;
 
 		default:
@@ -200,6 +201,7 @@ void APPLICATION_MainThread(void* params) {
 		case MSG_ID_BAT_MED:
 		case MSG_ID_BAT_HIGH:
 			systemInfos.batteryUpdate=1;
+			systemInfos.inCharge=0;
 			systemInfos.batteryState = msg.id;
 			break;
 		case MSG_ID_MOTEURS_END_OF_MOUVMENT:
@@ -226,11 +228,11 @@ void APPLICATION_StateMachine() {
 	}
 
 	if (systemInfos.batteryUpdate) {
-		ledState = leds_off;
-
 		if (systemInfos.batteryState==MSG_ID_BAT_CRITICAL_LOW) {
 			ledState = leds_bat_critical_low;
 			APPLICATION_TransitionToNewState(stateLowBatDisable);
+
+			LEDS_Set(ledState);
 		} else if (systemInfos.state == stateInCharge) {
 			switch (systemInfos.batteryState) {
 			case MSG_ID_BAT_CHARGE_COMPLETE:
@@ -246,6 +248,8 @@ void APPLICATION_StateMachine() {
 				ledState= leds_bat_charge_low;
 				break;
 			}
+
+			LEDS_Set(ledState);
 		} else if (systemInfos.state==stateStartup) {
 			switch (systemInfos.batteryState) {
 			case  MSG_ID_BAT_HIGH:
@@ -258,9 +262,9 @@ void APPLICATION_StateMachine() {
 				ledState= leds_bat_low;
 				break;
 			}
-		}
 
-		LEDS_Set(ledState);
+			LEDS_Set(ledState);
+		}
 	}
 
 	if (systemInfos.cmd != CMD_NONE) {
@@ -271,7 +275,8 @@ void APPLICATION_StateMachine() {
 		case CMD_RESET:
 			if ((systemInfos.state == stateIdle) ||
 					(systemInfos.state == stateRun) ||
-					(systemInfos.state == stateInMouvement)) {
+					(systemInfos.state == stateInMouvement) ||
+					(systemInfos.state == stateWatchdogDisable)) {
 				/* command RESET is only applicable in those 3 states, otherwise it is rejected */
 				cmdSendAnswer(ANS_OK);
 				APPLICATION_TransitionToNewState(stateIdle);
@@ -284,31 +289,34 @@ void APPLICATION_StateMachine() {
 				/* only state where START cmd is accepted */
 				cmdSendAnswer(ANS_OK);
 
-				APPLICATION_TransitionToNewState(stateRun);
-
 				if (systemInfos.cmd == CMD_START_WITH_WATCHDOG) {
 					systemTimeout.watchdogEnabled = 1;
 					systemTimeout.watchdogCnt=0;
 					systemTimeout.watchdogMissedCnt=0;
 				}
+
+				APPLICATION_TransitionToNewState(stateRun);
 			} else
 				cmdSendAnswer(ANS_ERR);
 			break;
 		case CMD_RESET_WATCHDOG:
 			if ((systemInfos.state == stateRun) || (systemInfos.state == stateInMouvement)) {
 				if ((systemTimeout.watchdogEnabled ==0 ) ||
-						((systemTimeout.watchdogCnt>=APPLICATION_WATCHDOG_MIN) && (systemTimeout.watchdogCnt<=APPLICATION_WATCHDOG_MAX)))
+						((systemTimeout.watchdogCnt>=(APPLICATION_WATCHDOG_MIN/100)) && (systemTimeout.watchdogCnt<=(APPLICATION_WATCHDOG_MAX/100)))) {
+					systemTimeout.watchdogMissedCnt=0; // gg, watchog is reset correctly
 					cmdSendAnswer(ANS_OK);
-				else
+				} else {
+					systemTimeout.watchdogMissedCnt++; // If you reset at the wrong time, it still count as missed watchdog reset
 					cmdSendAnswer(ANS_ERR);
+				}
 
 				systemTimeout.watchdogCnt =0;
-			}
+			} else
+				cmdSendAnswer(ANS_ERR);
 			break;
 		case CMD_MOVE:
 		case CMD_TURN:
 			if (systemInfos.state == stateRun) { // only state where MOVE or TURN cmds are accepted
-
 				if (((systemInfos.cmd == CMD_MOVE) && (systemInfos.distance !=0)) ||
 						((systemInfos.cmd == CMD_TURN) && (systemInfos.turns !=0))) {
 					systemInfos.endOfMouvement = 0;
@@ -320,6 +328,8 @@ void APPLICATION_StateMachine() {
 						((systemInfos.cmd == CMD_TURN) && (systemInfos.turns ==0))) {
 					systemInfos.endOfMouvement = 1;
 					cmdSendAnswer(ANS_OK);
+				} else { // If MOVE and TURN cmds come with parameters, reject them
+					cmdSendAnswer(ANS_ERR);
 				}
 			} else
 				cmdSendAnswer(ANS_ERR);
@@ -329,7 +339,7 @@ void APPLICATION_StateMachine() {
 		}
 	}
 
-	if (systemInfos.endOfMouvement) {
+	if ((systemInfos.state==stateInMouvement) && (systemInfos.endOfMouvement)) {
 		APPLICATION_TransitionToNewState(stateRun);
 	}
 
@@ -342,14 +352,14 @@ void APPLICATION_StateMachine() {
 	}
 
 	systemInfos.batteryUpdate = 0;
-	systemInfos.cmd =0;
+	systemInfos.cmd = CMD_NONE;
 	systemInfos.endOfMouvement =0;
 	systemInfos.powerOffRequired=0;
 }
 
 void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 	LEDS_State ledState = leds_off;
-	int32_t data;
+	//int32_t data;
 
 	switch (new_state) {
 	case stateStartup:
@@ -359,30 +369,32 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 		ledState = leds_idle;
 		LEDS_Set(ledState);
 
-		MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_STOP, APPLICATION_Mailbox, (void*)NULL);
+		MOTEURS_Stop();
 		systemTimeout.watchdogEnabled=0;
 		break;
 	case stateRun:
-		ledState = leds_run;
+		if (systemTimeout.watchdogEnabled)
+			ledState = leds_run_with_watchdog;
+		else
+			ledState = leds_run;
+
 		LEDS_Set(ledState);
 
-		MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_STOP, APPLICATION_Mailbox, (void*)NULL);
+		MOTEURS_Stop();
 		break;
 	case stateInMouvement:
 		ledState = leds_run;
 		LEDS_Set(ledState);
 
 		if (systemInfos.cmd == CMD_MOVE) {
-			data = systemInfos.distance;
-			MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_MOVE, APPLICATION_Mailbox, (void*)&data);
+			MOTEURS_Avance( systemInfos.distance);
 		} else { /* obviously, cmd is CMD_TURN */
-			data = systemInfos.turns;
-			MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_TURN, APPLICATION_Mailbox, (void*)&data);
+			MOTEURS_Tourne(systemInfos.turns);
 		}
 		break;
 	case stateInCharge:
 		/* les leds sont gerées dans APPLICATION_StateMachine */
-		MESSAGE_SendMailbox(MOTEURS_Mailbox, MSG_ID_MOTEURS_STOP, APPLICATION_Mailbox, (void*)NULL);
+		MOTEURS_Stop();
 		systemTimeout.watchdogEnabled=0;
 		break;
 	case stateWatchdogDisable:
@@ -413,7 +425,7 @@ void APPLICATION_PowerOff() {
 	/*
 	 * TODO: a decommenter quand le code sera debuggé
 	 */
-	//HAL_GPIO_WritePin(SHUTDOWN_GPIO_Port, SHUTDOWN_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(SHUTDOWN_GPIO_Port, SHUTDOWN_Pin, GPIO_PIN_RESET);
 
 	while (1){
 		__WFE(); // Attente infinie que le regulateur se coupe.
@@ -442,9 +454,9 @@ void vTimerTimeoutCallback( TimerHandle_t xTimer ) {
 		if (systemTimeout.watchdogCnt>(APPLICATION_WATCHDOG_MAX/100)) {
 			systemTimeout.watchdogCnt=0;
 			systemTimeout.watchdogMissedCnt++;
-
-			if (systemTimeout.watchdogMissedCnt>=(APPLICATION_WATCHDOG_MISSED_MAX/100))
-				APPLICATION_TransitionToNewState(stateWatchdogDisable); /* TODO: Reprendre pour en faire un envoi de message */
 		}
+
+		if (systemTimeout.watchdogMissedCnt>=APPLICATION_WATCHDOG_MISSED_MAX)
+			APPLICATION_TransitionToNewState(stateWatchdogDisable); /* TODO: Reprendre pour en faire un envoi de message */
 	}
 }

@@ -49,8 +49,8 @@ void PANIC_StopTasksAndWait(void){
 	currentTask = xTaskGetCurrentTaskHandle();
 
 	/* Arret des timers */
-	xTimerStop(xHandleTimerButton,0);
-	xTimerStop(xHandleTimerTimeout,0);
+	//xTimerStop(xHandleTimerButton,0);
+	//xTimerStop(xHandleTimerTimeout,0);
 
 	/* Arret des taches
 	 * On n'arrete toute les taches sauf celle en cours !

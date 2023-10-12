@@ -24,7 +24,10 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "application.h"
+
+#ifdef TESTS
 #include "tests.h"
+#endif /* TESTS */
 
 /* USER CODE END Includes */
 

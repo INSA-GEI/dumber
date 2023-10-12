@@ -355,9 +355,9 @@ void LEDS_ActionThread(void* params) {
 			cnt=0;
 			break;
 		case leds_watchdog_expired:
-			if (cnt<3)
+			if (cnt<4)
 				LEDS_ShowPattern(LED_PATTERN_WDT_EXP_1);
-			else if (cnt<6)
+			else if (cnt<7)
 				LEDS_ShowPattern(LED_PATTERN_WDT_EXP_2);
 			else
 				cnt=0;
