@@ -370,6 +370,7 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 		LEDS_Set(ledState);
 
 		MOTEURS_Stop();
+		systemTimeout.inactivityCnt=0;
 		systemTimeout.watchdogEnabled=0;
 		break;
 	case stateRun:
@@ -443,20 +444,22 @@ void vTimerTimeoutCallback( TimerHandle_t xTimer ) {
 			APPLICATION_TransitionToNewState(stateIdle);
 	}
 
-	systemTimeout.inactivityCnt++;
-	if (systemTimeout.inactivityCnt>=(APPLICATION_INACTIVITY_TIMEOUT/100))
-		/* send a message Button_Pressed to enable power off */
-		MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BUTTON_PRESSED, APPLICATION_Mailbox, (void*)NULL);
+	if (systemInfos.state != stateInCharge) {
+		systemTimeout.inactivityCnt++;
+		if (systemTimeout.inactivityCnt>=(APPLICATION_INACTIVITY_TIMEOUT/100))
+			/* send a message Button_Pressed to enable power off */
+			MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BUTTON_PRESSED, APPLICATION_Mailbox, (void*)NULL);
 
-	if (systemTimeout.watchdogEnabled) {
-		systemTimeout.watchdogCnt++;
+		if (systemTimeout.watchdogEnabled) {
+			systemTimeout.watchdogCnt++;
 
-		if (systemTimeout.watchdogCnt>(APPLICATION_WATCHDOG_MAX/100)) {
-			systemTimeout.watchdogCnt=0;
-			systemTimeout.watchdogMissedCnt++;
+			if (systemTimeout.watchdogCnt>(APPLICATION_WATCHDOG_MAX/100)) {
+				systemTimeout.watchdogCnt=0;
+				systemTimeout.watchdogMissedCnt++;
+			}
+
+			if (systemTimeout.watchdogMissedCnt>=APPLICATION_WATCHDOG_MISSED_MAX)
+				APPLICATION_TransitionToNewState(stateWatchdogDisable); /* TODO: Reprendre pour en faire un envoi de message */
 		}
-
-		if (systemTimeout.watchdogMissedCnt>=APPLICATION_WATCHDOG_MISSED_MAX)
-			APPLICATION_TransitionToNewState(stateWatchdogDisable); /* TODO: Reprendre pour en faire un envoi de message */
 	}
 }

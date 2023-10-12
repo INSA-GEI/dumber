@@ -7,9 +7,9 @@
 #include "stm32l0xx_hal.h"
 #include "cmsis_os.h"
 
-// current version is 2.0
-#define SYSTEM_VERSION_STR			"2.0"
-#define SYSTEM_VERSION				0x0200	// Upper byte: major version, lower byte: minor version
+// current version is 2.1
+#define SYSTEM_VERSION_STR			"2.1"
+#define SYSTEM_VERSION				0x0201	// Upper byte: major version, lower byte: minor version
 
 #define STACK_SIZE 					0x100
 
