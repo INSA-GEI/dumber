@@ -13,15 +13,16 @@
 
 #define STACK_SIZE 					0x100
 
-#define PriorityMoteursAsservissement	(configMAX_PRIORITIES -1)
+#define PriorityLedsAction 				(configMAX_PRIORITIES -1)
 #define PriorityXbeeRX 					(configMAX_PRIORITIES -2)
 #define PriorityXbeeTX 					(configMAX_PRIORITIES -3)
-#define PriorityMoteursHandler			(configMAX_PRIORITIES -4)
-#define PriorityBatterieHandler			(configMAX_PRIORITIES -5)
-#define PriorityApplicationHandler		(configMAX_PRIORITIES -6)
-#define PrioritySequenceurTimeout		(configMAX_PRIORITIES -7)
-#define PriorityLedsAction 				(configMAX_PRIORITIES -8)
-#define PriorityLedsHandler				(configMAX_PRIORITIES -9)
+#define PriorityLedsHandler				(configMAX_PRIORITIES -4)
+#define PriorityMoteursAsservissement	(configMAX_PRIORITIES -5)
+#define PriorityMoteursHandler			(configMAX_PRIORITIES -6)
+#define PriorityBatterieHandler			(configMAX_PRIORITIES -7)
+#define PriorityApplicationHandler		(configMAX_PRIORITIES -8)
+#define PrioritySequenceurTimeout		(configMAX_PRIORITIES -9)
+
 
 #define PriorityTestsHandler			(configMAX_PRIORITIES -10)
 

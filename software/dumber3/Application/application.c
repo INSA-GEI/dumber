@@ -141,7 +141,9 @@ void APPLICATION_MainThread(void* params) {
 					case CMD_PING:
 					case CMD_TEST:
 					case CMD_DEBUG:
+						cmdSendAnswer(ANS_OK);
 					case CMD_POWER_OFF:
+						systemInfos.powerOffRequired=1;
 						cmdSendAnswer(ANS_OK);
 						break;
 					case CMD_GET_BATTERY:
