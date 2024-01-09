@@ -1,8 +1,31 @@
-/*
- * cmd.c
+/**
+ ******************************************************************************
+ * @file commands.c
+ * @brief commands handler body
+ * @author S. DI MERCURIO (dimercur@insa-toulouse.fr)
+ * @date December 2023
  *
- *  Created on: 3 oct. 2022
- *      Author: dimercur
+ ******************************************************************************
+ * @copyright Copyright 2023 INSA-GEI, Toulouse, France. All rights reserved.
+ * @copyright This project is released under the Lesser GNU Public License (LGPL-3.0-only).
+ *
+ * @copyright This file is part of "Dumber" project
+ *
+ * @copyright This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * @copyright This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+
+ * @copyright You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+ ******************************************************************************
  */
 
 #include "commands.h"
@@ -10,8 +33,23 @@
 #include <string.h>
 #include <stdio.h>
 
-/* Definition des commandes */
+/** @addtogroup Application_Software
+  * @{
+  */
 
+/** @addtogroup COMMANDS
+ * Commands handler is in charge of decoding received commands and building answer frames.
+ * @{
+ */
+
+/** @addtogroup COMMANDS_Private Private
+ * @{
+ */
+
+/** @name Commands definition
+ *  List of accepted command identifiers
+ */
+///@{
 #define PingCMD                 'p'
 #define ResetCMD                'r'
 #define SetMotorCMD             'm'
@@ -26,28 +64,34 @@
 #define TestCMD                 't'
 #define DebugCMD                'a'
 #define PowerOffCMD             'z'
+///@}
 
+/** @name Answers definition
+ *  List of available answers
+ */
+///@{
 #define OK_ANS                  "O\r"
 #define ERR_ANS                 "E\r"
 #define UNKNOW_ANS              "C\r"
 #define BAT_OK                  "2\r"
 #define BAT_LOW                 "1\r"
 #define BAT_EMPTY               "0\r"
+///@}
 
 char* cmdAddChecksum(const char* str);
 char cmdVerifyChecksum(char* str);
 
-/** @addtogroup Checksum
- * @{
- */
 /**
- * @brief 		Inclut le checksum à sendString
+ * @brief Add checksum to a string
  *
- *				Parcours str pour y calculer le checksum ( xor sur chaque caractére)
- *				et inclut le resultat en fin de chaine.
+ *	Make a copy of a string and add checksum at its end (xor based).
  *
- * @param  		string sans checksum
- * @retval 		string avec checksum
+ * @warning This function use memory allocation for creating a copy of the original string. Be sure to free memory after use.
+ *
+ * @todo Error related to memory allocation (allocation failed) is not managed -> should generate a Panic
+ *
+ * @param[in] str string without checksum
+ * @return 	string with checksum added
  *
  */
 char* cmdAddChecksum(const char* str) {
@@ -70,14 +114,15 @@ char* cmdAddChecksum(const char* str) {
 }
 
 /**
- * @brief 		Verifie le checksum de la variable global recepitString
+ * @brief Verify checksum of given string
  *
- * 				Vérifie le dernier carctére de str sensé être le checksum.
- *				Si celui-ci est bon, ll retournera 0 et supprimera le checksum de str
- * 				sinon il retournera 1 sans faire de modification.
- * @param  		None
- * @retval 		0 si le checksum est faux, 1 sinon
+ * Verify if checksum of given string is correct or not. In case of success,
+ * function will suppress checksum from the string, otherwise string is not modified.
  *
+ * @param[in] str string to verify checksum
+ * @return
+ * - 0 if checksum is not correct
+ * - 1 if successful
  */
 char cmdVerifyChecksum(char* str) {
 	uint16_t j;
@@ -112,9 +157,25 @@ char cmdVerifyChecksum(char* str) {
 }
 
 /**
- * @}
+ * @brief Decode received command
+ *
+ * Command string is processed and a command structure is filled with information found in string.
+ *
+ * @warning This function use memory allocation for returning structure. Be sure to release memory after use.
+ *
+ * @param[in] cmd string with command received
+ * @param[in] length length of command string
+ * @return
+ * - NULL if memory allocation has failed
+ * - CMD_Move if string contains MOVE command
+ * - CMD_Turn if string contains TURN command
+ * - CMD_Generic for each other command
+ *
+ * Generic structure returned may contains CMD_NONE if command is unknown or CMD_INVALID_CHECKSUM if checksum is not valid
+ *
+ * @remark Returned value is always cast on a CMD_Generic type, but may contains CMD_Move or CMD_Turn structure. It is
+ * user responsibility to check type field inside structure and cast accordingly returned value to correct structure.
  */
-
 CMD_Generic* cmdDecode(char* cmd, uint8_t length) {
 	CMD_Generic* decodedCmd;
 	char cmd_type = cmd[0];
@@ -214,6 +275,19 @@ CMD_Generic* cmdDecode(char* cmd, uint8_t length) {
 	return decodedCmd;
 }
 
+/**
+ * @brief Add correct checksum to provided answer and send it to XBEE mailbox
+ *
+ * @warning This function use cmdAddChecksum, so indirectly make use of memory allocation for sending message to XBEE mailbox.
+ *          Be sure to release memory in XBEE driver after retrieving message from mailbox.
+ *
+ * @todo Error related to memory allocation (allocation failed) is not managed -> should generate a Panic
+ *
+ * @todo Maybe duplication between this function and cmdSendString: see if only one function with a macro/wrapper could be used
+ *
+ * @param[in] ans string containing answer to send, without checksum
+ * @return None
+ */
 void cmdSendAnswer(uint8_t ans) {
 	char* answer;
 
@@ -232,6 +306,19 @@ void cmdSendAnswer(uint8_t ans) {
 	MESSAGE_SendMailbox(XBEE_Mailbox, MSG_ID_XBEE_ANS, APPLICATION_Mailbox, (char*) answer);
 }
 
+/**
+ * @brief Send arbitrary answer to XBEE driver and add checksum before
+ *
+ * @warning This function use cmdAddChecksum, so indirectly make use of memory allocation for sending message to XBEE mailbox.
+ *          Be sure to release memory in XBEE driver after retrieving message from mailbox.
+ *
+ * @todo Error related to memory allocation (allocation failed) is not managed -> should generate a Panic
+ *
+ * @todo Maybe duplication between this function and cmdSendAnswer: see if only one function with a macro/wrapper could be used
+ *
+ * @param[in] str string containing answer to send without checksum
+ * @return None
+ */
 void cmdSendString(char *str) {
 	char* answer;
 	int strlength = strlen(str);
@@ -247,6 +334,19 @@ void cmdSendString(char *str) {
 	MESSAGE_SendMailbox(XBEE_Mailbox, MSG_ID_XBEE_ANS, APPLICATION_Mailbox, (char*) answer);
 }
 
+/**
+ * @brief Send battery level answer with correct checksum to XBEE driver
+ *
+ * @warning This function use cmdAddChecksum, so indirectly make use of memory allocation for sending message to XBEE mailbox.
+ *          Be sure to release memory in XBEE driver after retrieving message from mailbox.
+ *
+ * @todo Error related to memory allocation (allocation failed) is not managed -> should generate a Panic
+ *
+ * @todo Check batterystate type used here: seems a bit overkill (16bit for only 6 states) -> enum should be better
+ *
+ * @param[in] batteryState current battery state
+ * @return None
+ */
 void cmdSendBatteryLevel(uint16_t batteryState) {
 	char* answer;
 
@@ -268,6 +368,17 @@ void cmdSendBatteryLevel(uint16_t batteryState) {
 	MESSAGE_SendMailbox(XBEE_Mailbox, MSG_ID_XBEE_ANS, APPLICATION_Mailbox, (char*) answer);
 }
 
+/**
+ * @brief Send version number answer with correct checksum to XBEE driver
+ *
+ * @warning This function use cmdAddChecksum, so indirectly make use of memory allocation for sending message to XBEE mailbox.
+ *          Be sure to release memory in XBEE driver after retrieving message from mailbox.
+ *
+ * @todo Error related to memory allocation (allocation failed) is not managed -> should generate a Panic
+ *
+ * @param None
+ * @return None
+ */
 void cmdSendVersion(void) {
 	int versionlength = strlen(SYSTEM_VERSION_STR);
 	char versionstr[versionlength+2];
@@ -282,6 +393,17 @@ void cmdSendVersion(void) {
 	MESSAGE_SendMailbox(XBEE_Mailbox, MSG_ID_XBEE_ANS, APPLICATION_Mailbox, (char*) answer);
 }
 
+/**
+ * @brief Send if robot is busy (moving) or not XBEE driver
+ *
+ * @warning This function use cmdAddChecksum, so indirectly make use of memory allocation for sending message to XBEE mailbox.
+ *          Be sure to release memory in XBEE driver after retrieving message from mailbox.
+ *
+ * @todo Error related to memory allocation (allocation failed) is not managed -> should generate a Panic
+ *
+ * @param[in] state current robot state
+ * @return None
+ */
 void cmdSendBusyState(uint8_t state) {
 	char* answer;
 
@@ -292,3 +414,15 @@ void cmdSendBusyState(uint8_t state) {
 
 	MESSAGE_SendMailbox(XBEE_Mailbox, MSG_ID_XBEE_ANS, APPLICATION_Mailbox, (char*) answer);
 }
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */

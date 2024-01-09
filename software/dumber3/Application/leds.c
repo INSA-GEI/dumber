@@ -1,39 +1,89 @@
-/*
- * leds.h
+/**
+ ******************************************************************************
+ * @file leds.c
+ * @brief leds driver body
+ * @author S. DI MERCURIO (dimercur@insa-toulouse.fr)
+ * @date December 2023
  *
- *  Created on: Sep 12, 2022
- *      Author: dimercur
- */
+ ******************************************************************************
+ * @copyright Copyright 2023 INSA-GEI, Toulouse, France. All rights reserved.
+ * @copyright This project is released under the Lesser GNU Public License (LGPL-3.0-only).
+ *
+ * @copyright This file is part of "Dumber" project
+ *
+ * @copyright This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * @copyright This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
 
+ * @copyright You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+ ******************************************************************************
+ */
 #include "leds.h"
 
-#define LEDS_Allume_Seg_A() HAL_GPIO_WritePin(LED_SEG_A_GPIO_Port, LED_SEG_A_Pin, GPIO_PIN_SET)
-#define LEDS_Allume_Seg_B() HAL_GPIO_WritePin(LED_SEG_B_GPIO_Port, LED_SEG_B_Pin, GPIO_PIN_SET)
-#define LEDS_Allume_Seg_C() HAL_GPIO_WritePin(LED_SEG_C_GPIO_Port, LED_SEG_C_Pin, GPIO_PIN_SET)
-#define LEDS_Allume_Seg_D() HAL_GPIO_WritePin(LED_SEG_D_GPIO_Port, LED_SEG_D_Pin, GPIO_PIN_SET)
-#define LEDS_Allume_Seg_E() HAL_GPIO_WritePin(LED_SEG_E_GPIO_Port, LED_SEG_E_Pin, GPIO_PIN_SET)
-#define LEDS_Allume_Seg_F() HAL_GPIO_WritePin(LED_SEG_F_GPIO_Port, LED_SEG_F_Pin, GPIO_PIN_SET)
-#define LEDS_Allume_Seg_G() HAL_GPIO_WritePin(LED_SEG_G_GPIO_Port, LED_SEG_G_Pin, GPIO_PIN_SET)
-#define LEDS_Allume_Seg_DP() HAL_GPIO_WritePin(LED_SEG_DP_GPIO_Port, LED_SEG_DP_Pin, GPIO_PIN_SET)
+/** @addtogroup Application_Software
+  * @{
+  */
 
-#define LEDS_Eteint_Seg_A() HAL_GPIO_WritePin(LED_SEG_A_GPIO_Port, LED_SEG_A_Pin, GPIO_PIN_RESET)
-#define LEDS_Eteint_Seg_B() HAL_GPIO_WritePin(LED_SEG_B_GPIO_Port, LED_SEG_B_Pin, GPIO_PIN_RESET)
-#define LEDS_Eteint_Seg_C() HAL_GPIO_WritePin(LED_SEG_C_GPIO_Port, LED_SEG_C_Pin, GPIO_PIN_RESET)
-#define LEDS_Eteint_Seg_D() HAL_GPIO_WritePin(LED_SEG_D_GPIO_Port, LED_SEG_D_Pin, GPIO_PIN_RESET)
-#define LEDS_Eteint_Seg_E() HAL_GPIO_WritePin(LED_SEG_E_GPIO_Port, LED_SEG_E_Pin, GPIO_PIN_RESET)
-#define LEDS_Eteint_Seg_F() HAL_GPIO_WritePin(LED_SEG_F_GPIO_Port, LED_SEG_F_Pin, GPIO_PIN_RESET)
-#define LEDS_Eteint_Seg_G() HAL_GPIO_WritePin(LED_SEG_G_GPIO_Port, LED_SEG_G_Pin, GPIO_PIN_RESET)
-#define LEDS_Eteint_Seg_DP() HAL_GPIO_WritePin(LED_SEG_DP_GPIO_Port, LED_SEG_DP_Pin, GPIO_PIN_RESET)
+/** @addtogroup LEDS
+ * Leds handler is in charge of leds animation.
+ *
+ * Leds module consiste of two threads:
+ * - \ref LEDS_HandlerThread in charge of waiting for message in mailbox from application. Depending of the message received, animation is started, modified or stop
+ * - \ref LEDS_ActionThread, periodic task in charge of animating leds with configured sprites for given animation
+ * @{
+ */
 
-#define LEDS_Eteint_Tout() HAL_GPIO_WritePin(GPIOB, LED_SEG_A_Pin|LED_SEG_B_Pin|LED_SEG_C_Pin, GPIO_PIN_RESET);\
+/** @addtogroup LEDS_Private Private
+ * @{
+ */
+
+/** @name Macro for switching ON and OFF individual led segments
+ *
+ */
+///@{
+#define LEDS_On_Seg_A() HAL_GPIO_WritePin(LED_SEG_A_GPIO_Port, LED_SEG_A_Pin, GPIO_PIN_SET)
+#define LEDS_On_Seg_B() HAL_GPIO_WritePin(LED_SEG_B_GPIO_Port, LED_SEG_B_Pin, GPIO_PIN_SET)
+#define LEDS_On_Seg_C() HAL_GPIO_WritePin(LED_SEG_C_GPIO_Port, LED_SEG_C_Pin, GPIO_PIN_SET)
+#define LEDS_On_Seg_D() HAL_GPIO_WritePin(LED_SEG_D_GPIO_Port, LED_SEG_D_Pin, GPIO_PIN_SET)
+#define LEDS_On_Seg_E() HAL_GPIO_WritePin(LED_SEG_E_GPIO_Port, LED_SEG_E_Pin, GPIO_PIN_SET)
+#define LEDS_On_Seg_F() HAL_GPIO_WritePin(LED_SEG_F_GPIO_Port, LED_SEG_F_Pin, GPIO_PIN_SET)
+#define LEDS_On_Seg_G() HAL_GPIO_WritePin(LED_SEG_G_GPIO_Port, LED_SEG_G_Pin, GPIO_PIN_SET)
+#define LEDS_On_Seg_DP() HAL_GPIO_WritePin(LED_SEG_DP_GPIO_Port, LED_SEG_DP_Pin, GPIO_PIN_SET)
+
+#define LEDS_Off_Seg_A() HAL_GPIO_WritePin(LED_SEG_A_GPIO_Port, LED_SEG_A_Pin, GPIO_PIN_RESET)
+#define LEDS_Off_Seg_B() HAL_GPIO_WritePin(LED_SEG_B_GPIO_Port, LED_SEG_B_Pin, GPIO_PIN_RESET)
+#define LEDS_Off_Seg_C() HAL_GPIO_WritePin(LED_SEG_C_GPIO_Port, LED_SEG_C_Pin, GPIO_PIN_RESET)
+#define LEDS_Off_Seg_D() HAL_GPIO_WritePin(LED_SEG_D_GPIO_Port, LED_SEG_D_Pin, GPIO_PIN_RESET)
+#define LEDS_Off_Seg_E() HAL_GPIO_WritePin(LED_SEG_E_GPIO_Port, LED_SEG_E_Pin, GPIO_PIN_RESET)
+#define LEDS_Off_Seg_F() HAL_GPIO_WritePin(LED_SEG_F_GPIO_Port, LED_SEG_F_Pin, GPIO_PIN_RESET)
+#define LEDS_Off_Seg_G() HAL_GPIO_WritePin(LED_SEG_G_GPIO_Port, LED_SEG_G_Pin, GPIO_PIN_RESET)
+#define LEDS_Off_Seg_DP() HAL_GPIO_WritePin(LED_SEG_DP_GPIO_Port, LED_SEG_DP_Pin, GPIO_PIN_RESET)
+///@}
+
+/** @name Macro for switching all display ON or OFF
+ *
+ */
+///@{
+#define LEDS_All_Off() HAL_GPIO_WritePin(GPIOB, LED_SEG_A_Pin|LED_SEG_B_Pin|LED_SEG_C_Pin, GPIO_PIN_RESET);\
 		HAL_GPIO_WritePin(GPIOA, LED_SEG_D_Pin|LED_SEG_E_Pin|LED_SEG_F_Pin|LED_SEG_G_Pin|LED_SEG_DP_Pin, GPIO_PIN_RESET)
 
-#define LEDS_Allume_Tout() HAL_GPIO_WritePin(GPIOB, LED_SEG_A_Pin|LED_SEG_B_Pin|LED_SEG_C_Pin, GPIO_PIN_SET);\
+#define LEDS_All_On() HAL_GPIO_WritePin(GPIOB, LED_SEG_A_Pin|LED_SEG_B_Pin|LED_SEG_C_Pin, GPIO_PIN_SET);\
 		HAL_GPIO_WritePin(GPIOA, LED_SEG_D_Pin|LED_SEG_E_Pin|LED_SEG_F_Pin|LED_SEG_G_Pin|LED_SEG_DP_Pin, GPIO_PIN_SET)
+///@}
 
-#define LEDS_Allume_C() HAL_GPIO_WritePin(GPIOB, LED_SEG_A_Pin|LED_SEG_B_Pin|LED_SEG_C_Pin, GPIO_PIN_SET);\
-		HAL_GPIO_WritePin(GPIOA, LED_SEG_D_Pin, GPIO_PIN_SET)
-
+/** @name List of single sprite (pattern) in animation
+ *
+ */
+///@{
 #define LED_PATTERN_ALL_OFF			0
 #define LED_PATTERN_BAT_SPRITE_0	1
 #define LED_PATTERN_BAT_SPRITE_1	2
@@ -73,6 +123,7 @@
 #define LED_PATTERN_DIGIT_UNKNOWN	36
 
 #define LED_MAX_PATTERNS			37
+///@}
 
 /*
  * Relation entre segment et nom
@@ -97,6 +148,9 @@
  *
  */
 
+/** @brief Constant array defining led configuration for all possible sprites used in animation
+ *
+ */
 uint16_t LEDS_Patterns [LED_MAX_PATTERNS][4]= {
 		// GPIOA ON / GPIOB ON / GPIOA OFF / GPIOB OFF
 		{ 0, 0, LED_SEG_D_Pin|LED_SEG_E_Pin|LED_SEG_F_Pin|LED_SEG_G_Pin|LED_SEG_DP_Pin,	LED_SEG_A_Pin|LED_SEG_B_Pin|LED_SEG_C_Pin}, // All Off
@@ -162,8 +216,14 @@ void LEDS_ShowPattern(uint8_t pattern);
 void LEDS_Tests(void* params);
 void LEDS_HandlerThread(void* params);
 
+/**
+ * @brief Function for initializing leds animation
+ *
+ * @param  None
+ * @retval None
+ */
 void LEDS_Init(void) {
-	LEDS_Eteint_Tout();
+	LEDS_All_Off();
 
 	LEDS_Animation=leds_off;
 	LEDS_AnimationAncien =LEDS_Animation;
@@ -183,6 +243,15 @@ void LEDS_Init(void) {
 	vTaskResume(xHandleLedsHandler);
 }
 
+/**
+ * @brief Request an animation, given in parameter
+ *
+ * @remark This function wrap a message sending to leds mailbox.
+ *         If multiple module request animation, only the laste requested animation will be taken into account
+ *
+ * @param[in] state Led animation requested
+ * @retval None
+ */
 void LEDS_Set(LEDS_State state) {
 static LEDS_State leds_state;
 
@@ -193,6 +262,12 @@ static LEDS_State leds_state;
 	}
 }
 
+/**
+ * @brief Apply a pattern to led
+ *
+ * @param[in] pattern Pattern to show, defined in \ref LEDS_Patterns. Use macro starting with LED_PATTERN_ as parameter
+ * @retval None
+ */
 void LEDS_ShowPattern(uint8_t pattern) {
 	if (pattern < LED_MAX_PATTERNS) {
 		HAL_GPIO_WritePin(GPIOA, LEDS_Patterns[pattern][2], GPIO_PIN_RESET);
@@ -205,10 +280,18 @@ void LEDS_ShowPattern(uint8_t pattern) {
 	}
 }
 
+/**
+ * @brief Test task for checking animation correctness
+ *
+ * @warning Do not use in normal running condition
+ *
+ * @param[in] params Initial task parameters
+ * @retval None
+ */
 void LEDS_Tests(void* params) {
 	LEDS_State ledState = leds_idle;
 
-	LEDS_Eteint_Tout();
+	LEDS_All_Off();
 
 	while (1) {
 		MESSAGE_SendMailbox(LEDS_Mailbox, MSG_ID_LED_ETAT, LEDS_Mailbox, (void*)&ledState);
@@ -219,6 +302,16 @@ void LEDS_Tests(void* params) {
 	}
 }
 
+/**
+ * @brief Message handler task
+ *
+ * Get received animation message from application and start, stop or modify animation depending on animation requested
+ * by controlling \ref LEDS_ActionThread task.
+ * If requested animation is same of currently running, no modification is done.
+ *
+ * @param[in] params Initial task parameters
+ * @retval None
+ */
 void LEDS_HandlerThread(void* params) {
 	MESSAGE_Typedef msg;
 
@@ -252,6 +345,14 @@ void LEDS_HandlerThread(void* params) {
 	}
 }
 
+/**
+ * @brief Animation task
+ *
+ * Periodic task (100 ms) used for animating led. Started and stopped from \ref LEDS_HandlerThread
+ *
+ * @param[in] params Initial task parameters
+ * @retval None
+ */
 void LEDS_ActionThread(void* params) {
 	uint8_t cnt=0;
 	TickType_t xLastWakeTime;
@@ -259,13 +360,13 @@ void LEDS_ActionThread(void* params) {
 	// Initialise the xLastWakeTime variable with the current time.
 	xLastWakeTime = xTaskGetTickCount();
 
-	LEDS_Eteint_Tout();
+	LEDS_All_Off();
 
 	while (1) {
 
 		switch (LEDS_Animation) {
 		case leds_off:
-			LEDS_Eteint_Tout();
+			LEDS_All_Off();
 			break;
 		case leds_idle:
 			if (cnt<5)
@@ -362,7 +463,7 @@ void LEDS_ActionThread(void* params) {
 			else
 				cnt=0;
 			break;
-		case leds_erreur_1:
+		case leds_error_1:
 			if (cnt<5)
 				LEDS_ShowPattern(LED_PATTERN_ERROR);
 			else if (cnt<10)
@@ -370,7 +471,7 @@ void LEDS_ActionThread(void* params) {
 			else
 				cnt=0;
 			break;
-		case leds_erreur_2:
+		case leds_error_2:
 			if (cnt<5)
 				LEDS_ShowPattern(LED_PATTERN_ERROR);
 			else if (cnt<10)
@@ -378,7 +479,7 @@ void LEDS_ActionThread(void* params) {
 			else
 				cnt=0;
 			break;
-		case leds_erreur_3:
+		case leds_error_3:
 			if (cnt<5)
 				LEDS_ShowPattern(LED_PATTERN_ERROR);
 			else if (cnt<10)
@@ -386,7 +487,7 @@ void LEDS_ActionThread(void* params) {
 			else
 				cnt=0;
 			break;
-		case leds_erreur_4:
+		case leds_error_4:
 			if (cnt<5)
 				LEDS_ShowPattern(LED_PATTERN_ERROR);
 			else if (cnt<10)
@@ -394,7 +495,7 @@ void LEDS_ActionThread(void* params) {
 			else
 				cnt=0;
 			break;
-		case leds_erreur_5:
+		case leds_error_5:
 			if (cnt<5)
 				LEDS_ShowPattern(LED_PATTERN_ERROR);
 			else if (cnt<10)
@@ -415,7 +516,7 @@ void LEDS_ActionThread(void* params) {
 		}
 
 		// Wait for the next cycle.
-		vTaskDelayUntil( &xLastWakeTime, pdMS_TO_TICKS(LEDS_PERIODE));
+		vTaskDelayUntil( &xLastWakeTime, pdMS_TO_TICKS(LEDS_DELAY));
 
 		cnt++;
 	}

@@ -1,7 +1,7 @@
 /**
  ******************************************************************************
- * @file application.h
- * @brief application header
+ * @file battery.c
+ * @brief battery driver header
  * @author S. DI MERCURIO (dimercur@insa-toulouse.fr)
  * @date December 2023
  *
@@ -27,35 +27,25 @@
  *
  ******************************************************************************
  */
-#ifndef INC_APPLICATION_H_
-#define INC_APPLICATION_H_
 
-#include "cmsis_os.h"
+#ifndef INC_BATTERY_H_
+#define INC_BATTERY_H_
 
-#include "config.h"
-
-#include "messages.h"
-#include "leds.h"
-#include "battery.h"
-#include "motors.h"
-#include "xbee.h"
-#include "commands.h"
-
-#include "main.h"
+#include "application.h"
 
 /** @addtogroup Application_Software
   * @{
   */
 
-/** @addtogroup APPLICATION
+/** @addtogroup BATTERY
   * @{
   */
 
-/** @addtogroup APPLICATION_Public Public
+/** @addtogroup BATTERY_Public Public
   * @{
   */
 
-void APPLICATION_Init(void);
+void BATTERY_Init(void);
 
 /**
   * @}
@@ -69,4 +59,4 @@ void APPLICATION_Init(void);
   * @}
   */
 
-#endif /* INC_APPLICATION_H_ */
+#endif /* INC_BATTERY_H_ */

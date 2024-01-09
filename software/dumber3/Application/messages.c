@@ -11,13 +11,13 @@
 #define QUEUE_SIZE 5
 
 QueueHandle_t LEDS_Mailbox;
-QueueHandle_t MOTEURS_Mailbox;
+QueueHandle_t MOTORS_Mailbox;
 QueueHandle_t APPLICATION_Mailbox;
 QueueHandle_t XBEE_Mailbox;
 
 void  MESSAGE_Init(void) {
 	LEDS_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
-	MOTEURS_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
+	MOTORS_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
 	APPLICATION_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
 	XBEE_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
 }

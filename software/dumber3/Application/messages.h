@@ -18,7 +18,7 @@ typedef struct {
 } MESSAGE_Typedef;
 
 extern QueueHandle_t LEDS_Mailbox;
-extern QueueHandle_t MOTEURS_Mailbox;
+extern QueueHandle_t MOTORS_Mailbox;
 extern QueueHandle_t APPLICATION_Mailbox;
 extern QueueHandle_t XBEE_Mailbox;
 
@@ -43,10 +43,10 @@ extern QueueHandle_t XBEE_Mailbox;
 
 #define MSG_ID_BUTTON_PRESSED		0x30
 
-#define MSG_ID_MOTEURS_STOP			0x40
-#define MSG_ID_MOTEURS_MOVE			0x41
-#define MSG_ID_MOTEURS_TURN			0x42
-#define MSG_ID_MOTEURS_END_OF_MOUVMENT	0x43
+#define MSG_ID_MOTORS_STOP			0x40
+#define MSG_ID_MOTORS_MOVE			0x41
+#define MSG_ID_MOTORS_TURN			0x42
+#define MSG_ID_MOTORS_END_OF_MOUVMENT	0x43
 
 #define MSG_ID_XBEE_CMD				0x50
 #define MSG_ID_XBEE_ANS				0x51

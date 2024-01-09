@@ -1,8 +1,57 @@
-/*
- * statemachine.c
+/**
+ ******************************************************************************
+ * @file application.c
+ * @brief application body
+ * @author S. DI MERCURIO (dimercur@insa-toulouse.fr)
+ * @date December 2023
  *
- *  Created on: Sep 12, 2022
- *      Author: dimercur
+ ******************************************************************************
+ * @copyright Copyright 2023 INSA-GEI, Toulouse, France. All rights reserved.
+ * @copyright This project is released under the Lesser GNU Public License (LGPL-3.0-only).
+ *
+ * @copyright This file is part of "Dumber" project
+ *
+ * @copyright This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * @copyright This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+
+ * @copyright You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+ ******************************************************************************
+ */
+
+/**
+ * @mainpage  Dumber 3
+ *
+ * Dumber is a robot used at INSA-GEI, Toulouse, France for realtime computer science teaching.
+ * Robot is basically controlled by a supervisor program and move depending on commands send by supervisor.
+ * Movements are controlled by a camera.
+ *
+ * @copyright Copyright 2023 INSA-GEI, Toulouse, France. All rights reserved.
+ * @copyright This project is released under the Lesser GNU Public License (LGPL-3.0-only).
+ *
+ * @copyright This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * @copyright This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+
+ * @copyright You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
  */
 
 #include "application.h"
@@ -10,48 +59,63 @@
 #include "string.h"
 #include <stdlib.h>
 
-#include "moteurs.h"
 #include "leds.h"
 #include "xbee.h"
-#include "batterie.h"
 #include "messages.h"
+#include "motors.h"
+#include "battery.h"
 
 #include "panic.h"
 
+/** @addtogroup Application_Software
+  * @{
+  */
+
+/** @addtogroup APPLICATION
+  * @{
+  */
+
+/** @addtogroup APPLICATION_Private Private
+  * @{
+  */
+
+/** Enumeration class used by application state machine for defining current application state */
 typedef enum {
-	stateStartup=0,
-	stateIdle,
-	stateRun,
-	stateInCharge,
-	stateInMouvement,
-	stateWatchdogDisable,
-	stateLowBatDisable
+	stateStartup=0,				/**< Startup state, after system power on */
+	stateIdle,					/**< Idle state, after system has initialized all peripherals and is ready to handle commands */
+	stateRun,					/**< Run state, after system has received and accepted "StartWithWatchdog" or "StartWithoutWatchdog" command  */
+	stateInCharge,				/**< In Charge state, when a charger is plugged */
+	stateInMouvement,			/**< In Movement state, when the robot is moving */
+	stateWatchdogDisable,		/**< Watchdog Disable state, after watchdog has expired */
+	stateLowBatDisable			/**< Low Bat Disable state, when battery is too low */
 }  APPLICATION_State;
 
+/** Structure containing information about current system state */
 typedef struct {
-	APPLICATION_State state;
-	uint8_t cmd;
-	uint16_t batteryState;
-	char batteryUpdate;
-	char inCharge;
-	int32_t distance;
-	int32_t turns;
-	int32_t motor_left;
-	int32_t motor_right;
-	char endOfMouvement;
-	char powerOffRequired;
-	uint16_t senderAddress;
-	uint8_t rfProblem;
-
+	APPLICATION_State state;	/**< Store current application state*/
+	uint8_t cmd;				/**< Current received command, CMD_NONE if no command was received */
+	uint16_t batteryState;		/**< Last battery message received from battery driver*/
+	char batteryUpdate;			/**< Battery state has changed and need to be processed*/
+	char inCharge;				/**< Robot is currently plugged for charging*/
+	int32_t distance;			/**< Distance of movement requested with a MOVE command*/
+	int32_t turns;				/**< Number of turn requested with a TURN command*/
+	int32_t motor_left;			/**< Speed to be applied for left motor */
+	int32_t motor_right;		/**< Speed to be applied for right motor*/
+	char endOfMouvement;		/**< Flag indicating last movement request has ended, ready for new movement*/
+	char powerOffRequired;		/**< Flag indicating system power off*/
+	uint16_t senderAddress;		/**< Xbee sender address (not used)*/
+	uint8_t rfProblem;			/**< Xbee RF quality (not used)*/
 } APPLICATION_Infos;
 
+/** Structure storing counters used for watchdog and system inactivity.
+ * Used notably to check if watchdog reset was missed or power down system because of inactivity */
 typedef struct {
-	uint32_t startupCnt;
-	uint32_t inactivityCnt;
-	uint32_t watchdogCnt;
-	char watchdogEnabled;
-	char watchdogMissedCnt;
-
+	uint32_t startupCnt;		/**< Counter used during wake up, to allow couple of second for
+	                                 battery animation to show up before system enters IDLE state*/
+	uint32_t inactivityCnt;		/**< Counter used to check system inactivity (no command received)*/
+	uint32_t watchdogCnt;		/**< Counter used for watchdog check. Reset when RESET_WATCHDOG command is received */
+	char watchdogEnabled;		/**< Flag used to know if watchdog is enabled or not*/
+	char watchdogMissedCnt;		/**< Counter used to store each time watchdog reset is missed*/
 } APPLICATION_Timeout;
 
 StaticTask_t xTaskApplicationMain;
@@ -66,18 +130,19 @@ StaticTimer_t xBufferTimerTimeout;
 TimerHandle_t xHandleTimerTimeout = NULL;
 void vTimerTimeoutCallback( TimerHandle_t xTimer );
 
-void LEDS_Tests();
-
-void APPLICATION_MainThread(void* params);
-void APPLICATION_TimeoutThread(void* params);
+void APPLICATION_Thread(void* params);
 void APPLICATION_StateMachine();
-LEDS_State APPLICATION_BatteryLevel(uint8_t voltage, APPLICATION_State state);
 void APPLICATION_PowerOff();
 void APPLICATION_TransitionToNewState(APPLICATION_State new_state);
 
 APPLICATION_Infos systemInfos = {0};
 APPLICATION_Timeout systemTimeout = {0};
 
+/**
+  * @brief  Initialization of drivers, modules and application.
+  * @param  None
+  * @return None
+  */
 void APPLICATION_Init(void) {
 	/* Init des messages box */
 	MESSAGE_Init();
@@ -87,13 +152,13 @@ void APPLICATION_Init(void) {
 
 	/* Init de la partie RF / reception des messages */
 	XBEE_Init();
-	BATTERIE_Init();
-	MOTEURS_Init();
+	BATTERY_Init();
+	MOTORS_Init();
 
 	/* Create the task without using any dynamic memory allocation. */
 	xHandleApplicationMain = xTaskCreateStatic(
-			APPLICATION_MainThread,       /* Function that implements the task. */
-			"APPLICATION Main",          /* Text name for the task. */
+			APPLICATION_Thread,       /* Function that implements the task. */
+			"APPLICATION Thread",          /* Text name for the task. */
 			STACK_SIZE,      /* Number of indexes in the xStack array. */
 			NULL,    /* Parameter passed into the task. */
 			PriorityApplicationHandler,/* Priority at which the task is created. */
@@ -103,8 +168,8 @@ void APPLICATION_Init(void) {
 
 	/* Create a periodic task without using any dynamic memory allocation. */
 	xHandleTimerTimeout = xTimerCreateStatic(
-			"Seq Timer",
-			pdMS_TO_TICKS(APPLICATION_PERIODE),
+			"Counters Timer",
+			pdMS_TO_TICKS(APPLICATION_COUNTERS_DELAY),
 			pdTRUE,
 			( void * ) 0,
 			vTimerTimeoutCallback,
@@ -112,7 +177,16 @@ void APPLICATION_Init(void) {
 	xTimerStart(xHandleTimerTimeout,0 );
 }
 
-void APPLICATION_MainThread(void* params) {
+/**
+  * @brief  Application thread (main thread)
+  *
+  * This thread mainly waits for messages from others threads or drivers, store informations, set various flags
+  * and then call state machine function (APPLICATION_StateMachine()) for processing actions.
+  *
+  * @param[in] params startup parameters for task (not used)
+  * @return None
+  */
+void APPLICATION_Thread(void* params) {
 	MESSAGE_Typedef msg;
 	char* receivedCMD;
 	CMD_Generic* decodedCmd;
@@ -206,7 +280,7 @@ void APPLICATION_MainThread(void* params) {
 			systemInfos.inCharge=0;
 			systemInfos.batteryState = msg.id;
 			break;
-		case MSG_ID_MOTEURS_END_OF_MOUVMENT:
+		case MSG_ID_MOTORS_END_OF_MOUVMENT:
 			systemInfos.endOfMouvement= 1;
 			break;
 
@@ -219,7 +293,16 @@ void APPLICATION_MainThread(void* params) {
 	}
 }
 
-void APPLICATION_StateMachine() {
+/**
+  * @brief  State machine processing function
+  *
+  * This function processes received messages depending on current system state.
+  * In case of state transition, function APPLICATION_TransitionToNewState will be called at end for transition and clean up
+  *
+  * @param  None
+  * @return None
+  */
+void APPLICATION_StateMachine(void) {
 	LEDS_State ledState = leds_off;
 
 	if (systemInfos.powerOffRequired)
@@ -359,9 +442,16 @@ void APPLICATION_StateMachine() {
 	systemInfos.powerOffRequired=0;
 }
 
+/**
+  * @brief  State machine transition clean up
+  *
+  * This function is part of statemachine processing. It's job is to process and cleanup statemachine transition.
+  *
+  * @param[in] new_state New state to apply to system
+  * @return None
+  */
 void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 	LEDS_State ledState = leds_off;
-	//int32_t data;
 
 	switch (new_state) {
 	case stateStartup:
@@ -371,7 +461,7 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 		ledState = leds_idle;
 		LEDS_Set(ledState);
 
-		MOTEURS_Stop();
+		MOTORS_Stop();
 		systemTimeout.inactivityCnt=0;
 		systemTimeout.watchdogEnabled=0;
 		break;
@@ -383,21 +473,21 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 
 		LEDS_Set(ledState);
 
-		MOTEURS_Stop();
+		MOTORS_Stop();
 		break;
 	case stateInMouvement:
 		ledState = leds_run;
 		LEDS_Set(ledState);
 
 		if (systemInfos.cmd == CMD_MOVE) {
-			MOTEURS_Avance( systemInfos.distance);
+			MOTORS_Move( systemInfos.distance);
 		} else { /* obviously, cmd is CMD_TURN */
-			MOTEURS_Tourne(systemInfos.turns);
+			MOTORS_Turn(systemInfos.turns);
 		}
 		break;
 	case stateInCharge:
 		/* les leds sont gerées dans APPLICATION_StateMachine */
-		MOTEURS_Stop();
+		MOTORS_Stop();
 		systemTimeout.watchdogEnabled=0;
 		break;
 	case stateWatchdogDisable:
@@ -424,7 +514,15 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 	systemInfos.state = new_state;
 }
 
-void APPLICATION_PowerOff() {
+/**
+  * @brief  Power off robot
+  *
+  * Disable main regulator and power off system. Used after inactivity or when user press on/off button.
+  *
+  * @param  None
+  * @return None
+  */
+void APPLICATION_PowerOff(void) {
 	/*
 	 * TODO: a decommenter quand le code sera debuggé
 	 */
@@ -435,10 +533,17 @@ void APPLICATION_PowerOff() {
 	}
 }
 
-/*
- * This task is called every 100 ms
- * RQ: les constante de temps sont exprimé en ms, d'où la division par 100
- */
+/**
+  * @brief  Periodic task used for system counter update
+  *
+  * This periodic task is called every 100 ms and is used for updating inactivity, startup and watchdog counters,
+  * sending messages or triggering transition if necessary.
+  *
+  * @remark Time constants are expressed in ms, thus explaining the division by 100 used in comparison.
+  *
+  * @param[in]  xTimer Handler for periodic task
+  * @return None
+  */
 void vTimerTimeoutCallback( TimerHandle_t xTimer ) {
 	if (systemInfos.state == stateStartup) {
 		systemTimeout.startupCnt++;
@@ -465,3 +570,15 @@ void vTimerTimeoutCallback( TimerHandle_t xTimer ) {
 		}
 	}
 }
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */

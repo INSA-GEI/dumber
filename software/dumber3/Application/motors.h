@@ -1,7 +1,7 @@
 /**
  ******************************************************************************
- * @file application.h
- * @brief application header
+ * @file motors.c
+ * @brief motors driver header
  * @author S. DI MERCURIO (dimercur@insa-toulouse.fr)
  * @date December 2023
  *
@@ -27,35 +27,30 @@
  *
  ******************************************************************************
  */
-#ifndef INC_APPLICATION_H_
-#define INC_APPLICATION_H_
 
-#include "cmsis_os.h"
+#ifndef INC_MOTORS_H_
+#define INC_MOTORS_H_
 
-#include "config.h"
-
-#include "messages.h"
-#include "leds.h"
-#include "battery.h"
-#include "motors.h"
-#include "xbee.h"
-#include "commands.h"
-
-#include "main.h"
+#include "application.h"
 
 /** @addtogroup Application_Software
   * @{
   */
 
-/** @addtogroup APPLICATION
+/** @addtogroup MOTORS
   * @{
   */
 
-/** @addtogroup APPLICATION_Public Public
+/** @addtogroup MOTORS_Public Public
   * @{
   */
 
-void APPLICATION_Init(void);
+void MOTORS_Init(void);
+void MOTORS_Move(int32_t distance);
+void MOTORS_Turn(int32_t tours);
+void MOTORS_Stop(void);
+
+void MOTORS_TimerEncodeurUpdate (TIM_HandleTypeDef *htim);
 
 /**
   * @}
@@ -69,4 +64,4 @@ void APPLICATION_Init(void);
   * @}
   */
 
-#endif /* INC_APPLICATION_H_ */
+#endif /* INC_MOTORS_H_ */

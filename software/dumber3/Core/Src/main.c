@@ -681,7 +681,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
   /* USER CODE BEGIN Callback 1 */
   else if ((htim->Instance == TIM2) || (htim->Instance == TIM21))
-		  MOTEURS_TimerEncodeurUpdate (htim);
+		  MOTORS_TimerEncodeurUpdate (htim);
   /* USER CODE END Callback 1 */
 }
 
