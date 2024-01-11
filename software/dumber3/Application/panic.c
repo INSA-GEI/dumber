@@ -1,8 +1,31 @@
-/*
- * panic.c
+/**
+ ******************************************************************************
+ * @file panic.c
+ * @brief panic handler body
+ * @author S. DI MERCURIO (dimercur@insa-toulouse.fr)
+ * @date December 2023
  *
- *  Created on: Oct 11, 2023
- *      Author: dimercur
+ ******************************************************************************
+ * @copyright Copyright 2023 INSA-GEI, Toulouse, France. All rights reserved.
+ * @copyright This project is released under the Lesser GNU Public License (LGPL-3.0-only).
+ *
+ * @copyright This file is part of "Dumber" project
+ *
+ * @copyright This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * @copyright This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+
+ * @copyright You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+ ******************************************************************************
  */
 
 #include "application.h"
@@ -11,8 +34,24 @@
 #include "panic.h"
 #include "leds.h"
 
+/** @addtogroup Application_Software
+  * @{
+  */
+
+/** @addtogroup PANIC
+ * Panic module handles non recoverable error and display an error message on leds
+ * @{
+ */
+
+/** @addtogroup PANIC_Private Private
+ * @{
+ */
+
 void PANIC_StopTasksAndWait(void);
+
+/** @cond DOXYGEN_IGNORE_REF */
 void MOTORS_PowerOff(void);
+/** @endcond */
 
 extern TaskHandle_t xHandleLedsHandler;
 extern TaskHandle_t xHandleLedsAction;
@@ -25,6 +64,14 @@ extern TaskHandle_t xHandleMotorsControl;
 extern TaskHandle_t xHandleXbeeTXHandler;
 extern TaskHandle_t xHandleXbeeRX;
 
+/**
+ * @brief  Handle an unrecoverable error and display corresponding error on leds
+ *
+ * @param[in] panicId Panic error (as found in \ref PANIC_Typedef)
+ * @return None
+ *
+ * @remark This function will never return (as it calls \ref PANIC_StopTasksAndWait).
+ */
 void PANIC_Raise(PANIC_Typedef panicId) {
 	switch (panicId) {
 	case panic_adc_err:
@@ -44,6 +91,17 @@ void PANIC_Raise(PANIC_Typedef panicId) {
 	PANIC_StopTasksAndWait();
 }
 
+/**
+ * @brief  Stop all task and stop system
+ *
+ * All tasks are stopped except led animation (otherwise animation will stop)
+ * and, at end, system enter power saving mode.
+ *
+ * @param None
+ * @return None
+ *
+ * @remark This function will never return (as it calls \ref PANIC_StopTasksAndWait).
+ */
 void PANIC_StopTasksAndWait(void){
 	TaskHandle_t currentTask;
 	currentTask = xTaskGetCurrentTaskHandle();
@@ -92,3 +150,15 @@ void PANIC_StopTasksAndWait(void){
 		__WFE(); /* Attente infinie */
 	}
 }
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */

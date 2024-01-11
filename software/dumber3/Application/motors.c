@@ -62,29 +62,35 @@ extern TIM_HandleTypeDef htim3;
 #define MOTORS_MAX_COMMAND	200
 #define MOTORS_MAX_ENCODER	USHRT_MAX
 
-/** Structure for storing motore (left or right) regulation state
- * Used during regulation task for controlling motor */
+/** Structure for storing motors (left or right) control state
+ * Used during control loop task for controlling motor
+ */
 typedef struct {
-	int16_t output; 		/**< */
-	int16_t set_point;		/**< Xbee RF quality (not used)*/
-	uint16_t encoder;		/**< Xbee RF quality (not used)*/
-	uint16_t encoderEdge;	/**< Xbee RF quality (not used)*/
-	uint8_t slowMotor;		/**< Xbee RF quality (not used)*/
+	int16_t output; 		/**< Output value to send to motor. Positive values for forward and negative values for backward
+	                             +/- 65535 for full power and 0 for motor stop */
+	int16_t setpoint;		/**< Set point value for motor control*/
+	uint16_t encoder;		/**< Number of encoder pulse acquired between last control loop iteration*/
+	uint16_t encoderEdge;	/**< Delta T between two encoders pulse (the fastest the motor goes, the lowest the value is.
+	                             65536 means motor is stopped */
+	uint8_t slowMotor;		/**< Flag for indicating that motor has stopped */
 } MOTORS_MotorState;
 
-/** Structure storing counters used for watchdog and system inactivity.
- * Used notably to check if watchdog reset was missed or power down system because of inactivity */
+/** Structure for storing differential control state.
+ * Used during top differentiel control loop, to ensure trjactory is strait */
 typedef struct {
-	uint8_t type;			/**< Xbee RF quality (not used)*/
-	int16_t output;		/**< Xbee RF quality (not used)*/
-	int16_t set_point;		/**< Xbee RF quality (not used)*/
-	int32_t distance;		/**< Xbee RF quality (not used)*/
-	int32_t turns;			/**< Xbee RF quality (not used)*/
+	uint8_t type;			/**< not used */
+	int16_t output;			/**< not used */
+	int16_t setpoint;		/**< not used */
+	int32_t distance;		/**< Distance to move on */
+	int32_t turns;			/**< Number of turns to apply */
 } MOTORS_DifferentialState;
 
 MOTORS_MotorState MOTORS_LeftMotorState, MOTORS_RightMotorState = { 0 };
 MOTORS_DifferentialState MOTORS_DiffState = { 0 };
 
+/**
+ * Proportionnal constant for motor control loop
+ */
 #define MOTOR_Kp 		300
 
 /***** Tasks part *****/
@@ -159,7 +165,7 @@ void EndMeasure(void) {
  * @brief  Function for initializing motors driver
  *
  * @param  None
- * @retval None
+ * @return None
  */
 void MOTORS_Init(void) {
 	/* Désactive les alimentations des moteurs */
@@ -194,10 +200,15 @@ void MOTORS_Init(void) {
 }
 
 /**
- * @brief  Function for initializing motors driver
+ * @brief  Request a movment in strait line
  *
- * @param  None
- * @retval None
+ * @remark This function wrap a message sending to motors mailbox.
+ *         In case of multiple call, only last one will be applied,
+ *         with potentially some spurious movement when processing previous messages
+ *
+ * @param[in] distance Distance to move on, in mm.
+ *            Positive values for forward movements and negative values for backward movements
+ * @return None
  */
 void MOTORS_Move(int32_t distance) {
 	static int32_t dist;
@@ -213,15 +224,20 @@ void MOTORS_Move(int32_t distance) {
 }
 
 /**
- * @brief  Function for initializing motors driver
+ * @brief  Request a movement in rotation
  *
- * @param  None
- * @retval None
+ * @remark This function wrap a message sending to motors mailbox.
+ *         In case of multiple call, only last one will be applied,
+ *         with potentially some spurious movement when processing previous messages
+ *
+ * @param[in] rotations Angle of rotation to do in degree.
+ *            Positive values for clockwise rotations and negative values for counterclockwise rotations
+ * @return None
  */
-void MOTORS_Turn(int32_t tours) {
+void MOTORS_Turn(int32_t rotations) {
 	static int32_t turns;
 
-	turns = tours;
+	turns = rotations;
 
 	if (turns) {
 		MOTORS_PowerOn();
@@ -232,10 +248,14 @@ void MOTORS_Turn(int32_t tours) {
 }
 
 /**
- * @brief  Function for initializing motors driver
+ * @brief  Request for stopping any movement
  *
- * @param  None
- * @retval None
+ * @remark This function wrap a message sending to motors mailbox.
+ *         In case of multiple call, only last one will be applied,
+ *         with potentially some spurious movement when processing previous messages
+ *
+ * @param None
+ * @return None
  */
 void MOTORS_Stop(void) {
 	MOTORS_PowerOff();
@@ -243,10 +263,12 @@ void MOTORS_Stop(void) {
 			APPLICATION_Mailbox, (void*) NULL);
 }
 
-/*
- * @brief Tache de supervision des moteurs
- * 		  Gestion de la boite aux lettres moteurs, et supervision generale
- * @param params non utilisé
+/**
+ * @brief Handler task for motor control
+ *        Manage mailbox et overall management
+ *
+ * @param[in] params Initial task parameters
+ * @return None
  */
 void MOTORS_HandlerTask(void *params) {
 	MESSAGE_Typedef msg;
@@ -262,11 +284,11 @@ void MOTORS_HandlerTask(void *params) {
 			MOTORS_DiffState.turns = 0;
 
 			if (distance > 0) {
-				MOTORS_LeftMotorState.set_point = 50;
-				MOTORS_RightMotorState.set_point = 50;
+				MOTORS_LeftMotorState.setpoint = 50;
+				MOTORS_RightMotorState.setpoint = 50;
 			} else {
-				MOTORS_LeftMotorState.set_point = -50;
-				MOTORS_RightMotorState.set_point = -50;
+				MOTORS_LeftMotorState.setpoint = -50;
+				MOTORS_RightMotorState.setpoint = -50;
 			}
 
 			vTaskResume(xHandleMotorsControl);
@@ -278,11 +300,11 @@ void MOTORS_HandlerTask(void *params) {
 			MOTORS_DiffState.turns = tours;
 
 			if (tours > 0) {
-				MOTORS_LeftMotorState.set_point = -50;
-				MOTORS_RightMotorState.set_point = 50;
+				MOTORS_LeftMotorState.setpoint = -50;
+				MOTORS_RightMotorState.setpoint = 50;
 			} else {
-				MOTORS_LeftMotorState.set_point = 50;
-				MOTORS_RightMotorState.set_point = -50;
+				MOTORS_LeftMotorState.setpoint = 50;
+				MOTORS_RightMotorState.setpoint = -50;
 			}
 
 			vTaskResume(xHandleMotorsControl);
@@ -292,8 +314,8 @@ void MOTORS_HandlerTask(void *params) {
 			MOTORS_DiffState.distance = 0;
 			MOTORS_DiffState.turns = 0;
 
-			MOTORS_LeftMotorState.set_point = 0;
-			MOTORS_RightMotorState.set_point = 0;
+			MOTORS_LeftMotorState.setpoint = 0;
+			MOTORS_RightMotorState.setpoint = 0;
 			if ((MOTORS_EncoderCorrection(MOTORS_LeftMotorState) == 0)
 					&& (MOTORS_EncoderCorrection(MOTORS_RightMotorState) == 0)) {
 				// Les moteurs sont déjà arrêtés
@@ -311,10 +333,15 @@ void MOTORS_HandlerTask(void *params) {
 	}
 }
 
-/*
- * @brief Tache d'asservissement, périodique (10ms)
+/**
+ * @brief Control loop task
+ * 		Periodic task (3ms) for motor control loop
  *
- * @param params non utilisé
+ * @remark This task is started by \ref MOTORS_HandlerTask when receiving a movement message
+ *         but task kill by itself when movement has finished
+ *
+ * @param[in] params Initial task parameters
+ * @return None
  */
 void MOTORS_ControlTask(void *params) {
 	TickType_t xLastWakeTime;
@@ -343,11 +370,11 @@ void MOTORS_ControlTask(void *params) {
 		 * erreur est entre -32768 et 32767 selon la difference à apporter à la commande
 		 */
 
-		leftError = MOTORS_LeftMotorState.set_point - leftEncoder;
-		rightError = MOTORS_RightMotorState.set_point - rightEncoder;
+		leftError = MOTORS_LeftMotorState.setpoint - leftEncoder;
+		rightError = MOTORS_RightMotorState.setpoint - rightEncoder;
 
-		if (((MOTORS_RightMotorState.set_point == 0)
-				&& (MOTORS_LeftMotorState.set_point == 0))
+		if (((MOTORS_RightMotorState.setpoint == 0)
+				&& (MOTORS_LeftMotorState.setpoint == 0))
 				&& ((rightError == 0) && (leftError == 0))) {
 
 			MOTORS_PowerOff();
@@ -356,14 +383,14 @@ void MOTORS_ControlTask(void *params) {
 			vTaskSuspend(xHandleMotorsControl);
 		}
 
-		if (MOTORS_LeftMotorState.set_point == 0)
+		if (MOTORS_LeftMotorState.setpoint == 0)
 			MOTORS_LeftMotorState.output = 0;
 		else {
 			if (leftError != 0) {
 				//locCmdG = (int32_t)MOTEURS_EtatMoteurGauche.commande + ((int32_t)MOTEUR_Kp*(int32_t)erreurG)/100;
 				locCmdG = ((int32_t) MOTOR_Kp * (int32_t) leftError) / 100;
 
-				if (MOTORS_LeftMotorState.set_point >= 0) {
+				if (MOTORS_LeftMotorState.setpoint >= 0) {
 					if (locCmdG < 0)
 						MOTORS_LeftMotorState.output = 0;
 					else if (locCmdG > SHRT_MAX)
@@ -381,14 +408,14 @@ void MOTORS_ControlTask(void *params) {
 			}
 		}
 
-		if (MOTORS_RightMotorState.set_point == 0)
+		if (MOTORS_RightMotorState.setpoint == 0)
 			MOTORS_RightMotorState.output = 0;
 		else {
 			if (rightError != 0) {
 				//locCmdD = (int32_t)MOTEURS_EtatMoteurDroit.commande + ((int32_t)MOTEUR_Kp*(int32_t)erreurD)/100;
 				locCmdD = ((int32_t) MOTOR_Kp * (int32_t) rightError) / 100;
 
-				if (MOTORS_RightMotorState.set_point >= 0) {
+				if (MOTORS_RightMotorState.setpoint >= 0) {
 					if (locCmdD < 0)
 						MOTORS_RightMotorState.output = 0;
 					else if (locCmdD > SHRT_MAX)
@@ -416,13 +443,29 @@ void MOTORS_ControlTask(void *params) {
 	}
 }
 
+/** Structure for encoder convertion
+ * The structure store a equivalent state point, associating a raw encoder value to a linearized corrected value
+ */
 typedef struct {
-	uint16_t encoder;
-	uint16_t correction;
+	uint16_t encoder;		/**< Raw encoder value*/
+	uint16_t correction;	/**< Corrected, linearized value, equivalent to raw encoder*/
 } MOTORS_CorrectionPoint;
 
+/**
+ * Number max of correction points for encoder
+ */
 #define MOTORS_MAX_CORRECTION_POINTS 16
 
+/**
+ * Array of correction points, associating a raw encoder value and a linearized correction.
+ *
+ * Basically, encoders return delay between two signal edges. If motor is stopped, encoder return 65535 (\ref MOTORS_MAX_ENCODER).
+ * Then value tends towards zero as the motor accelerates. Resulting encoder output is not linear and
+ * reversed with respect to the setpoint.
+ *
+ * This table give several corresponding points, associating a raw, non linear and inverted encoder value to a linerized,
+ * corrected value that can be compared to setpoint
+ */
 const MOTORS_CorrectionPoint MOTORS_CorrectionPoints[MOTORS_MAX_CORRECTION_POINTS] =
 { { MOTORS_MAX_ENCODER - 1, 1 }, { 42000, 100 }, { 22000, 2500 }, {
 		18000, 5000 }, { 16500, 7500 }, { 15500, 10000 },
@@ -432,11 +475,13 @@ const MOTORS_CorrectionPoint MOTORS_CorrectionPoints[MOTORS_MAX_CORRECTION_POINT
 								SHRT_MAX } // 32767
 };
 
-/*
- * @brief Fonction de conversion des valeurs brutes de l'encodeur en valeur linearisées
+/**
+ * @brief Function for converting raw encoder values to linearized values
  *
- * @param encodeur valeur brute de l'encodeur
- * @return valeur linéarisée (entre -32768 et 32767)
+ * @remark This function use \ref MOTORS_CorrectionPoints for its conversion
+ *
+ * @param[in] state Current state of a motor, including raw encoder value
+ * @return Linearized value, from -32768 (full backward) to 32767 (full forward)
  */
 int16_t MOTORS_EncoderCorrection(MOTORS_MotorState state) {
 	int16_t correction = 0;
@@ -474,17 +519,17 @@ int16_t MOTORS_EncoderCorrection(MOTORS_MotorState state) {
 	/*
 	 * Selon le sens de rotation du moteur (commande > 0 ou < 0), on corrige le signe du capteur
 	 */
-	if (state.set_point < 0)
+	if (state.setpoint < 0)
 		correction = -correction;
 
 	return correction;
 }
 
 /**
- * @brief  Function for initializing motors driver
+ * @brief  Power off motor, disabling power regulator
  *
  * @param  None
- * @retval None
+ * @return None
  */
 void MOTORS_PowerOff(void) {
 	LL_TIM_DisableCounter(TIM3);
@@ -508,10 +553,10 @@ void MOTORS_PowerOff(void) {
 }
 
 /**
- * @brief  Function for initializing motors driver
+ * @brief  Power on motor, enabling power regulator
  *
  * @param  None
- * @retval None
+ * @return None
  */
 void MOTORS_PowerOn(void) {
 	LL_TIM_EnableCounter(TIM3);
@@ -535,16 +580,21 @@ void MOTORS_PowerOn(void) {
 }
 
 /**
- * @brief Active les encodeurs et le régulateur des moteur si nécessaire et
- *        règle la commande du moteur (entre -MOTEURS_MAX_COMMANDE et +MOTEURS_MAX_COMMANDE)
- *        On applique une "regle de 3"
- *        pour SHRT_MAX -> MOTEURS_MAX_COMMANDE
- *        pour 0 -> 0
- *        pour une commande C dans l'interval [0 .. 32767], la commande est
- *        	commande = (C * MOTEURS_MAX_COMMANDE)/32767
+ * @brief Set command to motor
  *
- * @param[in] cmdGauche blablabla
- * @param[in] cmdDroit blablabla
+ * This function drive motors directly. Values applied are output from regulation law.
+ * If power supply is not enabled (for motor and encoders), the function will enable it.
+ *
+ * Values provided are in the range [-SHRT_MAX; SHRT_MAX] and motor command must be
+ * in the range [-MOTORS_MAX_COMMAND et +MOTORS_MAX_COMMAND].
+ * The corresponding rule is used :
+ * 	- for SHRT_MAX -> MOTORS_MAX_COMMAND
+ *  - for 0 -> 0
+ *  - for a request R in range [0 .. SHRT_MAX], command = (R * MOTEURS_MAX_COMMANDE)/SHRT_MAX
+ *
+ * @param[in] leftMotor Request command for left motor
+ * @param[in] rightMotor Request command for right motor
+ * @return None
  */
 void MOTORS_Set(int16_t leftMotor, int16_t rightMotor) {
 	int32_t leftValue, rightValue;
@@ -576,10 +626,15 @@ void MOTORS_Set(int16_t leftMotor, int16_t rightMotor) {
 	}
 }
 
-/*
- * @brief Recupere les mesures brutes des encodeurs et les enregistre dans la structure moteur correspondante
+/**
+ * @brief Get raw values from encoders and store them in corresponding motor state
  *
- * @param[in] htim pointeur sur la reference du timer qui generé l'interruption
+ * @remark Encoder values are in fact timer counting time between to encoder pulses
+ *
+ * Also, manage distance and turn counter used for overall motor control
+ *
+ * @param[in] htim Pointer to timer reference that trigger interrupt
+ * @return None
  */
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM21) { /* moteur gauche */
@@ -604,8 +659,8 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 				else MOTORS_DiffState.distance++;
 
 				if (MOTORS_DiffState.distance==0) {
-					MOTORS_LeftMotorState.set_point=0;
-					MOTORS_RightMotorState.set_point=0;
+					MOTORS_LeftMotorState.setpoint=0;
+					MOTORS_RightMotorState.setpoint=0;
 				}
 			}
 
@@ -614,8 +669,8 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 				else MOTORS_DiffState.turns++;
 
 				if (MOTORS_DiffState.turns==0) {
-					MOTORS_LeftMotorState.set_point=0;
-					MOTORS_RightMotorState.set_point=0;
+					MOTORS_LeftMotorState.setpoint=0;
+					MOTORS_RightMotorState.setpoint=0;
 				}
 			}
 
@@ -640,13 +695,15 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 	}
 }
 
-/*
- * @brief Gestionnaire d'interruption "overflow"
- * 		  Lorsque deux interruptions "overflow" sont arrivées sans que l'interruption capture n'arrive,
- * 		  cela signifie que le moteur est à l'arret.
- * 		  On met la valeur de l'encodeur à MOTEURS_MAX_ENCODEUR
+/**
+ * @brief "overflow" interrupt handler
  *
- * @param[in] htim pointeur sur la reference du timer qui generé l'interruption
+ * 		  When two "overflow" interrupts occure without an encoder interrupt happened,
+ * 		  this means motor is halted.
+ * 		  So, we set encoder value to MOTEURS_MAX_ENCODEUR
+ *
+ * @param[in] htim Pointer to timer reference that trigger interrupt
+ * @return None
  */
 void MOTORS_TimerEncodeurUpdate(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM21) { /* moteur gauche */

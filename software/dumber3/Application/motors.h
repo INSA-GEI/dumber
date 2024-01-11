@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file motors.c
+ * @file motors.h
  * @brief motors driver header
  * @author S. DI MERCURIO (dimercur@insa-toulouse.fr)
  * @date December 2023

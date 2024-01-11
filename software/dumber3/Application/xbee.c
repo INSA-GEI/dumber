@@ -1,10 +1,32 @@
-/*
- * xbee.c
+/**
+ ******************************************************************************
+ * @file xbee.c
+ * @brief xbee driver body
+ * @author S. DI MERCURIO (dimercur@insa-toulouse.fr)
+ * @date December 2023
  *
- *  Created on: Sep 12, 2022
- *      Author: dimercur
- */
+ ******************************************************************************
+ * @copyright Copyright 2023 INSA-GEI, Toulouse, France. All rights reserved.
+ * @copyright This project is released under the Lesser GNU Public License (LGPL-3.0-only).
+ *
+ * @copyright This file is part of "Dumber" project
+ *
+ * @copyright This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * @copyright This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
 
+ * @copyright You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+ ******************************************************************************
+ */
 
 #include "xbee.h"
 #include "semphr.h"
@@ -12,17 +34,43 @@
 #include <string.h>
 #include "stm32l0xx_ll_usart.h"
 
+/** @addtogroup Application_Software
+  * @{
+  */
+
+/** @addtogroup XBEE
+ * Xbee driver handles RF communications with supervisor
+ * @{
+ */
+
+/** @addtogroup XBEE_Private Private
+ * @{
+ */
+
 extern UART_HandleTypeDef hlpuart1;
 extern DMA_HandleTypeDef hdma_lpuart1_tx;
 extern DMA_HandleTypeDef hdma_lpuart1_rx;
 
-/***** API2 escaped char *****/
+/**
+ * @anchor xbee_api2_escape_chars
+ * @name XBEE API2 Escape characters
+ * List of escaped characters, not used yet (transparent mode)
+ */
+///@{
 #define XBEE_API_ESCAPE_CHAR	0x7D
 #define XBEE_API_START_OF_FRAME 0x7E
 #define XBEE_API_XON			0x11
 #define XBEE_API_XOFF			0x13
+///@}
 
+/**
+ * @anchor xbee_ending_char
+ * @name XBEE command ending char
+ * Ending character used in protocol between supervisor and robot
+ */
+///@{
 #define XBEE_ENDING_CHAR		'\r'
+///@}
 
 /***** TX part *****/
 void XBEE_TxHandlerThread(void* params);
@@ -66,6 +114,12 @@ SemaphoreHandle_t xHandleSemaphoreTX = NULL;
 StaticSemaphore_t xSemaphoreTX;
 //StaticSemaphore_t xSemaphoreTX_ACK;
 
+/**
+ * @brief  Function for initializing xbee system
+ *
+ * @param  None
+ * @return None
+ */
 void XBEE_Init(void) {
 	xHandleSemaphoreTX = xSemaphoreCreateBinaryStatic( &xSemaphoreTX );
 	//xHandleSemaphoreTX_ACK = xSemaphoreCreateBinaryStatic( &xSemaphoreTX_ACK );
@@ -103,7 +157,13 @@ void XBEE_Init(void) {
 /**** Support functions ****/
 
 /**** TX Part *****/
-
+/**
+ * @brief Handler task for message to transmit (send to supervisor)
+ *        Manage XBEE mailbox and send messages
+ *
+ * @param[in] params Initial task parameters
+ * @return None
+ */
 void XBEE_TxHandlerThread(void* params) {
 	MESSAGE_Typedef msg;
 
@@ -119,12 +179,19 @@ void XBEE_TxHandlerThread(void* params) {
 }
 
 /**
- * Send data. Create a transmission frame, add escape char to data and send it over UART
+ * @brief Send data.
  *
- * \param data raw data to send
- * \return status of decoding: XBEE_OK if decoding is successful,
- *                             XBEE_TX_ERROR in case of sending error,
- *                             XBEE_TX_TIMEOUT in case semaphore takes too long
+ * Create a transmission frame, add escape char to data and send it over UART
+ *
+ * @remark Function is non blocking unless another transmission is still in progress
+ *
+ * @todo Change return status type from "int" to "\ref XBEE_Status"
+ *
+ * @param[in] data reference to raw data to send
+ * @return status of decoding (see \ref XBEE_Status)
+ * - XBEE_OK if decoding is successful,
+ * - XBEE_TX_ERROR in case of sending error,
+ * - XBEE_TX_TIMEOUT in case semaphore takes too long
  */
 int XBEE_SendData(char* data) {
 	BaseType_t state;
@@ -157,6 +224,15 @@ int XBEE_SendData(char* data) {
 	return status;
 }
 
+/**
+ * @brief Transmission interrupt handler
+ *
+ * 		  This ISR is called when USART transmit register is empty, ready for a new char to be sent
+ * 		  A Semaphore is used to signal end of transmission to \ref XBEE_SendData function
+ *
+ * @param None
+ * @return None
+ */
 void XBEE_TX_IRQHandler(void) {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
@@ -181,9 +257,12 @@ void XBEE_TX_IRQHandler(void) {
 /***** Rx Part *****/
 
 /**
- * Reception thread. Wait for incoming frame, process it and send message to application
+ * @brief Handler task for message reception (received from supervisor)
  *
- * \param params not used
+ * Wait for incoming message and send them to application mailbox
+ *
+ * @param[in] params Initial task parameters
+ * @return None
  */
 void XBEE_RxThread(void* params) {
 	char* incomingData;
@@ -213,6 +292,15 @@ void XBEE_RxThread(void* params) {
 	}
 }
 
+/**
+ * @brief Reception interrupt handler
+ *
+ * 		  This ISR is called when USART reception register is full, containing a newly received char
+ * 		  A Semaphore is used to signal end of frame reception to \ref XBEE_RxThread function
+ *
+ * @param None
+ * @return None
+ */
 void XBEE_RX_IRQHandler(void) {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 	uint8_t data;
@@ -243,9 +331,10 @@ void XBEE_RX_IRQHandler(void) {
 }
 
 /**
- * DMA IRQ handler for reception. Receive a complete frame send send event to sending frame in case of acknowledge frame or to receive task otherwise
+ * @brief IRQ handler for UART.
  *
- * \param UartHandle not used
+ * Dispatch IRQ event to transmission ISR (\ref XBEE_TX_IRQHandler), reception ISR (\ref XBEE_RX_IRQHandler) or clear errors flags
+ *
  */
 void LPUART1_IRQHandler(void) {
 
@@ -268,3 +357,16 @@ void LPUART1_IRQHandler(void) {
 		}
 	}
 }
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+

@@ -996,13 +996,14 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = /home/dimercur/Documents/Travail/Depots-Git/dumber/software/dumber3/Drivers \
-                         /home/dimercur/Documents/Travail/Depots-Git/dumber/software/dumber3/Tests \
-                         /home/dimercur/Documents/Travail/Depots-Git/dumber/software/dumber3/TestsPlans \
-                         /home/dimercur/Documents/Travail/Depots-Git/dumber/software/dumber3/Debug \
-                         /home/dimercur/Documents/Travail/Depots-Git/dumber/software/dumber3/Release \
-                         /home/dimercur/Documents/Travail/Depots-Git/dumber/software/dumber3/workspace \
-                         Middlewares
+EXCLUDE                = Drivers \
+                         Tests \
+                         TestsPlans \
+                         Debug \
+                         Release \
+                         workspace \
+                         Middlewares \
+                         Application/Xbee-API
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
