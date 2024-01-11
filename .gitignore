@@ -54,6 +54,19 @@ GUI
 *.7z
 *.rar
 
+# Images
+*.jpg
+*.png
+*.gif
+*.bmp
+*.jpeg
+*.tiff
+*.svg
+
+# Documents
+*.pdf
+*.chm
+
 # Trucs de MDK
 *.uvgui*
 *.bak
@@ -69,5 +82,8 @@ GUI
 /software/dumber3/Debug/
 /software/dumber3/Tests/
 /software/dumber3/workspace/
+
+/hardware/meca/Dumber_2022/Pieces/
+/hardware/meca/Dumber_2022/OldVersions/
 
 /doc/Doc\ robot/doxygen/

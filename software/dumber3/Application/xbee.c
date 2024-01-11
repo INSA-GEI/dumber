@@ -40,6 +40,11 @@
 
 /** @addtogroup XBEE
  * Xbee driver handles RF communications with supervisor
+ *
+ * @warning Very important information: robot is use a 2.5V power supply so
+ *          XBEE MODULES FROM S1 GENERATION DON'T WORK
+ *          Use, at least, module from S2 generation
+ *
  * @{
  */
 
@@ -110,9 +115,7 @@ uint16_t rxIndex;
 
 /****** TX part ******/
 SemaphoreHandle_t xHandleSemaphoreTX = NULL;
-//SemaphoreHandle_t xHandleSemaphoreTX_ACK = NULL;
 StaticSemaphore_t xSemaphoreTX;
-//StaticSemaphore_t xSemaphoreTX_ACK;
 
 /**
  * @brief  Function for initializing xbee system
@@ -122,9 +125,7 @@ StaticSemaphore_t xSemaphoreTX;
  */
 void XBEE_Init(void) {
 	xHandleSemaphoreTX = xSemaphoreCreateBinaryStatic( &xSemaphoreTX );
-	//xHandleSemaphoreTX_ACK = xSemaphoreCreateBinaryStatic( &xSemaphoreTX_ACK );
 	xSemaphoreGive(xHandleSemaphoreTX);
-	//xSemaphoreTake(xHandleSemaphoreTX_ACK);
 
 	xHandleSemaphoreRX = xSemaphoreCreateBinaryStatic( &xSemaphoreRx );
 
@@ -204,10 +205,6 @@ int XBEE_SendData(char* data) {
 	                           if answer is false, it means timeout appends
 	                           We should probably reset something in "else" branch */
 
-		//	while (LL_USART_IsEnabledIT_TXE(hlpuart1.Instance)) {
-		//		vTaskDelay(pdMS_TO_TICKS(1));
-		//	}
-
 		strncpy((char*)txBuffer,data,XBEE_TX_BUFFER_MAX_LENGTH-1);
 		txBuffer[XBEE_TX_BUFFER_MAX_LENGTH-1]=0;
 		txRemainingData = strlen((char*)txBuffer);
@@ -261,6 +258,12 @@ void XBEE_TX_IRQHandler(void) {
  *
  * Wait for incoming message and send them to application mailbox
  *
+ * @warning Very important information: robot is use a 2.5V power supply so
+ *          XBEE MODULES FROM S1 GENERATION DON'T WORK
+ *          Use, at least, module from S2 generation
+ *          Behavior of using S1 generation is that you receive only two '0' chars than nothing. In
+ *          case of this behavior, check module generation
+ *
  * @param[in] params Initial task parameters
  * @return None
  */
@@ -298,6 +301,12 @@ void XBEE_RxThread(void* params) {
  * 		  This ISR is called when USART reception register is full, containing a newly received char
  * 		  A Semaphore is used to signal end of frame reception to \ref XBEE_RxThread function
  *
+ * @warning Very important information: robot is use a 2.5V power supply so
+ *          XBEE MODULES FROM S1 GENERATION DON'T WORK
+ *          Use, at least, module from S2 generation
+ *          Behavior of using S1 generation is that you receive only two '0' chars than nothing. In
+ *          case of this behavior, check module generation
+ *
  * @param None
  * @return None
  */
@@ -306,6 +315,11 @@ void XBEE_RX_IRQHandler(void) {
 	uint8_t data;
 
 	data = LL_USART_ReceiveData8(hlpuart1.Instance); // lecture de l'octet reçu
+	/*
+	 * In case you only receive '0' chars (than nothing), check you XBEE module generation
+	 * XBEE MODULES FROM S1 GENERATION DON'T WORK because robot is 2.5V and modules need more
+	 * Use, at least, module from S2 generation
+	 */
 
 	if (data != XBEE_ENDING_CHAR) { // end of command not received
 		rxBuffer[rxIndex] = data;

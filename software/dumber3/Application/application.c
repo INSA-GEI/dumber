@@ -35,6 +35,10 @@
  * Robot is basically controlled by a supervisor program and move depending on commands send by supervisor.
  * Movements are controlled by a camera.
  *
+ * @warning Very important information: robot is use a 2.5V power supply so
+ *          XBEE MODULES FROM S1 GENERATION DON'T WORK
+ *          Use, at least, module from S2 generation
+ *
  * @copyright Copyright 2023 INSA-GEI, Toulouse, France. All rights reserved.
  * @copyright This project is released under the Lesser GNU Public License (LGPL-3.0-only).
  *
@@ -216,6 +220,7 @@ void APPLICATION_Thread(void* params) {
 					case CMD_TEST:
 					case CMD_DEBUG:
 						cmdSendAnswer(ANS_OK);
+						break;
 					case CMD_POWER_OFF:
 						systemInfos.powerOffRequired=1;
 						cmdSendAnswer(ANS_OK);
@@ -405,10 +410,15 @@ void APPLICATION_StateMachine(void) {
 				if (((systemInfos.cmd == CMD_MOVE) && (systemInfos.distance !=0)) ||
 						((systemInfos.cmd == CMD_TURN) && (systemInfos.turns !=0))) {
 					systemInfos.endOfMouvement = 0;
-					cmdSendAnswer(ANS_OK);
 					APPLICATION_TransitionToNewState(stateInMouvement);
-				} // if TURN and MOVE are sent without parameter, do nothing: we are still in run state
-			} else if (systemInfos.state == stateInMouvement) { // in this state, MOVE and TURN cmds are accepted only if they come with no parameter
+				} else {
+					if (((systemInfos.cmd == CMD_MOVE) && (systemInfos.distance ==0)) || // This case (M=0 or T=0) correspond to STOP
+						((systemInfos.cmd == CMD_TURN) && (systemInfos.turns ==0))) {
+						systemInfos.endOfMouvement = 1;
+					}
+				}
+				cmdSendAnswer(ANS_OK);
+			} else if (systemInfos.state == stateInMouvement) { // in this state, MOVE and TURN cmds are accepted only if they come with no parameter (0)
 				if (((systemInfos.cmd == CMD_MOVE) && (systemInfos.distance ==0)) ||
 						((systemInfos.cmd == CMD_TURN) && (systemInfos.turns ==0))) {
 					systemInfos.endOfMouvement = 1;
