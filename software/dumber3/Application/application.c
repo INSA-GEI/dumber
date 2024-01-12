@@ -70,6 +70,7 @@
 #include "battery.h"
 
 #include "panic.h"
+#include "rtos_support.h"
 
 /** @addtogroup Application_Software
   * @{
@@ -127,7 +128,7 @@ StaticTask_t xTaskApplicationMain;
 /* Buffer that the task being created will use as its stack.  Note this is
     an array of StackType_t variables.  The size of StackType_t is dependent on
     the RTOS port. */
-StackType_t xStackApplicationMain[ STACK_SIZE ];
+StackType_t xStackApplicationMain[ STACK_SIZE*2 ];
 TaskHandle_t xHandleApplicationMain = NULL;
 
 StaticTimer_t xBufferTimerTimeout;
@@ -148,6 +149,9 @@ APPLICATION_Timeout systemTimeout = {0};
   * @return None
   */
 void APPLICATION_Init(void) {
+	/* Init du support RTOS (notamment le timer de run time) */
+	//RTOS_SUPPORT_Init(); /* <- used for freertos run time usage */
+
 	/* Init des messages box */
 	MESSAGE_Init();
 
@@ -163,7 +167,7 @@ void APPLICATION_Init(void) {
 	xHandleApplicationMain = xTaskCreateStatic(
 			APPLICATION_Thread,       /* Function that implements the task. */
 			"APPLICATION Thread",          /* Text name for the task. */
-			STACK_SIZE,      /* Number of indexes in the xStack array. */
+			STACK_SIZE*2,      /* Number of indexes in the xStack array. */
 			NULL,    /* Parameter passed into the task. */
 			PriorityApplicationHandler,/* Priority at which the task is created. */
 			xStackApplicationMain,          /* Array to use as the task's stack. */

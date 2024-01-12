@@ -62,6 +62,12 @@ void  MESSAGE_Init(void) {
 	MOTORS_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
 	APPLICATION_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
 	XBEE_Mailbox = xQueueCreate(QUEUE_SIZE, sizeof(MESSAGE_Typedef));
+
+	/* Add queues to registry in order to view them in stm32cube ide */
+	vQueueAddToRegistry(LEDS_Mailbox,"LEDS Mailbox");
+	vQueueAddToRegistry(MOTORS_Mailbox,"MOTORS Mailbox");
+	vQueueAddToRegistry(APPLICATION_Mailbox,"APPLICATION Mailbox");
+	vQueueAddToRegistry(XBEE_Mailbox,"XBEE Mailbox");
 }
 
 /**

@@ -31,6 +31,9 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
+extern void RTOS_SUPPORT_Init(void);
+extern uint32_t RTOS_SUPPORT_GetTimer(void);
+
 /*-----------------------------------------------------------
  * Application specific definitions.
  *
@@ -62,9 +65,9 @@
 #define configUSE_TICK_HOOK                      0
 #define configCPU_CLOCK_HZ                       ( SystemCoreClock )
 #define configTICK_RATE_HZ                       ((TickType_t)1000)
-#define configMAX_PRIORITIES                     ( 56 )
+#define configMAX_PRIORITIES                     ( 12 )
 #define configMINIMAL_STACK_SIZE                 ((uint16_t)128)
-#define configTOTAL_HEAP_SIZE                    ((size_t)1024)
+#define configTOTAL_HEAP_SIZE                    ((size_t)10240)
 #define configMAX_TASK_NAME_LEN                  ( 25 )
 #define configUSE_TRACE_FACILITY                 1
 #define configUSE_16_BIT_TICKS                   0
@@ -82,13 +85,13 @@
 
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES                    0
-#define configMAX_CO_ROUTINE_PRIORITIES          ( 2 )
+#define configMAX_CO_ROUTINE_PRIORITIES          ( 1 )
 
 /* Software timer definitions. */
 #define configUSE_TIMERS                         1
-#define configTIMER_TASK_PRIORITY                ( 3 )
+#define configTIMER_TASK_PRIORITY                ( 1 )
 #define configTIMER_QUEUE_LENGTH                 10
-#define configTIMER_TASK_STACK_DEPTH             256
+#define configTIMER_TASK_STACK_DEPTH             64
 
 /* The following flag must be enabled only when using newlib */
 #define configUSE_NEWLIB_REENTRANT          1
@@ -151,5 +154,9 @@ placed into the low power state respectively. */
 #define configPRE_SLEEP_PROCESSING                        PreSleepProcessing
 #define configPOST_SLEEP_PROCESSING                       PostSleepProcessing
 #endif /* configUSE_TICKLESS_IDLE == 1 */
+
+#define configGENERATE_RUN_TIME_STATS       		1
+#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() RTOS_SUPPORT_Init()
+#define portGET_RUN_TIME_COUNTER_VALUE() RTOS_SUPPORT_GetTimer()
 
 #endif /* FREERTOS_CONFIG_H */

@@ -44,11 +44,11 @@
  *  Version in plain text and as a numeric value
  */
 ///@{
-#define SYSTEM_VERSION_STR			"2.2"
-#define SYSTEM_VERSION				0x0202	// Upper byte: major version, lower byte: minor version
+#define SYSTEM_VERSION_STR			"2.3"
+#define SYSTEM_VERSION				0x0203	// Upper byte: major version, lower byte: minor version
 ///@}
 
-#define STACK_SIZE 					0x100
+#define STACK_SIZE 					64
 
 /** @name Tasks priority constants
  *  Priority is based on configMAX_PRIORITIES which represent highest task priority.

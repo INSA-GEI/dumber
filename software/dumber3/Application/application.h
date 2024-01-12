@@ -41,6 +41,8 @@
 #include "xbee.h"
 #include "commands.h"
 
+#include "rtos_support.h"
+
 #include "main.h"
 
 /** @addtogroup Application_Software

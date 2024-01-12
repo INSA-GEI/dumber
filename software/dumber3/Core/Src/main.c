@@ -55,12 +55,12 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim21;
 
 /* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
+//osThreadId_t defaultTaskHandle;
+//const osThreadAttr_t defaultTask_attributes = {
+//  .name = "defaultTask",
+//  .stack_size = 128 * 4,
+//  .priority = (osPriority_t) osPriorityNormal,
+//};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -146,7 +146,7 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+//defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
@@ -644,9 +644,9 @@ TickType_t msToTicks(TickType_t ms) {
  * @retval None
  */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
-{
-  /* USER CODE BEGIN 5 */
+//void StartDefaultTask(void *argument)
+//{
+//  /* USER CODE BEGIN 5 */
 //	LEDS_State state = leds_off;
 //
 //	/* Infinite loop */
@@ -660,8 +660,13 @@ void StartDefaultTask(void *argument)
 //
 //		vTaskDelay(pdMS_TO_TICKS(5000));
 //	}
-  /* USER CODE END 5 */
-}
+//  /* USER CODE END 5 */
+//
+//	while (1)
+//	{
+//		//vTaskDelay(pdMS_TO_TICKS(50));
+//	}
+//}
 
 /**
   * @brief  Period elapsed callback in non blocking mode

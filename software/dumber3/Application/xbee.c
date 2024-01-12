@@ -103,7 +103,6 @@ StackType_t xStackXbeeRX[ STACK_SIZE ];
 TaskHandle_t xHandleXbeeRX = NULL;
 
 uint8_t rxBuffer[XBEE_RX_BUFFER_MAX_LENGTH]={0};
-//uint8_t rxWaitForACK =0;
 uint8_t rxPhase;
 uint16_t rxCmdLength;
 uint16_t rxDataToReceive;
@@ -128,6 +127,10 @@ void XBEE_Init(void) {
 	xSemaphoreGive(xHandleSemaphoreTX);
 
 	xHandleSemaphoreRX = xSemaphoreCreateBinaryStatic( &xSemaphoreRx );
+
+	/* Add semaphores to registry in order to view them in stm32cube ide */
+	vQueueAddToRegistry(xHandleSemaphoreTX,"XBEE TX sem");
+	vQueueAddToRegistry(xHandleSemaphoreRX,"XBEE RX sem");
 
 	/* Create the task without using any dynamic memory allocation. */
 	xHandleXbeeRX = xTaskCreateStatic(
