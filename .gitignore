@@ -54,6 +54,19 @@ GUI
 *.7z
 *.rar
 
+# Images
+*.jpg
+*.png
+*.gif
+*.bmp
+*.jpeg
+*.tiff
+*.svg
+
+# Documents
+*.pdf
+*.chm
+
 # Trucs de MDK
 *.uvgui*
 *.bak
@@ -65,3 +78,12 @@ GUI
 /software/raspberry/superviseur-robot/superviseur/dist/
 /software/raspberry/testeur/testeur/build/
 /software/raspberry/testeur/testeur/dist/
+/software/dumber3/Release/
+/software/dumber3/Debug/
+/software/dumber3/Tests/
+/software/dumber3/workspace/
+
+/hardware/meca/Dumber_2022/Pieces/
+/hardware/meca/Dumber_2022/OldVersions/
+
+/doc/Doc\ robot/doxygen/
