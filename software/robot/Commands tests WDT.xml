@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<data>
+  <loop>true</loop>
+  <repeat_times>1</repeat_times>
+  <repeat_period>1100</repeat_period>
+  <packets_list>
+    <packet name="Reset">
+      <payload>72720D</payload>
+    </packet>
+    <packet name="Start With Watchdog">
+      <payload>57570D</payload>
+    </packet>
+    <packet name="Reset Watchdog">
+      <payload>77770D</payload>
+    </packet>
+    <packet name="Reset Watchdog - Copy">
+      <payload>77770D</payload>
+    </packet>
+    <packet name="Reset Watchdog - Copy - Copy">
+      <payload>77770D</payload>
+    </packet>
+    <packet name="Reset Watchdog - Copy - Copy - Copy">
+      <payload>77770D</payload>
+    </packet>
+    <packet name="Reset Watchdog - Copy - Copy - Copy - Copy">
+      <payload>77770D</payload>
+    </packet>
+    <packet name="Reset Watchdog - Copy - Copy - Copy - Copy - Copy">
+      <payload>77770D</payload>
+    </packet>
+    <packet name="Reset Watchdog - Copy - Copy - Copy - Copy - Copy - Copy">
+      <payload>77770D</payload>
+    </packet>
+    <packet name="Reset Watchdog - Copy - Copy - Copy - Copy - Copy - Copy - Copy">
+      <payload>77770D</payload>
+    </packet>
+    <packet name="Reset Watchdog - Copy - Copy - Copy - Copy - Copy - Copy - Copy - Copy">
+      <payload>77770D</payload>
+    </packet>
+    <packet name="Reset Watchdog - Copy - Copy - Copy - Copy - Copy - Copy - Copy - Copy - Copy">
+      <payload>77770D</payload>
+    </packet>
+  </packets_list>
+</data>

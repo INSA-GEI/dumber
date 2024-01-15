@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<data>
+  <loop>true</loop>
+  <repeat_times>1</repeat_times>
+  <repeat_period>500</repeat_period>
+  <packets_list>
+    <packet name="Ping">
+      <payload>70700D</payload>
+    </packet>
+    <packet name="Reset">
+      <payload>72720D</payload>
+    </packet>
+    <packet name="Start With Watchdog">
+      <payload>57570D</payload>
+    </packet>
+    <packet name="Reset Watchdog">
+      <payload>77770D</payload>
+    </packet>
+    <packet name="Start Without Watchdog">
+      <payload>75750D</payload>
+    </packet>
+    <packet name="STOP">
+      <payload>4D3D30400D</payload>
+    </packet>
+    <packet name="Move forward">
+      <payload>4D3D3230720D</payload>
+    </packet>
+    <packet name="Move backward">
+      <payload>4D3D2D32305F0D</payload>
+    </packet>
+    <packet name="Turn Left">
+      <payload>543D3930600D</payload>
+    </packet>
+    <packet name="Turn Right">
+      <payload>543D2D39304D0D</payload>
+    </packet>
+    <packet name="Turn Right - Extreme">
+      <payload>543D2D3332373637730D</payload>
+    </packet>
+    <packet name="Move backward - Extreme">
+      <payload>4D3D2D33323736376A0D</payload>
+    </packet>
+    <packet name="Get battery">
+      <payload>76760D</payload>
+    </packet>
+    <packet name="Get version">
+      <payload>56560D</payload>
+    </packet>
+    <packet name="Get busy state">
+      <payload>62620D</payload>
+    </packet>
+    <packet name="Test">
+      <payload>74740D</payload>
+    </packet>
+    <packet name="Debug">
+      <payload>61610D</payload>
+    </packet>
+    <packet name="Poweroff">
+      <payload>7A7A0D</payload>
+    </packet>
+    <packet name="Unknown command">
+      <payload>4A4A0D</payload>
+    </packet>
+    <packet name="Invalid Checksum">
+      <payload>543D2D39303D0D</payload>
+    </packet>
+  </packets_list>
+</data>
