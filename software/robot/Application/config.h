@@ -44,8 +44,8 @@
  *  Version in plain text and as a numeric value
  */
 ///@{
-#define SYSTEM_VERSION_STR			"3.0"
-#define SYSTEM_VERSION				0x0300	// Upper byte: major version, lower byte: minor version
+#define SYSTEM_VERSION_STR			"3.1"
+#define SYSTEM_VERSION				0x0301	// Upper byte: major version, lower byte: minor version
 ///@}
 
 #define STACK_SIZE 					96
@@ -59,9 +59,9 @@
 #define PriorityXbeeRX 					(configMAX_PRIORITIES -2)
 #define PriorityXbeeTX 					(configMAX_PRIORITIES -3)
 #define PriorityLedsHandler				(configMAX_PRIORITIES -4)
-#define PriorityMotorsAsservissement	(configMAX_PRIORITIES -5)
-#define PriorityApplicationHandler		(configMAX_PRIORITIES -6)
-#define PriorityBatteryHandler			(configMAX_PRIORITIES -7)
+#define PriorityApplicationHandler		(configMAX_PRIORITIES -5)
+#define PriorityBatteryHandler			(configMAX_PRIORITIES -6)
+#define PriorityMotorsAsservissement	(configMAX_PRIORITIES -7)
 #define PriorityMotorsHandler			(configMAX_PRIORITIES -8)
 #define PrioritySequenceurTimeout		(configMAX_PRIORITIES -9)
 

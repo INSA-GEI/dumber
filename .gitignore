@@ -43,6 +43,18 @@ GUI
 # Image rpi
 *.img
 
+# Fichiers Images
+*.jpg
+*.jpeg
+*.png
+*.tiff
+*.bmp
+*.gif
+
+# Fichiers documentation
+*.pdf
+*.chm
+
 # Archives
 *.zip
 *.tar
@@ -65,3 +77,9 @@ GUI
 /software/raspberry/superviseur-robot/superviseur/dist/
 /software/raspberry/testeur/testeur/build/
 /software/raspberry/testeur/testeur/dist/
+/doc/Doc\ robot/doxygen/
+/software/robot/Debug/
+/software/robot/Release/
+/hardware/meca/Dumber_2022/Pieces/OldVersions/
+/hardware/meca/Dumber_2022/OldVersions/
+/hardware/meca/Dumber_2022/Pieces/export/

@@ -35,9 +35,12 @@
 #include "stm32l0xx_ll_usart.h"
 
 #include "panic.h"
+
+#include <stdio.h>
+
 /** @addtogroup Application_Software
-  * @{
-  */
+ * @{
+ */
 
 /** @addtogroup XBEE
  * Xbee driver handles RF communications with supervisor
@@ -327,14 +330,17 @@ void XBEE_RX_IRQHandler(void) {
 	 */
 
 	if (data != XBEE_ENDING_CHAR) { // end of command not received
-		rxBuffer[rxIndex] = data;
-		rxIndex++;
-		if (rxIndex>=XBEE_RX_BUFFER_MAX_LENGTH)
-			rxIndex=0;
+		if (data != 0x00) {
+			rxBuffer[rxIndex] = data;
 
-		rxCmdLength++;
-		if (rxCmdLength>=XBEE_RX_BUFFER_MAX_LENGTH)
-			rxCmdLength=0;
+			rxIndex++;
+			if (rxIndex>=XBEE_RX_BUFFER_MAX_LENGTH)
+				rxIndex=0;
+
+			rxCmdLength++;
+			if (rxCmdLength>=XBEE_RX_BUFFER_MAX_LENGTH)
+				rxCmdLength=0;
+		}
 	} else { // end of command  received
 		rxBuffer[rxIndex] = 0; // ending zero for C string
 		xSemaphoreGiveFromISR( xHandleSemaphoreRX, &xHigherPriorityTaskWoken ); /* send event to receive task to process received task */
@@ -378,14 +384,14 @@ void LPUART1_IRQHandler(void) {
 }
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 

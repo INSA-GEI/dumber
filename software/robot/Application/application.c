@@ -29,7 +29,7 @@
  */
 
 /**
- * @mainpage  Dumber 3
+ * @mainpage  Dumber 3 version 3.1
  *
  * Dumber is a robot used at INSA-GEI, Toulouse, France for realtime computer science teaching.
  * Robot is basically controlled by a supervisor program and move depending on commands send by supervisor.
@@ -149,9 +149,6 @@ APPLICATION_Timeout systemTimeout = {0};
  * @return None
  */
 void APPLICATION_Init(void) {
-	/* Init du support RTOS (notamment le timer de run time) */
-	//RTOS_SUPPORT_Init(); /* <- used for freertos run time usage */
-
 	/* Init des messages box */
 	MESSAGE_Init();
 
@@ -213,7 +210,6 @@ void APPLICATION_Thread(void* params) {
 
 				if (decodedCmd != NULL) {
 					if (decodedCmd->type==CMD_NONE) {
-						//XBEE_SendData("hello");
 						cmdSendAnswer(ANS_UNKNOWN);
 					} else if (decodedCmd->type == CMD_INVALID_CHECKSUM) {
 						cmdSendAnswer(ANS_ERR);
@@ -266,7 +262,8 @@ void APPLICATION_Thread(void* params) {
 					 * Don't know real source of pb
 					 */
 
-					if (decodedCmd->type!=CMD_NONE) free(receivedCMD);
+					//if (decodedCmd->type!=CMD_NONE) free(receivedCMD);
+					free(receivedCMD);
 
 					/* End workaround  */
 
