@@ -116,8 +116,8 @@ class Network(QtCore.QThread):
     
     # Private method for connecting to server     
     def __connect(self) -> None:
-        #self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         try:
             self.sock.connect((GlobVar.address, GlobVar.port))
@@ -126,7 +126,7 @@ class Network(QtCore.QThread):
     
         # In UDP, no way to know if server is running (connect is always successfull). 
         # So, send a single line feed to ping the server
-        self.sock.send(str.encode("\n"))
+        #self.sock.send(str.encode("\n"))
         self.waitForAnswer=False    
         
     # Private method for receiving data from server. 
@@ -146,6 +146,11 @@ class Network(QtCore.QThread):
                 chunks.append(chunk)
                 bytes_recd = bytes_recd + len(chunk)
                 last_char=chunk[-1]
+            
+            #print ("")
+            #print ("Data: ")
+            #print (b''.join(chunks))
+            #print ("")
             
             self.__receiveHandler(b''.join(chunks).decode("utf-8"))
             chunks = []
@@ -315,6 +320,46 @@ class Network(QtCore.QThread):
     def robotGetBattery(self) -> None:
         ans = self.__sendCommand(self.ROBOT_GET_BATTERY,False)
         
+    # Send OpenCamera command to server
+    def cameraOpen(self) -> int:
+        ans = self.__sendCommand(self.CAMERA_OPEN, True)
+        decodedAns = self.__decodeAnswer(ans)
+        self.answerEvent.emit(decodedAns)
+        return decodedAns
+    
+    # Send CloseCamera command to server
+    def cameraClose(self) -> int:
+        ans = self.__sendCommand(self.CAMERA_CLOSE, True)
+        decodedAns = self.__decodeAnswer(ans)
+        self.answerEvent.emit(decodedAns)
+        return decodedAns
+    
+    # Send GetPosition command to server
+    def cameraGetPosition(self) -> int:
+        ans = self.__sendCommand(self.CAMERA_POSITION_COMPUTE, True)
+        decodedAns = self.__decodeAnswer(ans)
+        self.answerEvent.emit(decodedAns)
+        return decodedAns
+    
+    # Send StopPosition command to server
+    def cameraStopPosition(self) -> int:
+        ans = self.__sendCommand(self.CAMERA_POSITION_STOP, True)
+        decodedAns = self.__decodeAnswer(ans)
+        self.answerEvent.emit(decodedAns)
+        return decodedAns
+    
+    # Send AskArena command to server
+    def cameraAskArena(self) -> None:
+        ans = self.__sendCommand(self.CAMERA_ARENA_ASK,False)
+
+    # Send ConfirmArena command to server
+    def cameraConfirmArena(self) -> None:
+        ans = self.__sendCommand(self.CAMERA_ARENA_CONFIRM,False)
+        
+    # Send InfirmArena command to server
+    def cameraInfirmArena(self) -> None:
+        ans = self.__sendCommand(self.CAMERA_ARENA_INFIRM,False)
+    
 # Function for decoding battery level
 def batterylevelToStr(batlvl: int) -> str:
     switcher = {

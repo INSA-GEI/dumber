@@ -1,27 +1,34 @@
 #!/usr/bin/env python3
 
 from email.message import Message
+from email.policy import Policy
 import os
 
 import time
 import sys
+from tkinter import Image
 
-from PyQt5 import (QtCore, QtWidgets)
+from PyQt5 import (QtCore, QtWidgets, QtGui)
 
 from main_window import Ui_MainWindow
 from log_dialog import Ui_Dialog
 from network import *
 from globvar import GlobVar
 
+import base64
+
 class Window(QtWidgets.QMainWindow, Ui_MainWindow):
     _msg_dialog= None
     _batteryTimer=None
+    _FPSTimer=None
+    
+    fps=0
     
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
         
-        self.DisableUIWidgets("Network")
+        #self.DisableUIWidgets("Network")
         
         self.lineEdit_address.setText(GlobVar.address)
         self.lineEdit_port.setText(str(GlobVar.port))
@@ -29,6 +36,8 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
         self._msg_dialog=QtWidgets.QDialog()
         self._msg_dialog.ui= Ui_Dialog()
         self._msg_dialog.ui.setupUi(self._msg_dialog)
+        
+        self.fps=0
         
         self.networkThread = Network()
         
@@ -40,6 +49,10 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
         # Create battery timer
         self._batteryTimer = QtCore.QTimer()
         self._batteryTimer.timeout.connect(self.OnBatteryTimeout)
+        
+        # Create fps timer
+        self._FPSTimer = QtCore.QTimer()
+        self._FPSTimer.timeout.connect(self.OnFPSTimeout)
         
     def connectSignalSlots(self):
         # Buttons
@@ -78,7 +91,7 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
     def EnableUIWidgets(self, area):
         if area == "Network":
             self.groupBox_activation.setDisabled(False)
-            self.graphicsView_Image.setDisabled(False)
+            self.label_Image.setDisabled(False)
             self.pushButton_confirmArena.setDisabled(False)
             self.checkBox_enableCamera.setDisabled(False)
             self.checkBox_enableFPS.setDisabled(False)
@@ -90,7 +103,7 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
     def DisableUIWidgets(self, area):
         if area == "Network":
             self.groupBox_activation.setDisabled(True)
-            self.graphicsView_Image.setDisabled(True)
+            self.label_Image.setDisabled(True)
             self.pushButton_confirmArena.setDisabled(True)
             self.checkBox_enableCamera.setDisabled(True)
             self.checkBox_enableFPS.setDisabled(True)
@@ -131,16 +144,19 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
                 msg.warning(self,'Invalid answer', 'Server answer was not acknowledged. Maybe robot is still running', msg.Ok)
             
             self.pushButton_start.setText("Start r&obot")
-            self.DisableUIWidgets("Robot")
+            #self.DisableUIWidgets("Robot")
             
     @QtCore.pyqtSlot() 
     def OnButtonPress_ConfirmArena(self):
+        self.networkThread.cameraAskArena()
         msg= QtWidgets.QMessageBox
         ret = msg.question(self, '', 'Arena boundaries are correctly detected ?',msg.Yes| msg.No)
         
         if ret == msg.Yes:
+            self.networkThread.cameraConfirmArena()
             print ("Answer is YES")
         else:
+            self.networkThread.cameraInfirmArena()
             print ("Answer is NO")
         
     @QtCore.pyqtSlot() 
@@ -165,21 +181,26 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
       
     @QtCore.pyqtSlot(int)  
     def OnCheckBoxChanged_EnableCamera(self, state):
-        msg= QtWidgets.QMessageBox
-        msg.information(self, 'Feature not ready', 'Feature not yet available', msg.Ok)
-        self.checkBox_enableCamera.setChecked(False)
+        if self.checkBox_enableCamera.isChecked():
+            self.networkThread.cameraOpen()
+        else:
+            self.networkThread.cameraClose()
         
     @QtCore.pyqtSlot(int) 
     def OnCheckBoxChanged_EnableFPS(self, state):
-        msg= QtWidgets.QMessageBox
-        msg.information(self, 'Feature not ready', 'Feature not yet available', msg.Ok)
-        self.checkBox_enableFPS.setChecked(False)
+        if state !=0:
+            self._FPSTimer.start(1000)
+            self.checkBox_enableFPS.setText("FPS (0)")
+        else:
+            self._FPSTimer.stop()
+            self.checkBox_enableFPS.setText("Enable FPS")
         
     @QtCore.pyqtSlot(int) 
     def OnCheckBoxChanged_EnablePosition(self, state):
-        msg= QtWidgets.QMessageBox
-        msg.information(self, 'Feature not ready', 'Feature not yet available', msg.Ok)
-        self.checkBox_enablePosition.setChecked(False)
+        if self.checkBox_enablePosition.isChecked():
+            self.networkThread.cameraGetPosition()
+        else:
+            self.networkThread.cameraStopPosition()
         
     @QtCore.pyqtSlot(int) 
     def OnCheckBoxChanged_GetBattery(self, state):
@@ -229,13 +250,82 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.checkBox_getBattery.setText ("Get battery (2 = full)")
             else:
                 self.checkBox_getBattery.setText ("Get battery (invalid value)")
-
+        elif Network.CAMERA_IMAGE in s:
+            #print ("Image received")
+            #print ("Date received: " + s)
+            
+            self.fps=self.fps+1
+            str_split = s.split(':')
+            try:
+                image_jpg= base64.b64decode(str_split[1])
+                img = QtGui.QImage.fromData(image_jpg, "jpg")
+                im_pixmap = QtGui.QPixmap(QtGui.QPixmap.fromImage(img))
+            
+                #print ("Image size: " + str(im_pixmap.width()) + "x" + str(im_pixmap.height()))
+            
+                self.label_Image.setPixmap(im_pixmap)
+                self.label_Image.setScaledContents(True)
+                self.label_Image.setSizePolicy(QtWidgets.QSizePolicy.Fixed,QtWidgets.QSizePolicy.Fixed)
+            except:
+                pass
+                #print ("Invalid image received")
+        elif Network.CAMERA_POSITION in s:          
+            #CPOS:-1;0.000000;0.000000;0.000000;0.000000;0.000000
+            str_split = s.split(':')
+            values_split = str_split[1].split(';')
+            
+            try: 
+                robot_ID = int(values_split[0]) # Id of robot
+            except:
+                robot_ID = -1
+            
+            try:
+                robot_Angle = float(values_split[1]) # angle of robot
+            except:
+                robot_Angle = 0.0
+                
+            try:
+                robot_Coord_X = float(values_split[2]) # X coord of robot
+            except:
+                robot_Coord_X = 0.0
+                
+            try:
+                robot_Coord_Y = float(values_split[3]) # Y coord of robot
+            except:
+                robot_Coord_Y = 0.0
+                
+            try:
+                robot_Cap_X = float(values_split[4]) # X cap of robot
+            except:
+                robot_Cap_X = 0.0
+                
+            try:
+                robot_Cap_Y = float(values_split[5]) # Y cap of robot
+            except:
+                robot_Cap_Y = 0.0
+            
+            if robot_ID == -1:
+                self.label_RobotID.setText("No robot (-1)")
+            else:
+                self.label_RobotID.setText(values_split[0])
+            
+            self.label_RobotAngle.setText("%.2f°" % (robot_Angle))
+            self.label_RobotPos.setText("(%.2f, %.2f)" % (robot_Coord_X, robot_Coord_Y))
+            self.label_RobotDirection.setText("(%.2f, %.2f)" % (robot_Cap_X, robot_Cap_Y))
+              
     # Callback for battery timeout
     @QtCore.pyqtSlot() 
     def OnBatteryTimeout(self) -> None:
         # Send a request for battery level. Answer will be done in OnReceptionEvent callback
         self.networkThread.robotGetBattery()
     
+    # Callback for FPS timeout
+    @QtCore.pyqtSlot() 
+    def OnFPSTimeout(self) -> None:
+        # Display current FPS
+        self.checkBox_enableFPS.setText("FPS (" + str(self.fps)+")")
+        self.fps=0
+        
     # Callback for connection/deconnection event from network manager
     @QtCore.pyqtSlot(int) 
     def OnConnectionEvent(self, event) -> None:       
@@ -251,7 +341,7 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
             
             self.label_connectionStatus.setText("Not connected")
             self.pushButton_start.setText("Start r&obot")
-            self.DisableUIWidgets("Network")
+            #self.DisableUIWidgets("Network")
             
     # Callback for answer event from network manager
     @QtCore.pyqtSlot(int) 
