@@ -191,8 +191,6 @@ void APPLICATION_Init(void) {
  * @param[in] params startup parameters for task (not used)
  * @return None
  */
-int XBEE_SendData(char* data);
-
 void APPLICATION_Thread(void* params) {
 	MESSAGE_Typedef msg;
 	char* receivedCMD;
@@ -255,18 +253,7 @@ void APPLICATION_Thread(void* params) {
 						}
 					}
 
-					/**
-					 * @todo: Workaround
-					 *
-					 * Pb when receiveing first command, messed up between Xbee and memory allocation when not in debug
-					 * Don't know real source of pb
-					 */
-
-					//if (decodedCmd->type!=CMD_NONE) free(receivedCMD);
 					free(receivedCMD);
-
-					/* End workaround  */
-
 					free(decodedCmd);
 				}
 			}
@@ -299,7 +286,6 @@ void APPLICATION_Thread(void* params) {
 		case MSG_ID_MOTORS_END_OF_MOUVMENT:
 			systemInfos.endOfMouvement= 1;
 			break;
-
 		case MSG_ID_BUTTON_PRESSED:
 			systemInfos.powerOffRequired =1;
 			break;
