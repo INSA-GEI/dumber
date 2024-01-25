@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+"""Monitor-python : a monitor tool for robot control, using QT5
+Usage: monitor-python.py
+
+"""
+
 from email.message import Message
 from email.policy import Policy
 import os
@@ -17,6 +22,20 @@ from globvar import GlobVar
 
 import base64
 
+__author__ = "Sebastien DI MERCURIO"
+__copyright__ = "Copyright 2024, INSA Toulouse"
+__credits__ = ["Sebastien DI MERCURIO"]
+__license__ = "GPL"
+__version__ = "1.1"
+__maintainer__ = "Sebastien DI MERCURIO"
+__email__ = "dimercur@insa-toulouse.fr"
+__status__ = "Production"
+
+"""
+The main application class.
+
+Instantiate it for opening main window 
+"""
 class Window(QtWidgets.QMainWindow, Ui_MainWindow):
     _msg_dialog= None
     _batteryTimer=None
@@ -27,8 +46,6 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
-        
-        #self.DisableUIWidgets("Network")
         
         self.lineEdit_address.setText(GlobVar.address)
         self.lineEdit_port.setText(str(GlobVar.port))
@@ -53,6 +70,9 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
         # Create fps timer
         self._FPSTimer = QtCore.QTimer()
         self._FPSTimer.timeout.connect(self.OnFPSTimeout)
+
+        self.DisableUIWidgets("Network")
+        self.DisableUIWidgets("Robot")
         
     def connectSignalSlots(self):
         # Buttons
@@ -90,27 +110,43 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
     
     def EnableUIWidgets(self, area):
         if area == "Network":
-            self.groupBox_activation.setDisabled(False)
+            # Widget for robot connection
+            self.checkBox_watchdog.setDisabled(False)
+            self.pushButton_start.setDisabled(False)
+
+            # Widget for camera and position
             self.label_Image.setDisabled(False)
             self.pushButton_confirmArena.setDisabled(False)
             self.checkBox_enableCamera.setDisabled(False)
             self.checkBox_enableFPS.setDisabled(False)
             self.checkBox_enablePosition.setDisabled(False)
-        else:
+            self.label_RobotID.setDisabled(False)
+            self.label_RobotAngle.setDisabled(False)
+            self.label_RobotPos.setDisabled(False)
+            self.label_RobotDirection.setDisabled(False)
+        else: # area Robot
+            # Widget for robot mouvement and battery
             self.groupBox_mouvments.setDisabled(False)
             self.groupBox_AnswerandBattery.setDisabled(False)  
                       
     def DisableUIWidgets(self, area):
         if area == "Network":
-            self.groupBox_activation.setDisabled(True)
+            # Widget for robot connection
+            self.checkBox_watchdog.setDisabled(True)
+            self.pushButton_start.setDisabled(True)
+
+            # Widget for camera and position
             self.label_Image.setDisabled(True)
             self.pushButton_confirmArena.setDisabled(True)
             self.checkBox_enableCamera.setDisabled(True)
             self.checkBox_enableFPS.setDisabled(True)
             self.checkBox_enablePosition.setDisabled(True)
-            self.groupBox_AnswerandBattery.setDisabled(True)
-            self.groupBox_mouvments.setDisabled(True)
-        else:
+            self.label_RobotID.setDisabled(True)
+            self.label_RobotAngle.setDisabled(True)
+            self.label_RobotPos.setDisabled(True)
+            self.label_RobotDirection.setDisabled(True)
+        else: # area Robot
+            # Widget for robot mouvement and battery
             self.groupBox_mouvments.setDisabled(True)
             self.groupBox_AnswerandBattery.setDisabled(True)
             
@@ -127,6 +163,8 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
     def OnButtonPress_Start (self):
         if self.pushButton_start.text() == "Start r&obot":
             if self.networkThread.robotOpenCom() == NetworkAnswers.ACK:
+                self.networkThread.robotReset()
+
                 # com opened successfully, start robot
                 if self.checkBox_watchdog.isChecked():
                     # start with watchdog
@@ -144,7 +182,7 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
                 msg.warning(self,'Invalid answer', 'Server answer was not acknowledged. Maybe robot is still running', msg.Ok)
             
             self.pushButton_start.setText("Start r&obot")
-            #self.DisableUIWidgets("Robot")
+            self.DisableUIWidgets("Robot")
             
     @QtCore.pyqtSlot() 
     def OnButtonPress_ConfirmArena(self):
@@ -341,7 +379,8 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
             
             self.label_connectionStatus.setText("Not connected")
             self.pushButton_start.setText("Start r&obot")
-            #self.DisableUIWidgets("Network")
+            self.DisableUIWidgets("Network")
+            self.DisableUIWidgets("Robot")
             
     # Callback for answer event from network manager
     @QtCore.pyqtSlot(int) 

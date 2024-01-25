@@ -270,7 +270,7 @@ class Ui_MainWindow(object):
         self.label_connectionStatus.setText(_translate("MainWindow", "Not connected"))
         self.checkBox_watchdog.setText(_translate("MainWindow", "Start with &watchdog"))
         self.pushButton_start.setText(_translate("MainWindow", "Start r&obot"))
-        self.groupBox_mouvments.setTitle(_translate("MainWindow", "Mouvments"))
+        self.groupBox_mouvments.setTitle(_translate("MainWindow", "Movements"))
         self.pushButton_up.setText(_translate("MainWindow", "&Up"))
         self.pushButton_left.setText(_translate("MainWindow", "&Left"))
         self.pushButton_stop.setText(_translate("MainWindow", "&Stop"))
