@@ -198,12 +198,12 @@ CMD_Generic* cmdDecode(char* cmd, uint8_t length) {
 		case MoveCMD:
 			decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Move));
 			decodedCmd->type = CMD_MOVE;
-			//((CMD_Move*)decodedCmd)->distance = ((int16_t)cmd[1]<<8) + (int16_t)cmd[2];
 
 			/* verify that command start with "M=" */
 			if ((cmd[0]=='M')&&(cmd[1]=='=')) {
 				cmd = cmd+2; //cmd+2 for removing "M=" at start of the string
-				((CMD_Move*)decodedCmd)->distance=strtoul(cmd , &p, 10);
+				//((CMD_Move*)decodedCmd)->distance=strtoul(cmd , &p, 10);
+				((CMD_Move*)decodedCmd)->distance=(int16_t)strtol(cmd , &p, 10);
 				if (p==cmd)
 					decodedCmd->type = CMD_NONE; /* missing number value xxxxx in "M=xxxxx" */
 			} else
@@ -213,15 +213,12 @@ CMD_Generic* cmdDecode(char* cmd, uint8_t length) {
 		case TurnCMD:
 			decodedCmd = (CMD_Generic*)malloc(sizeof(CMD_Turn));
 			decodedCmd->type = CMD_TURN;
-			//((CMD_Turn*)decodedCmd)->turns = ((int16_t)cmd[1]<<8) + (int16_t)cmd[2];
-
-			//if (!sscanf(cmd,"T=%hd",&((CMD_Turn*)decodedCmd)->turns ))
-			//	decodedCmd->type = CMD_NONE;
 
 			/* verify that command start with "T=" */
 			if ((cmd[0]=='T')&&(cmd[1]=='=')) {
 				cmd = cmd+2; //cmd+2 for removing "T=" at start of the string
-				((CMD_Turn*)decodedCmd)->turns=strtoul(cmd , &p, 10);
+				//((CMD_Turn*)decodedCmd)->turns=strtoul(cmd , &p, 10);
+				((CMD_Turn*)decodedCmd)->turns=(int16_t)strtol(cmd , &p, 10);
 				if (p==cmd)
 					decodedCmd->type = CMD_NONE; /* missing number value xxxxx in "T=xxxxx" */
 			} else

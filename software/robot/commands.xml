@@ -65,5 +65,20 @@
     <packet name="Invalid Checksum">
       <payload>543D2D39303D0D</payload>
     </packet>
+    <packet name="Move backward - limite pos">
+      <payload>4D3D3332373637470D</payload>
+    </packet>
+    <packet name="Move backward - Limite Neg">
+      <payload>4D3D2D3332373638650D</payload>
+    </packet>
+    <packet name="Move backward - Over neg">
+      <payload>4D3D2D3332373639640D</payload>
+    </packet>
+    <packet name="Move backward - Over pos">
+      <payload>4D3D3332373638480D</payload>
+    </packet>
+    <packet name="Move backward - Overkill">
+      <payload>4D3D31323334353637400D</payload>
+    </packet>
   </packets_list>
 </data>

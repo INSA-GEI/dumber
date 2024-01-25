@@ -284,22 +284,22 @@ string ComRobot::MessageToString(Message *msg) {
         case MESSAGE_ROBOT_GO_FORWARD:
             s += LABEL_ROBOT_MOVE;
             s += LABEL_ROBOT_SEPARATOR_CHAR;
-            s.append(to_string(500000));
+            s.append(to_string(32767));
             break;
         case MESSAGE_ROBOT_GO_BACKWARD:
             s += LABEL_ROBOT_MOVE;
             s += LABEL_ROBOT_SEPARATOR_CHAR;
-            s.append(to_string(-500000));
+            s.append(to_string(-32768));
             break;
         case MESSAGE_ROBOT_GO_LEFT:
             s += LABEL_ROBOT_TURN;
             s += LABEL_ROBOT_SEPARATOR_CHAR;
-            s.append(to_string(-500000));
+            s.append(to_string(32767));
             break;
         case MESSAGE_ROBOT_GO_RIGHT:
             s += LABEL_ROBOT_TURN;
             s += LABEL_ROBOT_SEPARATOR_CHAR;
-            s.append(to_string(500000));
+            s.append(to_string(-32768));
             break;
         case MESSAGE_ROBOT_STOP:
             s += LABEL_ROBOT_MOVE;
