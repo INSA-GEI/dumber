@@ -44,8 +44,8 @@
  *  Version in plain text and as a numeric value
  */
 ///@{
-#define SYSTEM_VERSION_STR			"3.2"
-#define SYSTEM_VERSION				0x0302	// Upper byte: major version, lower byte: minor version
+#define SYSTEM_VERSION_STR			"3.3"
+#define SYSTEM_VERSION				0x0303	// Upper byte: major version, lower byte: minor version
 ///@}
 
 #define STACK_SIZE 					96
@@ -61,9 +61,9 @@
 #define PriorityLedsHandler				(configMAX_PRIORITIES -4)
 #define PriorityApplicationHandler		(configMAX_PRIORITIES -5)
 #define PriorityBatteryHandler			(configMAX_PRIORITIES -6)
-#define PriorityMotorsAsservissement	(configMAX_PRIORITIES -7)
-#define PriorityMotorsHandler			(configMAX_PRIORITIES -8)
-#define PrioritySequenceurTimeout		(configMAX_PRIORITIES -9)
+#define PriorityMotorsHandler			(configMAX_PRIORITIES -7)   // evoxx-bug-watchdog-avec-moteurs : changement de priorité
+#define PrioritySequenceurTimeout		(configMAX_PRIORITIES -8)	// evoxx-bug-watchdog-avec-moteurs : changement de priorité
+#define PriorityMotorsAsservissement	(configMAX_PRIORITIES -9)	// evoxx-bug-watchdog-avec-moteurs : changement de priorité
 
 #define PriorityTestsHandler			(configMAX_PRIORITIES -10)
 ///@}

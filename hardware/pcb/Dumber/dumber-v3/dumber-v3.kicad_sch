@@ -5,8 +5,9 @@
   (paper "A4")
 
   (title_block
+    (title "Dumber-3")
     (date "2022-06-08")
-    (rev "1.0")
+    (rev "2.2")
     (company "INSA - GEI")
   )
 

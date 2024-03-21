@@ -485,7 +485,12 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 		MOTORS_Stop();
 		break;
 	case stateInMouvement:
-		ledState = leds_run;
+		// evoxx-bug-watchdog-avec-moteurs : mauvaise gestion des leds dans le cas où le watchdog est actif
+		if (systemTimeout.watchdogEnabled)
+			ledState = leds_run_with_watchdog;
+		else
+			ledState = leds_run;
+
 		LEDS_Set(ledState);
 
 		if (systemInfos.cmd == CMD_MOVE) {
@@ -502,19 +507,24 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 	case stateWatchdogDisable:
 		ledState = leds_watchdog_expired;
 		LEDS_Set(ledState);
+		MOTORS_Stop();		// evoxx-bug-watchdog-avec-moteurs : oublie d'arreter les moteurs
 
 		systemTimeout.watchdogEnabled=0;
 		break;
 	case stateLowBatDisable:
 		ledState = leds_bat_critical_low;
 		LEDS_Set(ledState);
+		MOTORS_Stop();		// evoxx-bug-watchdog-avec-moteurs : oublie d'arreter les moteurs
 
 		systemTimeout.watchdogEnabled=0;
 
-		vTaskDelay(pdMS_TO_TICKS(4000)); // wait 4s
+		// evoxx-bug-watchdog-avec-moteurs : le systeme ne s'arrete pas quand la batterie est tres faible:
+		//                                   envoi du message en priorité, sinon la mailbox se remplie de message et celui-ci est perdu
 
 		/* send a message Button_Pressed to enable power off */
 		MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_BUTTON_PRESSED, APPLICATION_Mailbox, (void*)NULL);
+
+		vTaskDelay(pdMS_TO_TICKS(4000)); // wait 4s
 		break;
 	default:
 		break;
@@ -532,9 +542,6 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
  * @return None
  */
 void APPLICATION_PowerOff(void) {
-	/*
-	 * TODO: a decommenter quand le code sera debuggé
-	 */
 	HAL_GPIO_WritePin(SHUTDOWN_GPIO_Port, SHUTDOWN_Pin, GPIO_PIN_RESET);
 
 	while (1){
