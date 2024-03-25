@@ -44,8 +44,8 @@
  *  Version in plain text and as a numeric value
  */
 ///@{
-#define SYSTEM_VERSION_STR			"3.3"
-#define SYSTEM_VERSION				0x0303	// Upper byte: major version, lower byte: minor version
+#define SYSTEM_VERSION_STR			"3.4"
+#define SYSTEM_VERSION				0x0304	// Upper byte: major version, lower byte: minor version
 ///@}
 
 #define STACK_SIZE 					96

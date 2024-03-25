@@ -37,8 +37,8 @@
 #include <limits.h>
 
 /** @addtogroup Application_Software
-  * @{
-  */
+ * @{
+ */
 
 /** @addtogroup MOTORS
  * Motors driver is in charge of controlling motors and applying a regulation to ensure a linear trajectory
@@ -122,44 +122,67 @@ volatile uint32_t DEBUG_duration = 0;
 volatile uint32_t DEBUG_worstCase = 0;
 
 void Init_Systick(void) {
-//	TIM_ClockConfigTypeDef sClockSourceConfig = { 0 };
-//
-//	__HAL_RCC_TIM7_CLK_ENABLE();
-//
-//	htim7.Instance = TIM2;
-//	htim7.Init.Prescaler = 0;
-//	htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
-//	htim7.Init.Period = 65535;
-//	htim7.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-//	htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-//	if (HAL_TIM_Base_Init(&htim7) != HAL_OK) {
-//		Error_Handler();
-//	}
-//
-//	sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-//	if (HAL_TIM_ConfigClockSource(&htim7, &sClockSourceConfig) != HAL_OK) {
-//		Error_Handler();
-//	}
-//
-//	LL_TIM_EnableCounter(TIM7);
+	//	TIM_ClockConfigTypeDef sClockSourceConfig = { 0 };
+	//
+	//	__HAL_RCC_TIM7_CLK_ENABLE();
+	//
+	//	htim7.Instance = TIM2;
+	//	htim7.Init.Prescaler = 0;
+	//	htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
+	//	htim7.Init.Period = 65535;
+	//	htim7.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	//	htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	//	if (HAL_TIM_Base_Init(&htim7) != HAL_OK) {
+	//		Error_Handler();
+	//	}
+	//
+	//	sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+	//	if (HAL_TIM_ConfigClockSource(&htim7, &sClockSourceConfig) != HAL_OK) {
+	//		Error_Handler();
+	//	}
+	//
+	//	LL_TIM_EnableCounter(TIM7);
 }
 
 void StartMeasure(void) {
-//	DEBUG_startTime = LL_TIM_GetCounter(TIM7);
+	//	DEBUG_startTime = LL_TIM_GetCounter(TIM7);
 }
 
 void EndMeasure(void) {
-//	DEBUG_endTime = LL_TIM_GetCounter(TIM7);
-//
-//	if (DEBUG_startTime >= DEBUG_endTime)
-//		DEBUG_duration = 65533 - DEBUG_startTime + DEBUG_endTime;
-//	else
-//		DEBUG_duration = DEBUG_endTime - DEBUG_startTime;
-//
-//	if (DEBUG_duration > DEBUG_worstCase)
-//		DEBUG_worstCase = DEBUG_duration;
+	//	DEBUG_endTime = LL_TIM_GetCounter(TIM7);
+	//
+	//	if (DEBUG_startTime >= DEBUG_endTime)
+	//		DEBUG_duration = 65533 - DEBUG_startTime + DEBUG_endTime;
+	//	else
+	//		DEBUG_duration = DEBUG_endTime - DEBUG_startTime;
+	//
+	//	if (DEBUG_duration > DEBUG_worstCase)
+	//		DEBUG_worstCase = DEBUG_duration;
 }
 #endif /* TESTS */
+
+/* +++ evoxx-probleme-refresh-wdt-moteurs-on : probleme lorsque l'on sort de l'etat WatchdogDisabled */
+/**
+ * @brief  Function for restarting motors control task
+ *
+ * @param  None
+ * @return None
+ */
+void MOTORS_ResetControlTask(void) {
+	vTaskDelete(xHandleMotorsControl);
+
+	/* Create the task without using any dynamic memory allocation. */
+	xHandleMotorsControl = xTaskCreateStatic(
+			MOTORS_ControlTask, /* Function that implements the task. */
+			"MOTORS Control", /* Text name for the task. */
+			STACK_SIZE, /* Number of indexes in the xStack array. */
+			NULL, /* Parameter passed into the task. */
+			PriorityMotorsAsservissement,/* Priority at which the task is created. */
+			xStackMotorsControl, /* Array to use as the task's stack. */
+			&xTaskMotorsControl); /* Variable to hold the task's data structure. */
+	vTaskSuspend(xHandleMotorsControl); // On ne lance la tache d'asservissement que lorsque'une commande moteur arrive
+}
+/* --- evoxx-probleme-refresh-wdt-moteurs-on : probleme lorsque l'on sort de l'etat WatchdogDisabled */
 
 /**
  * @brief  Function for initializing motors driver
@@ -311,21 +334,36 @@ void MOTORS_HandlerTask(void *params) {
 			break;
 
 		case MSG_ID_MOTORS_STOP:
+			//			MOTORS_DiffState.distance = 0;
+			//			MOTORS_DiffState.turns = 0;
+			//
+			//			MOTORS_LeftMotorState.setpoint = 0;
+			//			MOTORS_RightMotorState.setpoint = 0;
+			//			if ((MOTORS_EncoderCorrection(MOTORS_LeftMotorState) == 0)
+			//					&& (MOTORS_EncoderCorrection(MOTORS_RightMotorState) == 0)) {
+			//				// Les moteurs sont déjà arrêtés
+			//				vTaskSuspend(xHandleMotorsControl);
+			//
+			//				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_MOTORS_END_OF_MOUVMENT,
+			//						MOTORS_Mailbox, (void*) NULL);
+			//			} else
+			//				// Les moteurs tournent encore
+			//				vTaskResume(xHandleMotorsControl);
+
 			MOTORS_DiffState.distance = 0;
 			MOTORS_DiffState.turns = 0;
 
 			MOTORS_LeftMotorState.setpoint = 0;
 			MOTORS_RightMotorState.setpoint = 0;
-			if ((MOTORS_EncoderCorrection(MOTORS_LeftMotorState) == 0)
-					&& (MOTORS_EncoderCorrection(MOTORS_RightMotorState) == 0)) {
-				// Les moteurs sont déjà arrêtés
-				vTaskSuspend(xHandleMotorsControl);
 
-				MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_MOTORS_END_OF_MOUVMENT,
-						MOTORS_Mailbox, (void*) NULL);
-			} else
-				// Les moteurs tournent encore
-				vTaskResume(xHandleMotorsControl);
+			/* +++ evoxx-probleme-refresh-wdt-moteurs-on : probleme lorsque l'on sort de l'etat WatchdogDisabled */
+			//  vTaskSuspend(xHandleMotorsControl);
+			MOTORS_ResetControlTask();
+			/* --- evoxx-probleme-refresh-wdt-moteurs-on : probleme lorsque l'on sort de l'etat WatchdogDisabled */
+
+			MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_MOTORS_END_OF_MOUVMENT,
+					MOTORS_Mailbox, (void*) NULL);
+
 			break;
 		default:
 			break;
@@ -379,7 +417,7 @@ void MOTORS_ControlTask(void *params) {
 
 			MOTORS_PowerOff();
 			MESSAGE_SendMailbox(APPLICATION_Mailbox, MSG_ID_MOTORS_END_OF_MOUVMENT,
-									MOTORS_Mailbox, (void*) NULL);
+					MOTORS_Mailbox, (void*) NULL);
 			vTaskSuspend(xHandleMotorsControl);
 		}
 
@@ -720,13 +758,13 @@ void MOTORS_TimerEncodeurUpdate(TIM_HandleTypeDef *htim) {
 }
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */

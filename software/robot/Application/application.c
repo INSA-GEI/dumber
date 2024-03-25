@@ -405,7 +405,31 @@ void APPLICATION_StateMachine(void) {
 			break;
 		case CMD_MOVE:
 		case CMD_TURN:
-			if (systemInfos.state == stateRun) { // only state where MOVE or TURN cmds are accepted
+			//			if (systemInfos.state == stateRun) { // only state where MOVE or TURN cmds are accepted
+			//				if (((systemInfos.cmd == CMD_MOVE) && (systemInfos.distance !=0)) ||
+			//						((systemInfos.cmd == CMD_TURN) && (systemInfos.turns !=0))) {
+			//					systemInfos.endOfMouvement = 0;
+			//					APPLICATION_TransitionToNewState(stateInMouvement);
+			//				} else {
+			//					if (((systemInfos.cmd == CMD_MOVE) && (systemInfos.distance ==0)) || // This case (M=0 or T=0) correspond to STOP
+			//							((systemInfos.cmd == CMD_TURN) && (systemInfos.turns ==0))) {
+			//						systemInfos.endOfMouvement = 1;
+			//					}
+			//				}
+			//				cmdSendAnswer(ANS_OK);
+			//			} else if (systemInfos.state == stateInMouvement) { // in this state, MOVE and TURN cmds are accepted only if they come with no parameter (0)
+			//				if (((systemInfos.cmd == CMD_MOVE) && (systemInfos.distance ==0)) ||
+			//						((systemInfos.cmd == CMD_TURN) && (systemInfos.turns ==0))) {
+			//					systemInfos.endOfMouvement = 1;
+			//					cmdSendAnswer(ANS_OK);
+			//				} else { // If MOVE and TURN cmds come with parameters, reject them
+			//					cmdSendAnswer(ANS_ERR);
+			//				}
+			//			} else
+			//				cmdSendAnswer(ANS_ERR);
+
+			/* +++ evoxx-probleme-refresh-wdt-moteurs-on : probleme lorsque l'on sort de l'etat WatchdogDisabled */
+			if ((systemInfos.state == stateRun) || (systemInfos.state == stateInMouvement)) { // only state where MOVE or TURN cmds are accepted
 				if (((systemInfos.cmd == CMD_MOVE) && (systemInfos.distance !=0)) ||
 						((systemInfos.cmd == CMD_TURN) && (systemInfos.turns !=0))) {
 					systemInfos.endOfMouvement = 0;
@@ -417,16 +441,9 @@ void APPLICATION_StateMachine(void) {
 					}
 				}
 				cmdSendAnswer(ANS_OK);
-			} else if (systemInfos.state == stateInMouvement) { // in this state, MOVE and TURN cmds are accepted only if they come with no parameter (0)
-				if (((systemInfos.cmd == CMD_MOVE) && (systemInfos.distance ==0)) ||
-						((systemInfos.cmd == CMD_TURN) && (systemInfos.turns ==0))) {
-					systemInfos.endOfMouvement = 1;
-					cmdSendAnswer(ANS_OK);
-				} else { // If MOVE and TURN cmds come with parameters, reject them
-					cmdSendAnswer(ANS_ERR);
-				}
 			} else
 				cmdSendAnswer(ANS_ERR);
+			/* --- evoxx-probleme-refresh-wdt-moteurs-on : probleme lorsque l'on sort de l'etat WatchdogDisabled */
 			break;
 		default: // commands no common for every states
 			break;
@@ -485,7 +502,7 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 		MOTORS_Stop();
 		break;
 	case stateInMouvement:
-		// evoxx-bug-watchdog-avec-moteurs : mauvaise gestion des leds dans le cas où le watchdog est actif
+		// +++ evoxx-bug-watchdog-avec-moteurs : mauvaise gestion des leds dans le cas où le watchdog est actif
 		if (systemTimeout.watchdogEnabled)
 			ledState = leds_run_with_watchdog;
 		else
@@ -507,18 +524,18 @@ void APPLICATION_TransitionToNewState(APPLICATION_State new_state) {
 	case stateWatchdogDisable:
 		ledState = leds_watchdog_expired;
 		LEDS_Set(ledState);
-		MOTORS_Stop();		// evoxx-bug-watchdog-avec-moteurs : oublie d'arreter les moteurs
+		MOTORS_Stop();		// +++ evoxx-bug-watchdog-avec-moteurs : oublie d'arreter les moteurs
 
 		systemTimeout.watchdogEnabled=0;
 		break;
 	case stateLowBatDisable:
 		ledState = leds_bat_critical_low;
 		LEDS_Set(ledState);
-		MOTORS_Stop();		// evoxx-bug-watchdog-avec-moteurs : oublie d'arreter les moteurs
+		MOTORS_Stop();		// +++ evoxx-bug-watchdog-avec-moteurs : oublie d'arreter les moteurs
 
 		systemTimeout.watchdogEnabled=0;
 
-		// evoxx-bug-watchdog-avec-moteurs : le systeme ne s'arrete pas quand la batterie est tres faible:
+		// +++ evoxx-bug-watchdog-avec-moteurs : le systeme ne s'arrete pas quand la batterie est tres faible:
 		//                                   envoi du message en priorité, sinon la mailbox se remplie de message et celui-ci est perdu
 
 		/* send a message Button_Pressed to enable power off */
