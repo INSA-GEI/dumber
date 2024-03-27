@@ -76,7 +76,7 @@
         </ccTool>
         <linkerTool>
           <linkerLibItems>
-            <linkerOptionItem>`pkg-config --libs opencv`</linkerOptionItem>
+            <linkerOptionItem>`pkg-config --libs opencv4`</linkerOptionItem>
           </linkerLibItems>
           <commandLine>-Wl,--no-as-needed -lalchemy -lcopperplate /usr/xenomai/lib/xenomai/bootstrap.o -Wl,--wrap=main -Wl,--dynamic-list=/usr/xenomai/lib/dynlist.ld -L/usr/xenomai/lib -lmercury -lpthread -lrt</commandLine>
         </linkerTool>
@@ -145,7 +145,7 @@
         </ccTool>
         <linkerTool>
           <linkerLibItems>
-            <linkerOptionItem>`pkg-config --libs opencv`</linkerOptionItem>
+            <linkerOptionItem>`pkg-config --libs opencv4`</linkerOptionItem>
             <linkerLibLibItem>raspicam_cv</linkerLibLibItem>
             <linkerLibLibItem>raspicam</linkerLibLibItem>
           </linkerLibItems>

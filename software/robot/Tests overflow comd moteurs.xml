@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<data>
+  <loop>true</loop>
+  <repeat_times>1</repeat_times>
+  <repeat_period>500</repeat_period>
+  <packets_list>
+    <packet name="Get version">
+      <payload>56560D</payload>
+    </packet>
+    <packet name="Reset">
+      <payload>72720D</payload>
+    </packet>
+    <packet name="Start Without Watchdog">
+      <payload>75750D</payload>
+    </packet>
+    <packet name="STOP">
+      <payload>4D3D30400D</payload>
+    </packet>
+    <packet name="Move forward">
+      <payload>4D3D3230720D</payload>
+    </packet>
+    <packet name="Move backward">
+      <payload>4D3D2D32305F0D</payload>
+    </packet>
+    <packet name="Turn Left">
+      <payload>543D3930600D</payload>
+    </packet>
+    <packet name="Turn Right">
+      <payload>543D2D39304D0D</payload>
+    </packet>
+    <packet name="Get busy state">
+      <payload>62620D</payload>
+    </packet>
+    <packet name="Move backward - limite pos">
+      <payload>4D3D3332373637470D</payload>
+    </packet>
+    <packet name="Move backward - Limite Neg">
+      <payload>4D3D2D3332373638650D</payload>
+    </packet>
+    <packet name="Move backward - Extreme">
+      <payload>4D3D2D33323736376A0D</payload>
+    </packet>
+    <packet name="Move backward - Over neg">
+      <payload>4D3D2D3332373639640D</payload>
+    </packet>
+    <packet name="Move backward - Over pos">
+      <payload>4D3D3332373638480D</payload>
+    </packet>
+    <packet name="Move backward - Overkill">
+      <payload>4D3D31323334353637400D</payload>
+    </packet>
+    <packet name="Turn Right - Extreme">
+      <payload>543D2D3332373637730D</payload>
+    </packet>
+  </packets_list>
+</data>

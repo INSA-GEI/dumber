@@ -33,6 +33,10 @@
 #include <string.h>
 #include <stdio.h>
 
+/* +++ evoxx-overflow-sur-move-et-turn */
+#include <limits.h>
+/* --- evoxx-overflow-sur-move-et-turn */
+
 /** @addtogroup Application_Software
  * @{
  */
@@ -190,6 +194,7 @@ CMD_Generic* cmdDecode(char* cmd, uint8_t length) {
 	CMD_Generic* decodedCmd;
 	char cmd_type = cmd[0];
 	char *p;
+	long value=0;
 
 	/* First, verify checksum */
 	if (cmdVerifyChecksum(cmd)) {
@@ -202,10 +207,20 @@ CMD_Generic* cmdDecode(char* cmd, uint8_t length) {
 			/* verify that command start with "M=" */
 			if ((cmd[0]=='M')&&(cmd[1]=='=')) {
 				cmd = cmd+2; //cmd+2 for removing "M=" at start of the string
-				//((CMD_Move*)decodedCmd)->distance=strtoul(cmd , &p, 10);
-				((CMD_Move*)decodedCmd)->distance=(int16_t)strtol(cmd , &p, 10);
+
+				/* +++ evoxx-overflow-sur-move-et-turn */
+				value = strtol(cmd , &p, 10);
+
 				if (p==cmd)
 					decodedCmd->type = CMD_NONE; /* missing number value xxxxx in "M=xxxxx" */
+				else {
+					if (value > SHRT_MAX) value = SHRT_MAX;
+					else if (value < SHRT_MIN) value = SHRT_MIN;
+
+					((CMD_Move*)decodedCmd)->distance=(int16_t)value;
+				}
+				/* --- evoxx-overflow-sur-move-et-turn */
+
 			} else
 				decodedCmd->type = CMD_NONE; /* misformed command (should start with "M=" */
 			break;
@@ -217,10 +232,20 @@ CMD_Generic* cmdDecode(char* cmd, uint8_t length) {
 			/* verify that command start with "T=" */
 			if ((cmd[0]=='T')&&(cmd[1]=='=')) {
 				cmd = cmd+2; //cmd+2 for removing "T=" at start of the string
-				//((CMD_Turn*)decodedCmd)->turns=strtoul(cmd , &p, 10);
-				((CMD_Turn*)decodedCmd)->turns=(int16_t)strtol(cmd , &p, 10);
+
+				/* +++ evoxx-overflow-sur-move-et-turn */
+				value = strtol(cmd , &p, 10);
+
 				if (p==cmd)
 					decodedCmd->type = CMD_NONE; /* missing number value xxxxx in "T=xxxxx" */
+				else {
+					if (value > SHRT_MAX) value = SHRT_MAX;
+					else if (value < SHRT_MIN) value = SHRT_MIN;
+
+					((CMD_Turn*)decodedCmd)->turns=(int16_t)value;
+				}
+				/* --- evoxx-overflow-sur-move-et-turn */
+
 			} else
 				decodedCmd->type = CMD_NONE; /* misformed command (should start with "T=" */
 			break;
