@@ -16,6 +16,7 @@
  */
 
 #include "img.h"
+#include <opencv2/imgproc/types_c.h>
 
 /**
  * Tell if arena is empty (not found) or not
@@ -292,4 +293,15 @@ void Img::DrawArena(Arena arenaToDraw) {
  */
 ImageMat Img::CropArena(Arena arena) {
     return this->img(arena.arena);
+}
+
+/**
+ * Crop image around detected arena
+ * @param arena Coordinate of arena
+ * @return Reduced image, focused on arena
+ */
+Img Img::Resize() {
+    ImageMat newImage;
+    cv::resize(this->img, newImage, cv::Size(320,240), cv::INTER_LINEAR);
+    return Img(newImage);
 }

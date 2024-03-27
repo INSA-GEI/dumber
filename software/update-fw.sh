@@ -3,7 +3,7 @@
 # Script for updating firmware of dumber robot
 # Author: S. DI MERCURIO
 # Date : 25-03-2024
-# Version 1.0-25.03.24
+# Version 1.0-27.03.24
 
 # Create temporary directory
 mkdir ./tmp-robot
@@ -11,7 +11,7 @@ cd ./tmp-robot
 
 # Get firmware from server
 echo ""
-wget --no-check-certificate https://download-gei.insa-toulouse.fr/Dumber/firmware-robot/dumber3-3.4-25.03.24.hex.zip
+wget --no-check-certificate https://download-gei.insa-toulouse.fr/Dumber/firmware-robot/dumber3-3.5-27.03.24.hex.zip
 
 # Unzip firmware
 echo ""

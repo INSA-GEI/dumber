@@ -35,12 +35,7 @@ Camera::Camera():Camera(sm, 10){
  */
 Camera::Camera(int size, int fps) {
     this->SetSize(size);
-#ifndef __FOR_PC__
-    this->cap.set(CV_CAP_PROP_FORMAT, CV_8UC3);
-    this->cap.set(CV_CAP_PROP_FRAME_WIDTH, width);
-    this->cap.set(CV_CAP_PROP_FRAME_HEIGHT, height);
-    this->cap.set(CV_CAP_PROP_FPS, fps);
-#endif /* __FOR_PC__ */
+    this->fps = fps;
 }
 
 /**
@@ -50,23 +45,13 @@ Camera::Camera(int size, int fps) {
 bool Camera::Open() {
     bool status = false;
 
-#ifdef __FOR_PC__
     if (this->cap.open(0)) {
         //this->cap.set(CV_CAP_PROP_FORMAT, CV_8UC3);
         this->cap.set(CV_CAP_PROP_FRAME_WIDTH, width);
         this->cap.set(CV_CAP_PROP_FRAME_HEIGHT, height);
-
+        this->cap.set(CV_CAP_PROP_FPS, fps);
         status = true;
     }
-#else
-    if (this->cap.open()) {
-        cout << "Camera warmup 2sec" << endl << flush;
-        sleep(2);
-        cout << "Start capture" << endl << flush;
-
-        status = true;
-    }
-#endif /* __FOR_PC__ */
 
     return status;
 }
@@ -87,24 +72,24 @@ void Camera::SetSize(int size) {
 
     switch (size) {
         case xs:
-            this->width = 480;
-            this->height = 360;
+            this->width = 320;
+            this->height = 240;
             break;
         case sm:
             this->width = 640;
             this->height = 480;
             break;
         case md:
+            this->width = 800;
+            this->height = 600;
+            break;
+        case lg:
             this->width = 1024;
             this->height = 768;
             break;
-        case lg:
-            this->width = 1280;
-            this->height = 960;
-            break;
         default:
-            this->width = 480;
-            this->height = 360;
+            this->width = 320;
+            this->height = 240;
     }
 }
 
@@ -115,19 +100,8 @@ void Camera::SetSize(int size) {
 Img Camera::Grab() {
     ImageMat frame;
 
-#ifdef __FOR_PC__
     cap >> frame;
     Img capture = Img(frame);
-#else
-    cap.grab();
-    cap.retrieve(frame);
-
-#ifdef __INVERSE_COLOR__
-    cvtColor(frame, frame, CV_BGR2RGB);
-#endif // __INVERSE_COLOR__
-
-    Img capture = Img(frame);
-#endif /* __FOR_PC__ */
 
     return capture;
 }
@@ -155,3 +129,12 @@ int Camera::GetWidth() const {
 int Camera::GetHeight() const {
     return height;
 }
+
+/**
+ * Get fps of sampled image
+ * @return fps of sampled picture
+ */
+int Camera::GetFPS() const {
+    return fps;
+}
+
