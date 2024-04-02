@@ -150,9 +150,8 @@ void ComMonitor::Write(Message *msg) {
     //cout << "Message sent to monitor: " << str->c_str() << endl;
     write(clientID, str.c_str(), str.length());
 
-    if (!msg->CompareID(MESSAGE_CAM_IMAGE)) {
-        delete(msg);
-    }
+    // Delete msg 
+    delete(msg);
    
     // Call user method after write
     Write_Post();
