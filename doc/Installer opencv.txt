@@ -1,0 +1,58 @@
+installer opencv
+
+Tuto suivi : https://qengineering.eu/install-opencv-4.5-on-raspberry-pi-4.html
+
+RQ: Utiliser une carte SD de 16 GB minimum
+
+1. Installer le dernier raspberryOS avec imager
+
+2. Increase swap memory
+> sudo dphys-swapfile swapoff
+
+> sudo nano /sbin/dphys-swapfile
+Passer CONF_MAXSWAP à 4096
+
+> sudo nano /etc/dphys-swapfile
+Passer CONF_SWAPSIZE à 4096 
+
+> sudo dphys-swapfile setup
+
+> sudo dphys-swapfile swapon
+
+3. Utilisation du script d'installation
+> wget https://github.com/Qengineering/Install-OpenCV-Raspberry-Pi-32-bits/raw/main/OpenCV-4-5-5.sh 
+> chmod +x OpenCV-4-5-5.sh 
+> ./OpenCV-4-5-5.sh 
+
+3.1. Opencv est installé dans /usr/local/lib et les include dans /usr/local/include/opencv4
+C'est merdique
+Remettre les include dans /usr/local/include/opencv2 en direct et faire un lien symbolique vers opencv4
+> cd /usr/local/include/
+> sudo mv opencv4 opencv2
+> sudo ln -s opencv2 opencv4
+
+4. Installer raspicam
+Telecharger la derniere version ici:http://www.uco.es/investiga/grupos/ava/node/40
+L'archive est sur sourceforge: https://sourceforge.net/projects/raspicam/files/?
+
+5. Transferer le zip sur la raspberry
+> scp raspicam-xx.zip xenomai@10.105.1.14:~/
+
+6. Compiler libraspicam (sur la raspberry)
+> cd ~
+> unzip raspicam-xx.zip
+> cd raspicam-xx
+> mkdir build
+> cd build
+> cmake ..
+
+Normallement, si tout est OK, la ligne suivant doit apapraitre
+ CREATE OPENCV MODULE=1
+
+> make
+> sudo make install
+> sudo ldconfig
+
+7. connecter la liaison serie comme il faut
+https://alselectro.wordpress.com/2019/12/30/raspberry-pi-serial-port-configuration-solution-to-permission-denied/
+

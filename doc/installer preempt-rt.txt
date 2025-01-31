@@ -1,0 +1,34 @@
+Installer preempt-rt sur raspberry pi
+
+1. Creer un repertoire kernel-preempt-rt sur le PC
+> mkdir ~/Travail/kernel-preempt-rt
+> cd ~/Travail/kernel-preempt-rt
+
+2. Setup de l'environnement
+> export WORKDIR=~/Travail/kernel-preempt-rt
+> export ARCH=arm
+> export CROSS_COMPILE=$WORKDIR/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-
+> export INSTALL_MOD_PATH=$WORKDIR/rt-kernel
+> export INSTALL_DTBS_PATH=$INSTALL_MOD_PATH
+> export KERNEL=kernel7
+
+3 . Recuperer les outils (compilateur)
+> git clone https://github.com/raspberrypi/tools.git --depth 3
+
+4. Recuperer les sources du noyau
+> git clone https://github.com/raspberrypi/linux.git
+> git checkout d3e491a20d152e5fba6c02a38916d63f982d98a5
+
+4 . Patch du noyau5
+> wget https://mirrors.edge.kernel.org/pub/linux/kernel/projects/rt/5.10/patch-5.10.90-rt61-rc1.patch.gz
+> gunzip patch-5.10.90-rt61-rc1.patch.gz 
+> cd linux
+> patch -p1 <../patch-5.10.90-rt61-rc1.patch 
+
+6. Config du noyau
+> make bcm2835_defconfig !! attention bcm2706_defconfig semble mieux
+> make menuconfig
+Aller dans "General Setup" -> "Preemption Model" et activer "Fully Preemptible Kernel (Real-Time)"
+
+
+
