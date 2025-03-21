@@ -11,6 +11,7 @@
       <itemPath>./lib/img.h</itemPath>
       <itemPath>./lib/messages.h</itemPath>
       <itemPath>./tasks.h</itemPath>
+      <itemPath>tasks_pthread.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -28,6 +29,7 @@
       <itemPath>./main.cpp</itemPath>
       <itemPath>./lib/messages.cpp</itemPath>
       <itemPath>./tasks.cpp</itemPath>
+      <itemPath>tasks_pthread.cpp</itemPath>
       <itemPath>wrapper.c</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -114,6 +116,10 @@
       </item>
       <item path="./tasks.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="tasks_pthread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tasks_pthread.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="wrapper.c" ex="false" tool="0" flavor2="0">
       </item>
     </conf>
@@ -132,25 +138,27 @@
             <pElem>/usr/xenomai/include/mercury</pElem>
           </incDir>
           <commandLine>-I/usr/xenomai/include/mercury -I/usr/xenomai/include -D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__COBALT__ -I/usr/xenomai/include/alchemy</commandLine>
+          <preprocessorList>
+            <Elem>__WITH_PTHREAD__</Elem>
+          </preprocessorList>
         </cTool>
         <ccTool>
           <incDir>
             <pElem>./</pElem>
             <pElem>./lib</pElem>
-            <pElem>/usr/xenomai/include</pElem>
-            <pElem>/usr/xenomai/include/cobalt</pElem>
           </incDir>
-          <commandLine>-D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -D__COBALT__ -I/usr/xenomai/include/alchemy -Wno-pmf-conversions -std=gnu++11</commandLine>
+          <commandLine>-D_GNU_SOURCE -D_REENTRANT -fasynchronous-unwind-tables -Wno-pmf-conversions -std=gnu++11</commandLine>
           <preprocessorList>
             <Elem>_WITH_TRACE_</Elem>
             <Elem>__WITH_ARUCO__</Elem>
+            <Elem>__WITH_PTHREAD__</Elem>
           </preprocessorList>
         </ccTool>
         <linkerTool>
           <linkerLibItems>
             <linkerOptionItem>`pkg-config --libs opencv4`</linkerOptionItem>
           </linkerLibItems>
-          <commandLine>-Wl,--no-as-needed -lalchemy -lcopperplate -lcobalt /usr/xenomai/lib/xenomai/bootstrap.o -Wl,--wrap=main -Wl,--dynamic-list=/usr/xenomai/lib/dynlist.ld -L/usr/xenomai/lib -lpthread -lrt</commandLine>
+          <commandLine>-lpthread -lrt</commandLine>
         </linkerTool>
       </compileType>
       <item path="./gdbsudo.sh" ex="false" tool="3" flavor2="0">
@@ -181,9 +189,11 @@
       </item>
       <item path="./main.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="./tasks.cpp" ex="false" tool="1" flavor2="0">
-      </item>
       <item path="./tasks.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tasks_pthread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tasks_pthread.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="wrapper.c" ex="false" tool="0" flavor2="0">
       </item>

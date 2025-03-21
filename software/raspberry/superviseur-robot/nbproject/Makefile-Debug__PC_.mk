@@ -43,6 +43,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/lib/messages.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/tasks.o \
+	${OBJECTDIR}/tasks_pthread.o \
 	${OBJECTDIR}/wrapper.o
 
 
@@ -109,6 +110,11 @@ ${OBJECTDIR}/tasks.o: tasks.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -D__WITH_ARUCO__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tasks.o tasks.cpp
+
+${OBJECTDIR}/tasks_pthread.o: tasks_pthread.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_WITH_TRACE_ -D__FOR_PC__ -D__WITH_ARUCO__ -I./ -I./lib -I/usr/xenomai/include -I/usr/xenomai/include/mercury `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tasks_pthread.o tasks_pthread.cpp
 
 ${OBJECTDIR}/wrapper.o: wrapper.c
 	${MKDIR} -p ${OBJECTDIR}

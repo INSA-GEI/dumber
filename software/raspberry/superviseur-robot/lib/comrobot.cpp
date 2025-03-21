@@ -107,7 +107,7 @@ int ComRobot::Close() {
  * @warning Write is not thread save : check that multiple tasks can't access this method simultaneously  
  */
 Message *ComRobot::Write(Message* msg) {
-    Message *msgAnswer;
+    Message *msgAnswer=NULL;
     string s;
 
     if (this->fd != -1) {
@@ -186,9 +186,9 @@ string ComRobot::Read() {
 
 Message *ComRobot::SendCommand(Message* msg, MessageID answerID, int maxRetries) {
     int counter = maxRetries;
-    Message *msgSend;
-    Message *msgRcv;
-    Message *msgTmp;
+    Message *msgSend=NULL;
+    Message *msgRcv=NULL;
+    Message *msgTmp=NULL;
 
     do {
         msgSend = msg->Copy();
@@ -215,7 +215,7 @@ Message *ComRobot::SendCommand(Message* msg, MessageID answerID, int maxRetries)
  * @return Message corresponding to received array of char
  */
 Message* ComRobot::StringToMessage(string s) {
-    Message *msg;
+    Message *msg=NULL;
 
     switch (s[0]) {
         case LABEL_ROBOT_OK:

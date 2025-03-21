@@ -170,7 +170,7 @@ Message *ComMonitor::Read() {
     string s;
     char data;
     bool endReception = false;
-    Message *msg;
+    Message *msg=NULL;
 
     // Call user method before read
     Read_Pre();
@@ -213,7 +213,7 @@ string ComMonitor::MessageToString(Message *msg) {
     //Message *localMsg = msg;
     Position pos;
 
-    Img *image;
+    Img *image=NULL;
     Jpg jpeg ;
     string s;
                     
@@ -285,7 +285,7 @@ string ComMonitor::MessageToString(Message *msg) {
  * @return A message, image of the string
  */
 Message *ComMonitor::StringToMessage(string &s) {
-    Message *msg;
+    Message *msg=NULL;
     size_t pos;
     string org = s;
     string tokenCmd;
