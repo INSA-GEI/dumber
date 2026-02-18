@@ -41,7 +41,7 @@
     </conf>
     <conf name="Debug__RPI_" type="1">
       <toolsSet>
-        <developmentServer>xenomai@10.105.0.135:22</developmentServer>
+        <developmentServer>xenomai@xenomai.lan:22</developmentServer>
         <platform>2</platform>
       </toolsSet>
       <dbx_gdbdebugger version="1">
@@ -50,8 +50,6 @@
         <gdb_interceptlist>
           <gdbinterceptoptions gdb_all="false" gdb_unhandled="true" gdb_unexpected="true"/>
         </gdb_interceptlist>
-        <gdb_signals>
-        </gdb_signals>
         <gdb_options>
           <DebugOptions>
           </DebugOptions>
