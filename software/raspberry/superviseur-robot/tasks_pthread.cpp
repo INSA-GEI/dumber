@@ -53,7 +53,6 @@ void Tasks::Init() {
     Tasks::counter=0;
     Tasks::flag =false;
 
-
     /* Open com port with STM32 */
     cout << "Open serial com (";
     status = Tasks::robot.Open();

@@ -33,7 +33,8 @@ int main(int argc, char **argv) {
     mlockall(MCL_CURRENT | MCL_FUTURE);
 
     cout<<"#################################"<<endl;
-    cout<<"#      DE STIJL PROJECT         #"<<endl;
+    cout<<"#      Superviseur Robot        #"<<endl;
+    cout<<"#   Version Pthread complete    #"<<endl;
     cout<<"#################################"<<endl;
 
     tasks.Init();
